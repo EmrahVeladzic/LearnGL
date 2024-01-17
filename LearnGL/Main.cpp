@@ -36,7 +36,7 @@ GLuint renderingProgram;
 GLuint vao[numVAOs];
 GLuint vbo[numVBOs];
 
-GLuint projLoc, vLoc, tfLoc, mvLoc;
+GLuint projLoc, vLoc, tfLoc, mvLoc, invBindLoc, transLoc, offsetLoc;
 int width, height;
 float aspect, timeFactor;
 glm::mat4 pMat, vMat, mMat, mvMat;
@@ -206,14 +206,7 @@ void lightingConfig(glm::mat4x4 viewMatrix) {
 }
 
 void animate(GLFWwindow* window, double currentTime, std::vector<ImportedModel>& models) {
-	std::stack<glm::mat4> mvStack;
-
-	glClear(GL_DEPTH_BUFFER_BIT);
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	glClearColor(0.125f, 0.125f, 0.125f, 1.0f);
-
-	glUseProgram(renderingProgram);
+	
 
 	float currentGlobalTime = (float)currentTime;
 
@@ -232,9 +225,9 @@ void animate(GLFWwindow* window, double currentTime, std::vector<ImportedModel>&
 		int curr = model.currentAnim;
 
 
-		lightingConfig(vMat);
+		
 
-		model.currentAnim = 0;
+		
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, model.texture);
@@ -244,10 +237,10 @@ void animate(GLFWwindow* window, double currentTime, std::vector<ImportedModel>&
 		for (size_t i = 0; i < model.Meshes.size(); i++)
 		{
 
-
-
-			glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
+			
+			
 			projLoc = glGetUniformLocation(renderingProgram, "proj_matrix");
+			glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
 
 			mvLoc = glGetUniformLocation(renderingProgram, "mv_matrix");
 			vMat = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
@@ -270,17 +263,25 @@ void animate(GLFWwindow* window, double currentTime, std::vector<ImportedModel>&
 				model.bones[model.Meshes[i].jointIndex].TransformMat = glm::mat4x4(1.0f);
 
 
+				
+				int te = model.bones[model.Meshes[i].jointIndex].animations[curr].Tend_index;
+				
+				int re = model.bones[model.Meshes[i].jointIndex].animations[curr].Rend_index;
+				
+				int se = model.bones[model.Meshes[i].jointIndex].animations[curr].Send_index;
+
 
 				model.bones[model.Meshes[i].jointIndex].TransformMat = Utils::interpolateTransforms(
 					model.bones[model.Meshes[i].jointIndex].animations[curr].translations[trans_ind],
-					model.bones[model.Meshes[i].jointIndex].animations[curr].translations[trans_ind + 1],
+					model.bones[model.Meshes[i].jointIndex].animations[curr].translations[te],
 					model.bones[model.Meshes[i].jointIndex].animations[curr].rotations[rot_ind],
-					model.bones[model.Meshes[i].jointIndex].animations[curr].rotations[rot_ind + 1],
+					model.bones[model.Meshes[i].jointIndex].animations[curr].rotations[re],
 					model.bones[model.Meshes[i].jointIndex].animations[curr].scales[scal_ind],
-					model.bones[model.Meshes[i].jointIndex].animations[curr].scales[scal_ind + 1],
+					model.bones[model.Meshes[i].jointIndex].animations[curr].scales[se],
 					trans_inter, rot_inter, scal_inter
 				);
 
+				
 			}
 
 		}
@@ -301,7 +302,7 @@ void display(GLFWwindow* window ,std::vector<ImportedModel> models) {
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glClear(GL_COLOR_BUFFER_BIT);
 	
-	glClearColor(0.125f,0.125f,0.125f,1.0f);
+	glClearColor(0.15f,0.15f,0.15f,1.0f);
 
 	glUseProgram(renderingProgram);
 
@@ -311,6 +312,11 @@ void display(GLFWwindow* window ,std::vector<ImportedModel> models) {
 	for (ImportedModel& model : models)
 	{
 		
+		glm::mat4x4 invBTemp = glm::mat4x4(1.0f);
+		glm::mat4x4 transTemp = glm::mat4x4(1.0f);
+
+		invBindLoc = glGetUniformLocation(renderingProgram, "inv_bind_matrix");
+		transLoc = glGetUniformLocation(renderingProgram, "transform_matrix");
 
 
 		lightingConfig(vMat);
@@ -329,40 +335,16 @@ void display(GLFWwindow* window ,std::vector<ImportedModel> models) {
 		for (size_t i = 0; i < model.Meshes.size(); i++)
 		{
 
-			if (model.num_anims > 0) {
-
-				
-
-				for (size_t j = 0; j < model.Meshes[i].getNumVertices(); j++)
-				{
-					glm::vec3 skinVec;
-
-
-
-					skinVec.x = model.Meshes[i].pvalues[j * 3];
-
-					skinVec.y = model.Meshes[i].pvalues[j * 3 + 1];
-
-					skinVec.z = model.Meshes[i].pvalues[j * 3 + 2];
-
-
-					glm::vec4 skinVecFour = glm::vec4(skinVec, 1.0f);
-
-
-					skinVecFour = model.INVmatrices[model.Meshes[i].jointIndex] * skinVecFour;
-
-					skinVecFour = model.bones[model.Meshes[i].jointIndex].TransformMat * skinVecFour;
-
-					skinVec = glm::vec3(skinVecFour);
-
-					model.Meshes[i].pvalues[j * 3] = skinVec.x;
-					model.Meshes[i].pvalues[j * 3 + 1] = skinVec.y;
-					model.Meshes[i].pvalues[j * 3 + 2] = skinVec.z;
-
-
-				}
+			if (model.num_anims > 0)
+			{
+				invBTemp = model.INVmatrices[model.Meshes[i].jointIndex];
+				transTemp = model.bones[model.Meshes[i].jointIndex].TransformMat;
 
 			}
+
+			
+
+
 
 			glBindBuffer(GL_ARRAY_BUFFER, model.Meshes[i].vbo[0]);
 			glBufferData(GL_ARRAY_BUFFER, model.Meshes[i].pvalues.size() * 4, &model.Meshes[i].pvalues[0], GL_STATIC_DRAW);
@@ -402,6 +384,11 @@ void display(GLFWwindow* window ,std::vector<ImportedModel> models) {
 
 
 			glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
+
+
+
+			glUniformMatrix4fv(invBindLoc, 1, GL_FALSE, glm::value_ptr(invBTemp));
+			glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(transTemp));
 
 
 
@@ -546,7 +533,7 @@ int main(void) {
 	
 
 
-	//sfx = global_audio.load_WL("Ske.wl");
+	sfx = global_audio.load_WL("Ske.wl");
 	
 
 	ALuint src;

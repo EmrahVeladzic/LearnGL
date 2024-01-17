@@ -7,7 +7,7 @@
 extern GLuint vShader;
 extern GLuint fShader;
 
-#define INTERPOLATION_APPROX 1.0f
+#define INTERPOLATION_APPROX 0.99f
 
 void Utils::UpdateInterpolationIndex(animJoint& in, float timestamp) {
 	
@@ -36,6 +36,8 @@ void Utils::UpdateInterpolationIndex(animJoint& in, float timestamp) {
 	in.transInterpolation = getInterpolationValue(timestamp, beginTrans,endTrans);
 	in.rotInterpolation = getInterpolationValue(timestamp, beginRot, endRot);
 	in.scalInterpolation = getInterpolationValue(timestamp, beginScal, endScal);
+
+	
 
 
 	if (in.transInterpolation >= INTERPOLATION_APPROX)
@@ -67,6 +69,39 @@ void Utils::UpdateInterpolationIndex(animJoint& in, float timestamp) {
 	{
 		in.scalIndex = 0;
 	}
+
+
+
+
+
+	if (in.transIndex >= (int)(in.translations.size() - 2))
+	{
+		in.Tend_index = 0;
+	}
+	else
+	{
+		in.Tend_index = in.transIndex + 1;
+	}
+
+
+	if (in.rotIndex >= (int)(in.rotations.size() - 2))
+	{
+		in.Rend_index = 0;
+	}
+	else
+	{
+		in.Rend_index = in.rotIndex + 1;
+	}
+
+	if (in.scalIndex >= (int)(in.scales.size() - 2))
+	{
+		in.Send_index = 0;
+	}
+	else
+	{
+		in.Send_index = in.scalIndex + 1;
+	}
+
 	
 }
 
@@ -124,7 +159,9 @@ glm::mat4x4 Utils::interpolateTransforms(glm::vec3 transA, glm::vec3 transB, glm
 
 float Utils::getInterpolationValue(float current, float begin, float end) {
 	
-	
+	if (begin > end) {
+		end += begin;
+	}
 
 	float out = (current - begin) / (end - begin);
 

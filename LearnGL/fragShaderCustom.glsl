@@ -1,6 +1,8 @@
 #version 430
 in vec2 tc;
 
+
+
 in vec3 varyingNormal;
 in vec3 varyingLightDir;
 in vec3 varyingVertPos;
@@ -64,6 +66,10 @@ uniform float tf;
 layout (binding=0) uniform sampler2D samp;
 
 void main(void){
+
+
+
+
 vec3 L = normalize(varyingLightDir);
 vec3 N =normalize(varyingNormal);
 vec3 V = normalize(-varyingVertPos);
@@ -102,5 +108,5 @@ vec4 simple_color=texture(samp,tc);
 
 	color=simple_color*light;
 	
-
+	
 }

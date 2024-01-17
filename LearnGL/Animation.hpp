@@ -39,6 +39,16 @@ struct animJoint {
 	float transInterpolation;
 	float rotInterpolation;
 	float scalInterpolation;
+
+	int Tbegin_index;
+	int Tend_index;
+
+	int Rbegin_index;
+	int Rend_index;
+
+	int Sbegin_index;
+	int Send_index;
+
 };
 
 
