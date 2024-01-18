@@ -75,37 +75,6 @@ void setupVertices(std::vector<ImportedModel>& models) {
 		{
 			
 			
-
-			std::vector<glm::vec3> vert = model.Meshes[i].getVertices();
-			std::vector<glm::vec2> tex = model.Meshes[i].getTexCoords();
-			std::vector<glm::vec3> norm = model.Meshes[i].getNormals();
-
-			
-			
-		
-
-			int numVertices = model.Meshes[i].getNumVertices();
-	
-		
-
-			for (int j = 0; j < numVertices; j++)
-			{
-				model.Meshes[i].pvalues.push_back(vert[j].x);
-				model.Meshes[i].pvalues.push_back(vert[j].y);
-				model.Meshes[i].pvalues.push_back(vert[j].z);
-
-
-
-				model.Meshes[i].tvalues.push_back(tex[j].s);
-				model.Meshes[i].tvalues.push_back(tex[j].t);
-
-				model.Meshes[i].nvalues.push_back(norm[j].x);
-				model.Meshes[i].nvalues.push_back(norm[j].y);
-				model.Meshes[i].nvalues.push_back(norm[j].z);
-
-			}
-
-
 			glGenVertexArrays(1, model.Meshes[i].vao);
 			glBindVertexArray(model.Meshes[i].vao[0]);
 
@@ -114,19 +83,21 @@ void setupVertices(std::vector<ImportedModel>& models) {
 		
 
 			glBindBuffer(GL_ARRAY_BUFFER, model.Meshes[i].vbo[0]);
-			glBufferData(GL_ARRAY_BUFFER, model.Meshes[i].pvalues.size() * 4, &model.Meshes[i].pvalues[0], GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, model.Meshes[i].vertices.size() * 12, &model.Meshes[i].vertices.data()[0], GL_STATIC_DRAW);
 
 			glBindBuffer(GL_ARRAY_BUFFER, model.Meshes[i].vbo[1]);
-			glBufferData(GL_ARRAY_BUFFER, model.Meshes[i].tvalues.size() * 4, &model.Meshes[i].tvalues[0], GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, model.Meshes[i].texCoords.size() * 8, &model.Meshes[i].texCoords.data()[0], GL_STATIC_DRAW);
 
 			glBindBuffer(GL_ARRAY_BUFFER, model.Meshes[i].vbo[2]);
-			glBufferData(GL_ARRAY_BUFFER, model.Meshes[i].nvalues.size() * 4, &model.Meshes[i].nvalues[0], GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, model.Meshes[i].normalVecs.size() * 12, &model.Meshes[i].normalVecs.data()[0], GL_STATIC_DRAW);
 
 
 			glGenBuffers(numEBOs, model.Meshes[i].ebo);
 
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model.Meshes[i].ebo[0]);
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, model.Meshes[i].indices.size() * 2, &model.Meshes[i].indices[0], GL_STATIC_DRAW);
+
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		}
 	}
 
@@ -188,7 +159,8 @@ void lightingConfig(glm::mat4x4 viewMatrix) {
 	mSpecLoc = glGetUniformLocation(renderingProgram, "material.specular");
 	mShinLoc = glGetUniformLocation(renderingProgram, "material.shininess");
 
-
+	invBindLoc = glGetUniformLocation(renderingProgram, "inv_bind_matrix");
+	transLoc = glGetUniformLocation(renderingProgram, "transform_matrix");
 
 
 	glProgramUniform4fv(renderingProgram, globalAmbiLoc, 1, ambient.get_ambient_float());
@@ -320,8 +292,7 @@ void display(GLFWwindow* window ,std::vector<ImportedModel> models) {
 		glm::mat4x4 invBTemp = glm::mat4x4(1.0f);
 		glm::mat4x4 transTemp = glm::mat4x4(1.0f);
 
-		invBindLoc = glGetUniformLocation(renderingProgram, "inv_bind_matrix");
-		transLoc = glGetUniformLocation(renderingProgram, "transform_matrix");
+		
 
 
 		lightingConfig(vMat);
@@ -352,7 +323,7 @@ void display(GLFWwindow* window ,std::vector<ImportedModel> models) {
 
 
 			glBindBuffer(GL_ARRAY_BUFFER, model.Meshes[i].vbo[0]);
-			glBufferData(GL_ARRAY_BUFFER, model.Meshes[i].pvalues.size() * 4, &model.Meshes[i].pvalues[0], GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, model.Meshes[i].vertices.size() * 12, &model.Meshes[i].vertices.data()[0], GL_STATIC_DRAW);
 
 
 
@@ -403,8 +374,8 @@ void display(GLFWwindow* window ,std::vector<ImportedModel> models) {
 			glEnable(GL_ALPHA_TEST);
 
 
-			//glDrawArrays(GL_TRIANGLES, 0, model.Meshes[i].getNumVertices());
-			glDrawElements(GL_TRIANGLES, model.Meshes[i].getNumVertices(), GL_UNSIGNED_SHORT, model.Meshes[i].getIndices().data());
+			
+			glDrawElements(GL_TRIANGLES, model.Meshes[i].getNumIndices(), GL_UNSIGNED_SHORT, 0);
 
 		}
 

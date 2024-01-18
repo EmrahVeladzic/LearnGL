@@ -135,11 +135,6 @@ struct Mesh {
 	GLuint vao[numVAOs];
 	GLuint vbo[numVBOs];
 	GLuint ebo[numEBOs];
-
-
-	std::vector<float>pvalues;
-	std::vector<float>tvalues;
-	std::vector<float>nvalues;
 	
 
 	int getNumVertices();

@@ -363,6 +363,8 @@ void ModelImporter::parseGLTF(const char* filePath) {
 
 			}
 
+			mtemp.triangleVerts = vertVals;
+
 		}
 
 		if (j_son["meshes"][i]["primitives"][0]["attributes"]["NORMAL"].is_number_integer()) {
@@ -386,6 +388,7 @@ void ModelImporter::parseGLTF(const char* filePath) {
 
 			}
 
+			mtemp.normals = normVals;
 		}
 
 		if (j_son["meshes"][i]["primitives"][0]["attributes"]["TEXCOORD_0"].is_number_integer()) {
@@ -413,6 +416,8 @@ void ModelImporter::parseGLTF(const char* filePath) {
 
 
 			}
+
+			mtemp.textureCoords = stVals;
 
 		}
 
@@ -461,45 +466,7 @@ void ModelImporter::parseGLTF(const char* filePath) {
 			mtemp.indices = indices;				
 
 			
-		}
-
-
-	
-		for (int j = 0; j < indices.size(); j++)
-		{		
-			if (indices[j] * 3 < vertVals.size() && indices[j] * 3 + 1  < vertVals.size() && indices[j] * 3 + 2 < vertVals.size())
-			{
-						
-				mtemp.triangleVerts.push_back(vertVals[indices[j] * 3]);
-				mtemp.triangleVerts.push_back(vertVals[indices[j] * 3 + 1]);
-				mtemp.triangleVerts.push_back(vertVals[indices[j] * 3 + 2]);
-
-			}
-
-		
-
-
-			if (indices[j] * 2 < stVals.size() && indices[j] * 2 + 1 < stVals.size())
-			{
-
-				mtemp.textureCoords.push_back(stVals[indices[j] * 2]);
-				mtemp.textureCoords.push_back(stVals[indices[j] * 2 + 1]);
-
-			}
-
-		
-
-			if (indices[j] * 3 < normVals.size() && indices[j] * 3 + 1 < normVals.size() && indices[j] * 3 + 2 < normVals.size())
-			{
-
-				mtemp.normals.push_back(normVals[indices[j] * 3]);
-				mtemp.normals.push_back(normVals[indices[j] * 3 + 1]);
-				mtemp.normals.push_back(normVals[indices[j] * 3 + 2]);
-
-			}
-
-
-		}
+		}		
 
 
 
