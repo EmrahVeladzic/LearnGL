@@ -146,10 +146,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="fragShader.glsl" />
-    <None Include="fragShaderCustom.glsl" />
     <None Include="packages.config" />
     <None Include="vertShader.glsl" />
-    <None Include="vertShaderCustom.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation.hpp" />

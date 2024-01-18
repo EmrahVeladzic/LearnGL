@@ -6,6 +6,8 @@ layout (location=2) in vec3 normals;
 out vec2 tc;
 
 
+
+
 out vec3 varyingNormal;
 out vec3 varyingLightDir;
 out vec3 varyingVertPos;
@@ -44,6 +46,13 @@ uniform Material material;
 uniform mat4 v_matrix;
 uniform mat4 mv_matrix;
 uniform mat4 proj_matrix;
+
+uniform mat4 inv_bind_matrix;
+uniform mat4 transform_matrix;
+
+uniform vec3 vertex_offset;
+
+
 uniform float tf;
 
 layout(binding=0) uniform sampler2D samp;
@@ -55,17 +64,36 @@ mat4 buildRotateZ(float rad);
 mat4 buildTranslate(float x, float y, float z);
 
 
+float roundToPrecision(float value, float precis) {
+    return round(value * precis) / precis;
+}
+
+
 void main(void)
 {
-varyingVertPos=(mv_matrix*vec4(position,1.0f)).xyz;
+varyingVertPos=round(mv_matrix*vec4(position,1.0f)).xyz;
 varyingLightDir=pos_light.position-varyingVertPos;
 varyingNormal= normalize(mat3(transpose(inverse(mv_matrix))) * vec4(normals,1.0f).xyz);
 
 varyingHalfVector = (varyingLightDir+(-varyingVertPos)).xyz;
 
+vec4 posFour = vec4(position,1.0);
 
-gl_Position = proj_matrix * mv_matrix * vec4(position,1.0);
+posFour = inv_bind_matrix * posFour;
+
+posFour = transform_matrix * posFour;
+
+
+
+vec4 tmpPos = proj_matrix * mv_matrix * posFour;
+
+
+
+gl_Position = tmpPos;
+
 tc=texCoord;
+
+
 }
 
 mat4 buildTranslate(float x, float y, float z)

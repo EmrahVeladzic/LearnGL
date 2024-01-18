@@ -1,12 +1,32 @@
 #version 430
 in vec2 tc;
 
+
+
 in vec3 varyingNormal;
 in vec3 varyingLightDir;
 in vec3 varyingVertPos;
 in vec3 varyingHalfVector;
 
+
 out vec4 color;
+
+const mat3 bayerMatrix = mat3(
+    vec3(1.0 / 9.0, 3.0 / 9.0, 5.0 / 9.0),
+    vec3(7.0 / 9.0, 8.0 / 9.0, 1.0 / 9.0),
+    vec3(3.0 / 9.0, 5.0 / 9.0, 7.0 / 9.0)
+);
+
+
+
+
+float dither (vec2 position){
+int dith_x = int(mod(int(position.x*64),3));
+int dith_y = int(mod(int(position.y*64),3));
+return bayerMatrix[dith_x][dith_y];
+};
+
+
 
 struct GlobalLight{
 vec4 ambient;
@@ -46,6 +66,10 @@ uniform float tf;
 layout (binding=0) uniform sampler2D samp;
 
 void main(void){
+
+
+
+
 vec3 L = normalize(varyingLightDir);
 vec3 N =normalize(varyingNormal);
 vec3 V = normalize(-varyingVertPos);
@@ -61,20 +85,28 @@ vec3 specular=pos_light.specular.xyz*material.specular.xyz*pow(max(cosPhi,0.0f),
 
 vec4 light = vec4((ambient+diffuse+specular),1.0f);
 
+
+
 vec4 simple_color=texture(samp,tc);
 
-vec3 alpha_clip=vec3(1.0,0.0,1.0);
 
-	if(all(lessThanEqual(abs(simple_color.rgb-alpha_clip),vec3(0.5)))){
+
+	if(simple_color.a==0.0){
 
 		discard;
 
 	}
+	else{
 
+		float dith = dither(tc);
 
+		
+		simple_color-=dith/4;
+		
+
+	}
+
+	color=simple_color*light;
 	
-color=simple_color*light;
 	
-
-
 }

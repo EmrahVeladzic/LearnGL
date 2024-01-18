@@ -107,7 +107,7 @@ void setupVertices(std::vector<ImportedModel>& models) {
 
 void init(GLFWwindow* window, std::vector<ImportedModel>& models) {
 
-	renderingProgram = Utils::createShaderProgram("vertShaderCustom.glsl", "fragShaderCustom.glsl");
+	renderingProgram = Utils::createShaderProgram("vertShader.glsl", "fragShader.glsl");
 
 
 	glfwGetFramebufferSize(window, &width, &height);
@@ -143,7 +143,7 @@ void init(GLFWwindow* window, std::vector<ImportedModel>& models) {
 	
 }
 
-void lightingConfig(glm::mat4x4 viewMatrix) {
+void lightingConfig(glm::mat4x4 & viewMatrix ) {
 
 
 
@@ -273,7 +273,7 @@ void animate(GLFWwindow* window, double currentTime, std::vector<ImportedModel>&
 
 
 
-void display(GLFWwindow* window ,std::vector<ImportedModel> models) {
+void display(GLFWwindow* window ,std::vector<ImportedModel>& models) {
 	std::stack<glm::mat4> mvStack;
 
 	glClear(GL_DEPTH_BUFFER_BIT);
@@ -419,7 +419,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 		if (Models.empty() == false) {
 
-			Models[0].currentAnim = 2;
+			Models[0].currentAnim = 1;
 
 		}
 	}
@@ -431,7 +431,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 		if (Models.empty() == false) {
 
-			Models[0].currentAnim = 2;
+			Models[0].currentAnim = 1;
 
 		}
 	}
@@ -444,7 +444,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 		if (Models.empty() == false) {
 
-			Models[0].currentAnim = 2;
+			Models[0].currentAnim = 1;
 
 		}
 	}
@@ -456,7 +456,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 
 		if (Models.empty() == false) {
-			Models[0].currentAnim = 2;
+			Models[0].currentAnim = 1;
 
 		}
 	}
@@ -469,7 +469,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		if (Models.empty() == false) {
 
 
-			Models[0].currentAnim = 3;
+			Models[0].currentAnim = 0;
 
 		}
 	}
@@ -518,12 +518,13 @@ int main(void) {
 
 		exit(EXIT_FAILURE);
 	}
+	
 
 	if (glewInit() != GLEW_OK) { exit(EXIT_FAILURE); }
 	glfwSwapInterval(1);
 
 	
-	Models.push_back(ImportedModel("Dillon.gltf", "Dillon.rpf", glm::vec3(0.0f, 0.0f, 0.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
+	Models.push_back(ImportedModel("skele.gltf", "skele.rpf", glm::vec3(0.0f, 0.0f, 0.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
 	Models.push_back(ImportedModel("skele.gltf", "skele.rpf", glm::vec3(1.0f, 0.0f, -2.0f),glm::quat(1.8f, 0.0f, 1.0f, 0.0f)));
 	Models.push_back(ImportedModel("skele.gltf", "skele.rpf", glm::vec3(-5.0f, 0.0f, -2.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
 	Models.push_back(ImportedModel("ground.gltf", "ground.rpf", glm::vec3(2.0f, -2.85f, -2.0f), glm::quat((3.14159f/2.0f), 1.0f, 0.0f, 0.0f)));
