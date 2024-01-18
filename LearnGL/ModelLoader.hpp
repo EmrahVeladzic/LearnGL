@@ -10,8 +10,8 @@
 #include "Animation.hpp"
 
 #define numVAOs 1
-#define numVBOs 4
-
+#define numVBOs 3
+#define numEBOs 1
 
 
 
@@ -45,6 +45,7 @@ struct MImeshes {
 	std::vector<float> triangleVerts;
 	std::vector<float> textureCoords;
 	std::vector<float> normals;
+	std::vector<uint16_t> indices;
 
 	int jointIndex;
 
@@ -98,9 +99,11 @@ public:
 	int findBoneByNode(int node);
 	int findBoneByJointVal(int jointVal);
 	int getNumVertices(int m);
+	int getNumIndices(int m);
 	std::vector<float> getVertices(int m);
 	std::vector<float> getTextureCoords(int m);
 	std::vector<float> getNormals(int m);
+	std::vector<uint16_t> getIndices(int m);
 
 	void clearRig();
 
@@ -120,27 +123,32 @@ struct Mesh {
 
 
 	int numVertices;
+	int numIndices;
 
 	int jointIndex;
 
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec2> texCoords;
 	std::vector<glm::vec3> normalVecs;
-
+	std::vector<uint16_t> indices;
 
 	GLuint vao[numVAOs];
 	GLuint vbo[numVBOs];
+	GLuint ebo[numEBOs];
 
 
 	std::vector<float>pvalues;
 	std::vector<float>tvalues;
 	std::vector<float>nvalues;
+	
 
 	int getNumVertices();
+	int getNumIndices();
+
 	std::vector<glm::vec3> getVertices();
 	std::vector<glm::vec2> getTexCoords();
 	std::vector<glm::vec3> getNormals();
-
+	std::vector<uint16_t>  getIndices();
 
 
 };

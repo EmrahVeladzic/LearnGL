@@ -19,8 +19,8 @@
 #include <glm/gtx/string_cast.hpp>
 
 #define numVAOs 1
-#define numVBOs 4
-
+#define numVBOs 3
+#define numEBOs 1
 
 
 float cameraX, cameraY, cameraZ;
@@ -80,7 +80,7 @@ void setupVertices(std::vector<ImportedModel>& models) {
 			std::vector<glm::vec2> tex = model.Meshes[i].getTexCoords();
 			std::vector<glm::vec3> norm = model.Meshes[i].getNormals();
 
-
+			
 			
 		
 
@@ -122,6 +122,11 @@ void setupVertices(std::vector<ImportedModel>& models) {
 			glBindBuffer(GL_ARRAY_BUFFER, model.Meshes[i].vbo[2]);
 			glBufferData(GL_ARRAY_BUFFER, model.Meshes[i].nvalues.size() * 4, &model.Meshes[i].nvalues[0], GL_STATIC_DRAW);
 
+
+			glGenBuffers(numEBOs, model.Meshes[i].ebo);
+
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model.Meshes[i].ebo[0]);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, model.Meshes[i].indices.size() * 2, &model.Meshes[i].indices[0], GL_STATIC_DRAW);
 		}
 	}
 
@@ -378,7 +383,7 @@ void display(GLFWwindow* window ,std::vector<ImportedModel> models) {
 			glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
 			glEnableVertexAttribArray(2);
 
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model.Meshes[i].vbo[3]);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model.Meshes[i].ebo[0]);
 
 
 
@@ -398,7 +403,8 @@ void display(GLFWwindow* window ,std::vector<ImportedModel> models) {
 			glEnable(GL_ALPHA_TEST);
 
 
-			glDrawArrays(GL_TRIANGLES, 0, model.Meshes[i].getNumVertices());
+			//glDrawArrays(GL_TRIANGLES, 0, model.Meshes[i].getNumVertices());
+			glDrawElements(GL_TRIANGLES, model.Meshes[i].getNumVertices(), GL_UNSIGNED_SHORT, model.Meshes[i].getIndices().data());
 
 		}
 

@@ -48,6 +48,7 @@ ImportedModel::ImportedModel(const char* filePath, const char* ImagePath, glm::v
 		Mesh mtmp;
 
 		mtmp.numVertices = (int)importer.getNumVertices(i);
+		mtmp.numIndices = (int)importer.getNumIndices(i);
 
 		std::vector<float>verts = importer.getVertices(i);
 		std::vector<float>tex = importer.getTextureCoords(i);
@@ -61,9 +62,11 @@ ImportedModel::ImportedModel(const char* filePath, const char* ImagePath, glm::v
 
 		}
 		mtmp.jointIndex=importer.getBoneIndex(i);
-		
+		mtmp.indices = importer.getIndices(i);
 
 		Meshes.push_back(mtmp);
+
+		
 	}
 
 	
@@ -80,10 +83,11 @@ ImportedModel::ImportedModel(const char* filePath, const char* ImagePath, glm::v
 
 
 int Mesh::getNumVertices() { return numVertices; }
+int Mesh::getNumIndices() { return numIndices; }
 std::vector<glm::vec3> Mesh::getVertices() { return vertices; }
 std::vector<glm::vec2>Mesh::getTexCoords() { return texCoords; }
 std::vector<glm::vec3>Mesh::getNormals() { return normalVecs; }
-
+std::vector<uint16_t> Mesh::getIndices() { return indices; }
 
 
 
@@ -450,9 +454,13 @@ void ModelImporter::parseGLTF(const char* filePath) {
 
 
 				indices.push_back(temp_ushort);
-			}
+			}			
+			
 
+			
+			mtemp.indices = indices;				
 
+			
 		}
 
 
@@ -948,10 +956,11 @@ int ModelImporter::getBoneIndex(int m) {
 }
 
 int ModelImporter::getNumVertices(int m) { return ((int)ImpMeshes[m].triangleVerts.size() / 3); }
+int ModelImporter::getNumIndices(int m) { return((int)ImpMeshes[m].indices.size()); }
 std::vector<float> ModelImporter::getVertices(int m) { return ImpMeshes[m].triangleVerts; }
 std::vector<float> ModelImporter::getTextureCoords(int m) { return ImpMeshes[m].textureCoords; }
 std::vector<float> ModelImporter::getNormals(int m) { return ImpMeshes[m].normals; }
-
+std::vector<uint16_t> ModelImporter::getIndices(int m) { return ImpMeshes[m].indices; }
 
 int ModelImporter::findBoneByJointVal(int jointVal) {
 
