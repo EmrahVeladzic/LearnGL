@@ -440,7 +440,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 		tmq.w = 3.0f;
 
-		Models[0].currentAnim = 2;
+		if (Models.empty() == false) {
+
+			Models[0].currentAnim = 2;
+
+		}
 	}
 	else if (keys[GLFW_KEY_S] == true)
 	{
@@ -448,7 +452,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 		tmq.w = 0.0f;
 
-		Models[0].currentAnim = 2;
+		if (Models.empty() == false) {
+
+			Models[0].currentAnim = 2;
+
+		}
 	}
 
 	else if (keys[GLFW_KEY_A] == true)
@@ -457,7 +465,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 		tmq.w = -1.5f;
 
-		Models[0].currentAnim = 2;
+		if (Models.empty() == false) {
+
+			Models[0].currentAnim = 2;
+
+		}
 	}
 	else if (keys[GLFW_KEY_D] == true)
 	{
@@ -465,22 +477,36 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 		tmq.w = 1.5f;
 
-		Models[0].currentAnim = 2;
+
+		if (Models.empty() == false) {
+			Models[0].currentAnim = 2;
+
+		}
 	}
 
 	else
 	{
 		tmq.w = Models[0].rotation.w;
 
-		Models[0].currentAnim = 3;
+
+		if (Models.empty() == false) {
+
+
+			Models[0].currentAnim = 3;
+
+		}
 	}
 	
 	cameraX += outtrv.x;
 	cameraY += outtrv.y;
 	cameraZ += outtrv.z;
 
-	Models[0].position += outtrv;
-	Models[0].rotation = tmq;
+	if (Models.empty() == false) {
+
+		Models[0].position += outtrv;
+		Models[0].rotation = tmq;
+
+	}
 }
 
 void window_reshape_callback(GLFWwindow* window, int newWidth, int newHeight) {
