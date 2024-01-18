@@ -67,11 +67,4 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
-  <ItemGroup>
-    <Library Include="..\..\..\..\Files\Desktop\LearnGL\LearnGL\LearnGL\lib\EFX-Util.lib" />
-    <Library Include="..\..\..\..\Files\Desktop\LearnGL\LearnGL\LearnGL\lib\glew32.lib" />
-    <Library Include="..\..\..\..\Files\Desktop\LearnGL\LearnGL\LearnGL\lib\glfw3.lib" />
-    <Library Include="..\..\..\..\Files\Desktop\LearnGL\LearnGL\LearnGL\lib\OpenAL32.lib" />
-    <Library Include="..\..\..\..\Files\Desktop\LearnGL\LearnGL\LearnGL\lib\soil2-debug.lib" />
-  </ItemGroup>
 </Project>
