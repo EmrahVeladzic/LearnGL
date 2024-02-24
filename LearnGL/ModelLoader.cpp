@@ -91,7 +91,7 @@ std::vector<uint16_t> Mesh::getIndices() { return indices; }
 
 
 
-void ModelImporter::parseGLTF(const char* filePath) {
+void ModelImporter::parseGLTF(const char* filePathRel) {
 
 	num_meshes = 0;
 	num_mats = 0;
@@ -102,7 +102,7 @@ void ModelImporter::parseGLTF(const char* filePath) {
 	uint16_t temp_ushort=0;
 	uint8_t temp_ubyte=0;
 
-
+	const std::string filePath = "Assets/" + (std::string)filePathRel;
 
 	std::ifstream gltf_file(filePath);
 
@@ -118,6 +118,7 @@ void ModelImporter::parseGLTF(const char* filePath) {
 
 
 	std::string bin_file_path = j_son["buffers"][0]["uri"];
+	bin_file_path = "Assets/" + bin_file_path;
 
 	std::ifstream bin_file(bin_file_path, std::ios::binary);
 
@@ -742,9 +743,9 @@ glm::mat4x4 ImportedModel::compute_transformJ(int boneI) {
 
 
 
-GLuint ModelImporter::loadRPF(const char* filePath) {
+GLuint ModelImporter::loadRPF(const char* filePathRel) {
 
-
+	std::string filePath = "Assets/" + (std::string)filePathRel;
 
 	std::ifstream rpfloader(filePath, std::ios::binary);
 

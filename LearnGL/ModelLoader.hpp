@@ -94,7 +94,7 @@ public:
 	int get_child_index(int j_son_index);
 
 	
-	void parseGLTF(const char* filePath);
+	void parseGLTF(const char* filePathRel);
 	
 	int findBoneByNode(int node);
 	int findBoneByJointVal(int jointVal);
@@ -113,7 +113,7 @@ public:
 
 
 
-	GLuint loadRPF(const char* filepath);
+	GLuint loadRPF(const char* filePathRel);
 
 	void clearData();
 

@@ -50,10 +50,10 @@ int16_t adapt_step(int16_t pred, int16_t current_step, int8_t shift) {
 
 
 
-ALuint Audio_Handler::load_WL(const char* filepath) {
+ALuint Audio_Handler::load_WL(const char* filepathRel) {
 	ALuint out;
 
-
+	std::string filepath = "Assets/" + (std::string)filepathRel;
 
 	std::ifstream filestr = std::ifstream(filepath,std::ios::in);
 
