@@ -206,8 +206,7 @@ void animate(GLFWwindow* window, double currentTime, std::vector<ImportedModel>&
 
 		
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, model.texture);
+	
 
 
 
@@ -302,7 +301,10 @@ void display(GLFWwindow* window ,std::vector<ImportedModel>& models) {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, model.texture);		
 
-		
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_1D, model.clut);
+
+
 		if (model.num_joints>0)
 		{
 			model.compute_pose(model.root);

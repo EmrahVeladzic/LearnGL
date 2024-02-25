@@ -113,7 +113,7 @@ public:
 
 
 
-	GLuint loadRPF(const char* filePathRel);
+	GLuint* loadRPF(const char* filePathRel);
 
 	void clearData();
 
@@ -176,7 +176,7 @@ struct ImportedModel {
 	
 
 	GLuint texture;
-	
+	GLuint clut;
 	
 };
 
