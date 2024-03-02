@@ -14,7 +14,7 @@
 
 #define ROOT_MARKER -1
 
-
+#define FOUR_BPP_MULT 16
 
 
 ImportedModel::ImportedModel(const char* filePath, const char* ImagePath, glm::vec3 pos, glm::quat rot) {
@@ -71,9 +71,13 @@ ImportedModel::ImportedModel(const char* filePath, const char* ImagePath, glm::v
 
 	
 
-	texture = importer.loadRPF(ImagePath);
+	GLuint* temptext = importer.loadRPF(ImagePath);
+
+	texture = temptext[0];
+	clut = temptext[1];
 
 
+	delete[] temptext;
 
 
 	importer.clearData();
@@ -91,7 +95,7 @@ std::vector<uint16_t> Mesh::getIndices() { return indices; }
 
 
 
-void ModelImporter::parseGLTF(const char* filePath) {
+void ModelImporter::parseGLTF(const char* filePathRel) {
 
 	num_meshes = 0;
 	num_mats = 0;
@@ -102,7 +106,7 @@ void ModelImporter::parseGLTF(const char* filePath) {
 	uint16_t temp_ushort=0;
 	uint8_t temp_ubyte=0;
 
-
+	const std::string filePath = "Assets/" + (std::string)filePathRel;
 
 	std::ifstream gltf_file(filePath);
 
@@ -118,6 +122,7 @@ void ModelImporter::parseGLTF(const char* filePath) {
 
 
 	std::string bin_file_path = j_son["buffers"][0]["uri"];
+	bin_file_path = "Assets/" + bin_file_path;
 
 	std::ifstream bin_file(bin_file_path, std::ios::binary);
 
@@ -742,9 +747,9 @@ glm::mat4x4 ImportedModel::compute_transformJ(int boneI) {
 
 
 
-GLuint ModelImporter::loadRPF(const char* filePath) {
+GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
-
+	std::string filePath = "Assets/" + (std::string)filePathRel;
 
 	std::ifstream rpfloader(filePath, std::ios::binary);
 
@@ -754,28 +759,35 @@ GLuint ModelImporter::loadRPF(const char* filePath) {
 
 	rpfloader.read(reinterpret_cast<char*>(&rpf.magic), sizeof(rpf.magic));
 
-	rpf.CLUT = new Pixel[(rpf.magic[1] + 1)];
+	rpf.CLUT = new Pixel32[(int)(rpf.magic[1] + 1)];
+
+	Pixel temp_pixel;
 
 
-	rpf.data = new uint8_t[(rpf.magic[2] + 1) * (rpf.magic[3] + 1)];
+	rpf.data = new uint8_t[((int)rpf.magic[2] + 1) * ((int)rpf.magic[3] + 1)];
 
 	uint16_t reader = 0;
 
-	for (int i = 0; i < (rpf.magic[1] + 1); i++)
+	for (int i = 0; i < ((int)rpf.magic[1] + 1); i++)
 	{
 		rpfloader.read(reinterpret_cast<char*>(&reader), 1 * sizeof(uint16_t));
 
 
-		rpf.CLUT[i].a = (reader >> 0) & 0x01;
-		rpf.CLUT[i].r = (reader >> 1) & 0x1F;
-		rpf.CLUT[i].g = (reader >> 6) & 0x1F;
-		rpf.CLUT[i].b = (reader >> 11) & 0x1F;
+		temp_pixel.a = (reader >> 0) & 0x01;
+		temp_pixel.r = (reader >> 1) & 0x1F;
+		temp_pixel.g = (reader >> 6) & 0x1F;
+		temp_pixel.b = (reader >> 11) & 0x1F;
+
+		rpf.CLUT[i].a = temp_pixel.a * 255;
+		rpf.CLUT[i].r = temp_pixel.r * 8;
+		rpf.CLUT[i].g = temp_pixel.g * 8;
+		rpf.CLUT[i].b = temp_pixel.b * 8;
 
 	}
 
 	if ((rpf.magic[1] + 1) > 16)
 	{
-		rpfloader.read(reinterpret_cast<char*>(rpf.data), sizeof(char) * (rpf.magic[2] + 1) * (rpf.magic[3] + 1));
+		rpfloader.read(reinterpret_cast<char*>(rpf.data), sizeof(char) * ((int)rpf.magic[2] + 1) * ((int)rpf.magic[3] + 1));
 	}
 
 	else
@@ -785,15 +797,16 @@ GLuint ModelImporter::loadRPF(const char* filePath) {
 
 		uint8_t temp_data = 0;
 
-		for (int i = 0; i < (int)(((rpf.magic[2] + 1) * (rpf.magic[3] + 1)) / 2); i++)
+		for (int i = 0; i < (int)((((int)rpf.magic[2] + 1) * ((int)rpf.magic[3] + 1)) / 2); i++)
 		{
 			rpfloader.read(reinterpret_cast<char*>(&temp_data), sizeof(char));
 
-			msb = (temp_data >> 4) & 0x0F;
-			lsb = (temp_data) & 0x0F;
+			msb = (uint8_t)(temp_data >> 4) & 0x0F;
+			lsb = (uint8_t)(temp_data) & 0x0F;
+			
 
-			rpf.data[(2 * i)] = msb;
-			rpf.data[(2 * i) + 1] = lsb;
+			rpf.data[(2 * i)] = msb * FOUR_BPP_MULT;
+			rpf.data[(2 * i) + 1] = lsb * FOUR_BPP_MULT;
 
 		}
 
@@ -806,52 +819,57 @@ GLuint ModelImporter::loadRPF(const char* filePath) {
 
 	GLuint text;
 
-	int tempw = rpf.magic[2] + 1;
+	int tempc = (int)rpf.magic[1] + 1;
 
-	int temph = rpf.magic[3] + 1;
+	int tempw = (int)rpf.magic[2] + 1;
+
+	int temph = (int)rpf.magic[3] + 1;
+
+
 
 
 	int temp = tempw * temph;
-
-
-	Pixel32* rpfdata = new Pixel32[temp];
-
-
-
-	for (int i = 0; i < temp; i++)
-	{
-
-
-		uint8_t j = rpf.data[i];
-
-
-		rpfdata[i].r = ((uint8_t)rpf.CLUT[j].r * 8);
-		rpfdata[i].g = ((uint8_t)rpf.CLUT[j].g * 8);
-		rpfdata[i].b = ((uint8_t)rpf.CLUT[j].b * 8);
-		rpfdata[i].a = ((uint8_t)rpf.CLUT[j].a * 255);
-
-	}
-
 
 
 	glGenTextures(1, &text);
 
 	glBindTexture(GL_TEXTURE_2D, text);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tempw, temph, 0, GL_RGBA, GL_UNSIGNED_BYTE, rpfdata);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, tempw, temph, 0, GL_RED, GL_UNSIGNED_BYTE, rpf.data);
 
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 
+	GLuint clt;
+
+	glGenTextures(1, &clt);
+
+	glBindTexture(GL_TEXTURE_1D, clt);
+
+	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, tempc, 0, GL_RGBA, GL_UNSIGNED_BYTE, rpf.CLUT);
+
+
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+
+	GLuint* rtn = new GLuint[2];
+
+	rtn[0] = text;
+	rtn[1] = clt;
+
+
 	delete[] rpf.CLUT;
 
 	delete[] rpf.data;
 
-	delete[] rpfdata;
+	
 
-	return text;
+	
+
+	return rtn;
 
 
 

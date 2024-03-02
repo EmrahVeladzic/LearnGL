@@ -35,7 +35,7 @@ struct RPF
 {
 	uint8_t magic[4];// Byte 0 = "R" , Byte 1 = CLUT size, Byte 2 = width, Byte 3 = height
 
-	Pixel* CLUT;//Color lookup table
+	Pixel32* CLUT;//Color lookup table
 
 	uint8_t* data;//Pixel references to the CLUT
 };

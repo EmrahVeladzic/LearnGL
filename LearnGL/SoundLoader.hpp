@@ -20,7 +20,7 @@ private:
 
 public:
 
-	ALuint load_WL(const char* filepath);
+	ALuint load_WL(const char* filepathRel);
 
 };
 
