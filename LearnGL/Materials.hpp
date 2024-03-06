@@ -1,5 +1,10 @@
-#pragma once
+#ifndef MATERIALS
+#define MATERIALS
+
 #include <glm/glm.hpp>
+
+#endif // !MATERIALS
+
 
 
 class Material {

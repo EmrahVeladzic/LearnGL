@@ -14,13 +14,28 @@
 
 #define ROOT_MARKER -1
 
-#define FOUR_BPP_MULT 16
+#define EIGHT_BPP_MULT 1.0f
+#define FOUR_BPP_MULT 16.0f
+#define TWO_BPP_MULT 64.0f
+#define ONE_BPP_MULT 255.0f
+
+
+enum RPF_MODE
+{
+	EIGHT_BPP = 1,
+	FOUR_BPP = 2,
+	TWO_BPP = 3,
+	ONE_BPP = 4
+
+};
 
 
 ImportedModel::ImportedModel(const char* filePath, const char* ImagePath, glm::vec3 pos, glm::quat rot) {
 
 	position = pos;
 	rotation = rot;
+
+	clut_multiplier = 1.0f;
 
 	currentAnim = 0;
 
@@ -75,6 +90,21 @@ ImportedModel::ImportedModel(const char* filePath, const char* ImagePath, glm::v
 
 	texture = temptext[0];
 	clut = temptext[1];
+
+
+	int Mode = temptext[2];
+
+	switch (Mode)
+	{
+	case EIGHT_BPP: { clut_multiplier = EIGHT_BPP_MULT; break; }
+	case FOUR_BPP: { clut_multiplier = FOUR_BPP_MULT; break; }
+	case TWO_BPP: { clut_multiplier = TWO_BPP_MULT; break; }
+	case ONE_BPP: { clut_multiplier = ONE_BPP_MULT; break; }
+
+
+	default:
+		break;
+	}
 
 
 	delete[] temptext;
@@ -744,9 +774,6 @@ glm::mat4x4 ImportedModel::compute_transformJ(int boneI) {
 
 
 
-
-
-
 GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
 	std::string filePath = "Assets/" + (std::string)filePathRel;
@@ -755,7 +782,7 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
 	RPF rpf;
 
-
+	GLuint Mode = EIGHT_BPP;
 
 	rpfloader.read(reinterpret_cast<char*>(&rpf.magic), sizeof(rpf.magic));
 
@@ -788,10 +815,11 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 	if ((rpf.magic[1] + 1) > 16)
 	{
 		rpfloader.read(reinterpret_cast<char*>(rpf.data), sizeof(char) * ((int)rpf.magic[2] + 1) * ((int)rpf.magic[3] + 1));
+
+
 	}
 
-	else
-	{
+	else if ((rpf.magic[1] + 1) <= 16 && (rpf.magic[1]+1)>4) {
 		uint8_t msb = 0;
 		uint8_t lsb = 0;
 
@@ -805,12 +833,91 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 			lsb = (uint8_t)(temp_data) & 0x0F;
 			
 
-			rpf.data[(2 * i)] = msb * FOUR_BPP_MULT;
-			rpf.data[(2 * i) + 1] = lsb * FOUR_BPP_MULT;
+			rpf.data[(2 * i)] = msb;
+			rpf.data[(2 * i) + 1] = lsb;
 
 		}
 
+		Mode = FOUR_BPP;
 	}
+
+	else if ((rpf.magic[1] + 1) <= 4 && (rpf.magic[1] + 1) > 2)
+	{
+
+		uint8_t msb = 0;
+		uint8_t hsb = 0;
+		uint8_t rsb = 0;
+		uint8_t lsb = 0;
+
+		uint8_t temp_data = 0;
+
+		for (int i = 0; i < (int)((((int)rpf.magic[2] + 1) * ((int)rpf.magic[3] + 1)) / 4); i++)
+		{
+			rpfloader.read(reinterpret_cast<char*>(&temp_data), sizeof(char));
+
+			msb = (uint8_t)(temp_data >> 6) & 0x03;
+			hsb = (uint8_t)(temp_data >> 4) & 0x03;
+			rsb = (uint8_t)(temp_data >> 2) & 0x03;
+			lsb = (uint8_t)(temp_data) & 0x03;
+
+
+			rpf.data[(4 * i)] = msb;
+			rpf.data[(4 * i) + 1] = hsb;
+			rpf.data[(4 * i) + 2] = rsb;
+			rpf.data[(4 * i) + 3] = lsb;
+
+		}
+
+
+		Mode = TWO_BPP;
+
+	}
+
+	else
+	{
+		uint8_t msb = 0;
+		uint8_t asb = 0;
+		uint8_t bsb = 0;
+		uint8_t csb = 0;
+		uint8_t dsb = 0;
+		uint8_t esb = 0;
+		uint8_t fsb = 0;
+		uint8_t lsb = 0;
+
+
+		uint8_t temp_data = 0;
+
+		for (int i = 0; i < (int)((((int)rpf.magic[2] + 1) * ((int)rpf.magic[3] + 1)) / 8); i++)
+		{
+			rpfloader.read(reinterpret_cast<char*>(&temp_data), sizeof(char));
+
+
+			msb = (uint8_t)(temp_data >> 7) & 0x01;
+			asb = (uint8_t)(temp_data >> 6) & 0x01;
+			bsb = (uint8_t)(temp_data >> 5) & 0x01;
+			csb = (uint8_t)(temp_data >> 4) & 0x01;
+			dsb = (uint8_t)(temp_data >> 3) & 0x01;
+			esb = (uint8_t)(temp_data >> 2) & 0x01;
+			fsb = (uint8_t)(temp_data >> 1) & 0x01;
+			lsb = (uint8_t)(temp_data) & 0x01;
+
+
+			rpf.data[(8 * i)] = msb ;
+			rpf.data[(8 * i) + 1] = asb;
+			rpf.data[(8 * i) + 2] = bsb;
+			rpf.data[(8 * i) + 3] = csb;
+			rpf.data[(8 * i) + 4] = dsb;
+			rpf.data[(8 * i) + 5] = esb;
+			rpf.data[(8 * i) + 6] = fsb;
+			rpf.data[(8 * i) + 7] = lsb;
+
+		}
+
+		Mode = ONE_BPP;
+
+		
+	}
+
 
 
 	rpfloader.close();
@@ -855,10 +962,11 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 
-	GLuint* rtn = new GLuint[2];
+	GLuint* rtn = new GLuint[3];
 
 	rtn[0] = text;
 	rtn[1] = clt;
+	rtn[2] = Mode;
 
 
 	delete[] rpf.CLUT;

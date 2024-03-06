@@ -1,4 +1,9 @@
-#pragma once
+#ifndef UTILS
+#define UTILS
+
+
+
+
 
 #include<GL/glew.h>
 #include <string>
@@ -46,3 +51,5 @@ public:
 	
 };
 
+
+#endif // !UTILS

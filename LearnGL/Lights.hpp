@@ -1,6 +1,11 @@
-#pragma once
+#ifndef LIGHTS
+#define LIGHTS
+
 #include <iostream>
 #include <glm/glm.hpp>
+#endif // !LIGHTS
+
+
 
 
 

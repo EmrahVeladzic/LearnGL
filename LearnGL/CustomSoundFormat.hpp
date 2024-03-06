@@ -1,5 +1,10 @@
-#pragma once
+#ifndef WL_FORMAT
+#define WL_FORMAT
 #include <stdint.h>
+
+
+
+
 
 #pragma pack(push,1)
 struct Four_bit {
@@ -31,3 +36,6 @@ struct WL
 
 };
 #pragma pack(pop)
+
+
+#endif // !WL_FORMAT
