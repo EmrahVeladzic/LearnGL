@@ -62,6 +62,8 @@ uniform mat4 proj_matrix;
 uniform mat4 norm_matrix;
 uniform float tf;
 
+uniform float clut_multiplier;
+
 
 layout (binding=0) uniform sampler2D samp;
 layout(binding=1) uniform sampler1D cltsamp;
@@ -86,7 +88,7 @@ vec3 specular=pos_light.specular.xyz*material.specular.xyz*pow(max(cosPhi,0.0f),
 
 vec4 light = vec4((ambient+diffuse+specular),1.0f);
 
-float clr_ind = texture(samp,tc).r;
+float clr_ind = texture(samp,tc).r * clut_multiplier;
 
 vec4 simple_color=texture(cltsamp,clr_ind);
 

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MODEL_LOADER
+#define MODEL_LOADER
 
 #include <vector>
 #include <glm/glm.hpp>
@@ -8,6 +9,11 @@
 #include "CustomImageFormat.hpp"
 #include "nlohmann/json.hpp"
 #include "Animation.hpp"
+
+
+
+
+
 
 #define numVAOs 1
 #define numVBOs 3
@@ -35,6 +41,17 @@ struct Bone {
 
 	std::vector<animJoint> animations;
 
+	Bone()
+	{
+		fromNode = 0;
+		fromJointTab = 0;
+		extremity = false;
+		name = "NONE";
+		parent = 0;
+		TransformMat = glm::mat4x4(1.0f);
+	}
+	
+
 		
 };
 
@@ -48,6 +65,12 @@ struct MImeshes {
 	std::vector<uint16_t> indices;
 
 	int jointIndex;
+
+	MImeshes()
+	{
+		jointIndex = 0;
+		name = "NONE";
+	}
 
 };
 
@@ -110,12 +133,24 @@ public:
 	std::vector<Bone> getBones();
 	std::vector<glm::mat4x4> getInverseBinds();
 
-
+	
 
 
 	GLuint* loadRPF(const char* filePathRel);
 
 	void clearData();
+
+
+	ModelImporter()
+	{
+		root = 0;
+		num_meshes = 0;
+		num_mats = 0;
+		num_joints = 0;
+		num_anims = 0;
+
+		
+	}
 
 };
 
@@ -145,6 +180,26 @@ struct Mesh {
 	std::vector<glm::vec3> getNormals();
 	std::vector<uint16_t>  getIndices();
 
+
+	Mesh()
+	{
+		numVertices = 0;
+		numIndices = 0;
+		jointIndex = 0;
+
+		for (size_t i = 0; i < numVAOs; i++)
+		{
+			vao[i] = 0;
+		}
+		for (size_t i = 0; i < numVBOs; i++)
+		{
+			vbo[i] = 0;
+		}
+		for (size_t i = 0; i < numEBOs; i++)
+		{
+			ebo[i] = 0;
+		}
+	}
 
 };
 
@@ -177,6 +232,24 @@ struct ImportedModel {
 
 	GLuint texture;
 	GLuint clut;
+
+	float clut_multiplier;
+
+	ImportedModel()
+	{
+		importer = ModelImporter();
+		num_joints = 0;
+		num_anims = 0;
+		position = glm::vec3(0.0,0.0,0.0);
+		rotation = glm::quat(0.0,0.0,0.0,0.0);
+		root = 0;
+		currentAnim = 0;
+		texture = 0;
+		clut = 0;
+		num_mats = 0;
+		clut_multiplier = 1.0f;
+	}
 	
 };
 
+#endif // !MODEL_LOADER

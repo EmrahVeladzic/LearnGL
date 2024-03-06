@@ -1,10 +1,15 @@
-#pragma once
+#ifndef WL_LOADER
+#define WL_LOADER
+
 #include <OpenAL/al.h>
 #include <OpenAL/alc.h>
 #include <iostream>
 #include "CustomSoundFormat.hpp"
 #include <vector>
 #include <fstream>
+
+
+
 
 #define SAMPLES_PER_BLOCK 28
 
@@ -24,3 +29,4 @@ public:
 
 };
 
+#endif // !WL_LOADER

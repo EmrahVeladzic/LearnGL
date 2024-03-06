@@ -22,6 +22,8 @@
 #define numVBOs 3
 #define numEBOs 1
 
+#define TARGET_FPS 60.0f
+#define SECOND_F 1000.0f
 
 float cameraX, cameraY, cameraZ;
 
@@ -36,7 +38,7 @@ GLuint renderingProgram;
 GLuint vao[numVAOs];
 GLuint vbo[numVBOs];
 
-GLuint projLoc, vLoc, tfLoc, mvLoc, invBindLoc, transLoc, offsetLoc;
+GLuint projLoc, vLoc, tfLoc, mvLoc, invBindLoc, transLoc, offsetLoc, clutMultLoc;
 int width, height;
 float aspect, timeFactor;
 glm::mat4 pMat, vMat, mMat, mvMat;
@@ -291,8 +293,8 @@ void display(GLFWwindow* window ,std::vector<ImportedModel>& models) {
 		glm::mat4x4 invBTemp = glm::mat4x4(1.0f);
 		glm::mat4x4 transTemp = glm::mat4x4(1.0f);
 
-		
-
+		clutMultLoc = glGetUniformLocation(renderingProgram,"clut_multiplier");
+		glUniform1f(clutMultLoc, model.clut_multiplier);
 
 		lightingConfig(vMat);
 
@@ -562,15 +564,21 @@ int main(void) {
 	glfwSetWindowSizeCallback(window, window_reshape_callback);
 
 
-	while (!glfwWindowShouldClose(window))
-	{
+	float beg_time = 0.0f;
+	float end_time = 0.0f;
+
+	while (!glfwWindowShouldClose(window)){
 		
-		
+		beg_time =(float) glfwGetTime();
 
 		animate(window,glfwGetTime(),Models);
 		display(window,Models);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+
+		end_time =(float) glfwGetTime();
+
+		
 	}
 
 

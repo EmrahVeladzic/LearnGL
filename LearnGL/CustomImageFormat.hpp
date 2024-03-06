@@ -1,5 +1,10 @@
-#pragma once
+#ifndef RPF_FORMAT
+#define RPF_FORMAT
 #include <stdint.h>
+
+
+
+
 
 #pragma pack(push,4)
 struct Pixel
@@ -44,3 +49,4 @@ struct RPF
 
 
 
+#endif // !RPF_FORMAT
