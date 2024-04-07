@@ -24,6 +24,8 @@ void Utils::UpdateInterpolationIndex(animJoint& in, float timestamp) {
 		in.scalIndex = 0;
 	}
 
+	
+
 	float beginTrans = in.transTimes[in.transIndex];
 	float endTrans = in.transTimes[in.transIndex + 1];
 
@@ -236,8 +238,8 @@ GLuint Utils::createShaderProgram() {
 	GLuint vShader = glCreateShader(GL_VERTEX_SHADER);
 	GLuint fShader = glCreateShader(GL_FRAGMENT_SHADER);
 
-	const char* vertShaderSrc = vertShaderStr.c_str();
-	const char* fragShaderSrc = fragShaderStr.c_str();
+	const char* vertShaderSrc = vertShaderStr.c_str() + '\0';
+	const char* fragShaderSrc = fragShaderStr.c_str() + '\0';
 
 	glShaderSource(vShader, 1, &vertShaderSrc, NULL);
 	glShaderSource(fShader, 1, &fragShaderSrc, NULL);
@@ -264,8 +266,8 @@ GLuint Utils::createShaderProgram(const char* vp, const char* fp) {
 	GLuint vShader = glCreateShader(GL_VERTEX_SHADER);
 	GLuint fShader = glCreateShader(GL_FRAGMENT_SHADER);
 
-	const char* vertShaderSrc = vertShaderStr.c_str();
-	const char* fragShaderSrc = fragShaderStr.c_str();
+	const char* vertShaderSrc = vertShaderStr.c_str() + '\0';
+	const char* fragShaderSrc = fragShaderStr.c_str() + '\0';
 
 	glShaderSource(vShader, 1, &vertShaderSrc, NULL);
 	glShaderSource(fShader, 1, &fragShaderSrc, NULL);
@@ -273,7 +275,7 @@ GLuint Utils::createShaderProgram(const char* vp, const char* fp) {
 
 	glCompileShader(fShader);
 
-	
+
 
 	GLuint vfProgram = glCreateProgram();
 	glAttachShader(vfProgram, vShader);
@@ -281,8 +283,6 @@ GLuint Utils::createShaderProgram(const char* vp, const char* fp) {
 	glLinkProgram(vfProgram);
 	return vfProgram;
 
-	
+
 }
-
-
 

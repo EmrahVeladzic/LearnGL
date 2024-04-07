@@ -128,10 +128,31 @@ void init(GLFWwindow* window, std::vector<ImportedModel>& models) {
 	ambient.enabled = true;
 	light.enabled = true;
 
-	glEnable(GL_MAP_COLOR);
-	glEnable(GL_INDEX);
+	
+
+	glEnable(GL_DEPTH_TEST);
+	
+	projLoc = glGetUniformLocation(renderingProgram, "proj_matrix");
+	globalAmbiLoc = glGetUniformLocation(renderingProgram, "glo_light.ambient");
+
+	ambiLoc = glGetUniformLocation(renderingProgram, "pos_light.ambient");
+	diffLoc = glGetUniformLocation(renderingProgram, "pos_light.diffuse");
+	specLoc = glGetUniformLocation(renderingProgram, "pos_light.specular");
+	posLoc = glGetUniformLocation(renderingProgram, "pos_light.position");
+
+	mAmbiLoc = glGetUniformLocation(renderingProgram, "material.ambient");
+	mDiffLoc = glGetUniformLocation(renderingProgram, "material.diffuse");
+	mSpecLoc = glGetUniformLocation(renderingProgram, "material.specular");
+	mShinLoc = glGetUniformLocation(renderingProgram, "material.shininess");
+
+	invBindLoc = glGetUniformLocation(renderingProgram, "inv_bind_matrix");
+	transLoc = glGetUniformLocation(renderingProgram, "transform_matrix");
+	mvLoc = glGetUniformLocation(renderingProgram, "mv_matrix");
+	clutMultLoc = glGetUniformLocation(renderingProgram, "clut_multiplier");
 
 
+
+	
 
 
 	for (ImportedModel& model : models)
@@ -149,20 +170,7 @@ void lightingConfig(glm::mat4x4 & viewMatrix ) {
 
 
 
-	globalAmbiLoc = glGetUniformLocation(renderingProgram, "glo_light.ambient");
-
-	ambiLoc = glGetUniformLocation(renderingProgram, "pos_light.ambient");
-	diffLoc = glGetUniformLocation(renderingProgram, "pos_light.diffuse");
-	specLoc = glGetUniformLocation(renderingProgram, "pos_light.specular");
-	posLoc = glGetUniformLocation(renderingProgram, "pos_light.position");
-
-	mAmbiLoc = glGetUniformLocation(renderingProgram, "material.ambient");
-	mDiffLoc = glGetUniformLocation(renderingProgram, "material.diffuse");
-	mSpecLoc = glGetUniformLocation(renderingProgram, "material.specular");
-	mShinLoc = glGetUniformLocation(renderingProgram, "material.shininess");
-
-	invBindLoc = glGetUniformLocation(renderingProgram, "inv_bind_matrix");
-	transLoc = glGetUniformLocation(renderingProgram, "transform_matrix");
+	
 
 
 	glProgramUniform4fv(renderingProgram, globalAmbiLoc, 1, ambient.get_ambient_float());
@@ -204,12 +212,6 @@ void animate(GLFWwindow* window, double currentTime, std::vector<ImportedModel>&
 		int curr = model.currentAnim;
 
 
-		
-
-		
-
-	
-
 
 
 		for (size_t i = 0; i < model.Meshes.size(); i++)
@@ -217,10 +219,12 @@ void animate(GLFWwindow* window, double currentTime, std::vector<ImportedModel>&
 
 			
 			
-			projLoc = glGetUniformLocation(renderingProgram, "proj_matrix");
+			
+
+			
 			glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
 
-			mvLoc = glGetUniformLocation(renderingProgram, "mv_matrix");
+			
 			vMat = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
 
 
@@ -293,7 +297,7 @@ void display(GLFWwindow* window ,std::vector<ImportedModel>& models) {
 		glm::mat4x4 invBTemp = glm::mat4x4(1.0f);
 		glm::mat4x4 transTemp = glm::mat4x4(1.0f);
 
-		clutMultLoc = glGetUniformLocation(renderingProgram,"clut_multiplier");
+		
 		glUniform1f(clutMultLoc, model.clut_multiplier);
 
 		lightingConfig(vMat);
@@ -372,10 +376,7 @@ void display(GLFWwindow* window ,std::vector<ImportedModel>& models) {
 
 
 
-			glEnable(GL_DEPTH_TEST);
-			glEnable(GL_LEQUAL);
-
-			glEnable(GL_ALPHA_TEST);
+		
 
 
 			
@@ -502,11 +503,27 @@ void window_reshape_callback(GLFWwindow* window, int newWidth, int newHeight) {
 
 }
 
+void GLAPIENTRY
+MessageCallback(GLenum source,
+	GLenum type,
+	GLuint id,
+	GLenum severity,
+	GLsizei length,
+	const GLchar* message,
+	const void* userParam)
+{
+	/*fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+		(type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
+		type, severity, message);
+		*/
+
+}
+
 int main(void) {
 	if (!glfwInit()) { exit(EXIT_FAILURE); }
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 
 	
 
@@ -528,13 +545,17 @@ int main(void) {
 	glfwSwapInterval(1);
 
 	
-	Models.push_back(ImportedModel("skele.gltf", "skele.rpf", glm::vec3(0.0f, 0.0f, 0.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
-	Models.push_back(ImportedModel("skele.gltf", "skele.rpf", glm::vec3(1.0f, 0.0f, -2.0f),glm::quat(1.8f, 0.0f, 1.0f, 0.0f)));
-	Models.push_back(ImportedModel("skele.gltf", "skele.rpf", glm::vec3(-5.0f, 0.0f, -2.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
-	Models.push_back(ImportedModel("ground.gltf", "ground.rpf", glm::vec3(2.0f, -2.85f, -2.0f), glm::quat((3.14159f/2.0f), 1.0f, 0.0f, 0.0f)));
+	Models.push_back(ImportedModel("skele.gltf", "skele.rpf", glm::vec3(0.0f, 0.0f, -5.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
+	Models.push_back(ImportedModel("skele.gltf", "skele.rpf", glm::vec3(1.0f, 0.0f, -6.0f),glm::quat(1.8f, 0.0f, 1.0f, 0.0f)));
+	Models.push_back(ImportedModel("raven.gltf", "raven.rpf", glm::vec3(-5.0f, 0.0f, -7.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
+	Models.push_back(ImportedModel("ground.gltf", "Test.rpf", glm::vec3(2.0f, -2.85f, 0.0f), glm::quat((3.14159f/2.0f), 1.0f, 0.0f, 0.0f)));
 	
 
 	glfwSetKeyCallback(window,key_callback);
+
+
+	glEnable(GL_DEBUG_OUTPUT);
+	glDebugMessageCallback(MessageCallback, 0);
 
 	init(window,Models);
 

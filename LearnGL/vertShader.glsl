@@ -1,10 +1,10 @@
-#version 430
+#version 460
 layout (location=0) in vec3 position;
 layout (location=1) in vec2 texCoord;
 layout (location=2) in vec3 normals;
 
 out vec2 tc;
-
+out noperspective vec2 affine_tc;
 
 
 
@@ -50,7 +50,6 @@ uniform mat4 proj_matrix;
 uniform mat4 inv_bind_matrix;
 uniform mat4 transform_matrix;
 
-uniform vec3 vertex_offset;
 
 
 uniform float tf;
@@ -87,12 +86,20 @@ posFour = transform_matrix * posFour;
 
 vec4 tmpPos = proj_matrix * mv_matrix * posFour;
 
+float object_distance = clamp(tmpPos.w,-1,1000);
+
+
 
 
 gl_Position = tmpPos;
 
-tc=texCoord;
+if(true){
+gl_Position.xy = round(gl_Position.xy*(256.0/object_distance))/object_distance;
+}
 
+
+tc=texCoord;
+affine_tc = texCoord;
 
 }
 

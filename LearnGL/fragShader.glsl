@@ -1,6 +1,6 @@
-#version 430
+#version 460
 in vec2 tc;
-
+noperspective in vec2 affine_tc;
 
 
 in vec3 varyingNormal;
@@ -11,19 +11,24 @@ in vec3 varyingHalfVector;
 
 out vec4 color;
 
-const mat3 bayerMatrix = mat3(
-    vec3(1.0 / 9.0, 3.0 / 9.0, 5.0 / 9.0),
-    vec3(7.0 / 9.0, 8.0 / 9.0, 1.0 / 9.0),
-    vec3(3.0 / 9.0, 5.0 / 9.0, 7.0 / 9.0)
-);
+const float[8][8] bayerMatrix ={
+    { 0, 32, 8, 40, 2, 34, 10, 42   },
+    {48, 16, 56, 24, 50, 18, 58, 26 },
+    {12, 44, 4, 36, 14, 46, 6, 38   },
+    {60, 28, 52, 20, 62, 30, 54, 22 },
+    { 3, 35, 11, 43, 1, 33, 9, 41   },
+    {51, 19, 59, 27, 49, 17, 57, 25 },
+    {15, 47, 7, 39, 13, 45, 5, 37   },
+    {63, 31, 55, 23, 61, 29, 53, 21 } 
+};
 
 
 
 
 float dither (vec2 position){
-int dith_x = int(mod(int(position.x*64),3));
-int dith_y = int(mod(int(position.y*64),3));
-return bayerMatrix[dith_x][dith_y];
+int dith_x = int(mod(int(position.x*128),8));
+int dith_y = int(mod(int(position.y*128),8));
+return bayerMatrix[dith_x][dith_y]/192;
 };
 
 
@@ -88,6 +93,36 @@ vec3 specular=pos_light.specular.xyz*material.specular.xyz*pow(max(cosPhi,0.0f),
 
 vec4 light = vec4((ambient+diffuse+specular),1.0f);
 
+
+
+
+if(true){
+
+float clr_ind = texture(samp,affine_tc).r * clut_multiplier;
+
+vec4 simple_color=texture(cltsamp,clr_ind);
+
+
+
+
+	if(simple_color.a==0.0){
+
+		discard;
+
+	}
+	
+
+		float dith = dither(tc);
+
+		
+		simple_color=(simple_color-dith);
+
+	
+
+	color=simple_color*light;
+}
+
+else{
 float clr_ind = texture(samp,tc).r * clut_multiplier;
 
 vec4 simple_color=texture(cltsamp,clr_ind);
@@ -100,17 +135,10 @@ vec4 simple_color=texture(cltsamp,clr_ind);
 		discard;
 
 	}
-	else{
-
-		float dith = dither(tc);
-
-		
-		simple_color-=dith/4;
-		
-
-	}
+	
 
 	color=simple_color*light;
-	
+
+}
 	
 }
