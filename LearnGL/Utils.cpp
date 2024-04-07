@@ -243,8 +243,8 @@ GLuint Utils::createShaderProgram(const char* vp, const char* fp) {
 	GLuint vShader = glCreateShader(GL_VERTEX_SHADER);
 	GLuint fShader = glCreateShader(GL_FRAGMENT_SHADER);
 
-	const char* vertShaderSrc = vertShaderStr.c_str();
-	const char* fragShaderSrc = fragShaderStr.c_str();
+	const char* vertShaderSrc = vertShaderStr.c_str() + '\0';
+	const char* fragShaderSrc = fragShaderStr.c_str() + '\0';
 
 	glShaderSource(vShader, 1, &vertShaderSrc, NULL);
 	glShaderSource(fShader, 1, &fragShaderSrc, NULL);

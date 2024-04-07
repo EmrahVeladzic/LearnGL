@@ -1,6 +1,6 @@
 #version 430
 in vec2 tc;
-
+noperspective in vec2 affine_tc;
 
 
 in vec3 varyingNormal;
@@ -75,7 +75,7 @@ layout(binding=1) uniform sampler1D cltsamp;
 
 void main(void){
 
-noperspective vec2 affine_tc = tc;
+
 
 
 vec3 L = normalize(varyingLightDir);

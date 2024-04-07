@@ -4,7 +4,7 @@ layout (location=1) in vec2 texCoord;
 layout (location=2) in vec3 normals;
 
 out vec2 tc;
-
+out noperspective vec2 affine_tc;
 
 
 
@@ -100,7 +100,7 @@ gl_Position.xy = round(gl_Position.xy*(256.0/object_distance))/object_distance;
 
 
 tc=texCoord;
-
+affine_tc = texCoord;
 
 }
 
