@@ -1,4 +1,4 @@
-#version 430
+#version 460
 in vec2 tc;
 noperspective in vec2 affine_tc;
 

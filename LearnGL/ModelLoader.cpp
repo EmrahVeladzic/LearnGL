@@ -14,20 +14,7 @@
 
 #define ROOT_MARKER -1
 
-#define EIGHT_BPP_MULT 1.0f
-#define FOUR_BPP_MULT 16.0f
-#define TWO_BPP_MULT 64.0f
-#define ONE_BPP_MULT 255.0f
 
-
-enum RPF_MODE
-{
-	EIGHT_BPP = 1,
-	FOUR_BPP = 2,
-	TWO_BPP = 3,
-	ONE_BPP = 4
-
-};
 
 
 ImportedModel::ImportedModel(const char* filePath, const char* ImagePath, glm::vec3 pos, glm::quat rot) {
@@ -94,18 +81,10 @@ ImportedModel::ImportedModel(const char* filePath, const char* ImagePath, glm::v
 
 	int Mode = temptext[2];
 
-	switch (Mode)
-	{
-	case EIGHT_BPP: { clut_multiplier = EIGHT_BPP_MULT; break; }
-	case FOUR_BPP: { clut_multiplier = FOUR_BPP_MULT; break; }
-	case TWO_BPP: { clut_multiplier = TWO_BPP_MULT; break; }
-	case ONE_BPP: { clut_multiplier = ONE_BPP_MULT; break; }
 
+	clut_multiplier = 256.0f / (float)Mode;
 
-	default:
-		break;
-	}
-
+	
 
 	delete[] temptext;
 
@@ -782,7 +761,7 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
 	RPF rpf;
 
-	GLuint Mode = EIGHT_BPP;
+	GLuint Mode = 0;
 
 	rpfloader.read(reinterpret_cast<char*>(&rpf.magic), sizeof(rpf.magic));
 
@@ -810,7 +789,11 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 		rpf.CLUT[i].g = temp_pixel.g * 8;
 		rpf.CLUT[i].b = temp_pixel.b * 8;
 
+		
+
 	}
+
+
 
 	if ((rpf.magic[1] + 1) > 16)
 	{
@@ -822,6 +805,8 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 	else if ((rpf.magic[1] + 1) <= 16 && (rpf.magic[1]+1)>4) {
 		uint8_t msb = 0;
 		uint8_t lsb = 0;
+
+		
 
 		uint8_t temp_data = 0;
 
@@ -838,7 +823,7 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
 		}
 
-		Mode = FOUR_BPP;
+		
 	}
 
 	else if ((rpf.magic[1] + 1) <= 4 && (rpf.magic[1] + 1) > 2)
@@ -869,7 +854,7 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 		}
 
 
-		Mode = TWO_BPP;
+	
 
 	}
 
@@ -913,10 +898,12 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
 		}
 
-		Mode = ONE_BPP;
+	
 
 		
 	}
+
+
 
 
 
@@ -932,7 +919,7 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
 	int temph = (int)rpf.magic[3] + 1;
 
-
+	Mode = rpf.magic[1]+1;
 
 
 	int temp = tempw * temph;
@@ -955,7 +942,7 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
 	glBindTexture(GL_TEXTURE_1D, clt);
 
-	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, tempc, 0, GL_RGBA, GL_UNSIGNED_BYTE, rpf.CLUT);
+	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA16, tempc, 0, GL_RGBA, GL_UNSIGNED_BYTE, rpf.CLUT);
 
 
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);

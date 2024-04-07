@@ -1,4 +1,4 @@
-#version 430
+#version 460
 layout (location=0) in vec3 position;
 layout (location=1) in vec2 texCoord;
 layout (location=2) in vec3 normals;
@@ -50,7 +50,6 @@ uniform mat4 proj_matrix;
 uniform mat4 inv_bind_matrix;
 uniform mat4 transform_matrix;
 
-uniform vec3 vertex_offset;
 
 
 uniform float tf;

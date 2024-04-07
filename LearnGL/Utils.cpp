@@ -181,7 +181,30 @@ float Utils::getInterpolationValue(float current, float begin, float end) {
 
 
 
-
+void Utils::printShaderLog(GLuint shader) {
+	int len = 0;
+	int chWrittn = 0;
+	char* log;
+	glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &len);
+	if (len > 0) {
+		log = (char*)malloc(len);
+		glGetShaderInfoLog(shader, len, &chWrittn, log);
+		std::cout << "Shader Info Log: " << log << std::endl;
+		free(log);
+	}
+}
+void Utils::printProgramLog(int prog) {
+	int len = 0;
+	int chWrittn = 0;
+	char* log;
+	glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &len);
+	if (len > 0) {
+		log = (char*)malloc(len);
+		glGetProgramInfoLog(prog, len, &chWrittn, log);
+		std::cout << "Program Info Log: " << log << std::endl;
+		free(log);
+	}
+}
 bool Utils::checkOpenGLError() {
 	bool foundError = false;
 	int glErr = glGetError();
@@ -215,8 +238,8 @@ GLuint Utils::createShaderProgram() {
 	GLuint vShader = glCreateShader(GL_VERTEX_SHADER);
 	GLuint fShader = glCreateShader(GL_FRAGMENT_SHADER);
 
-	const char* vertShaderSrc = vertShaderStr.c_str();
-	const char* fragShaderSrc = fragShaderStr.c_str();
+	const char* vertShaderSrc = vertShaderStr.c_str() + '\0';
+	const char* fragShaderSrc = fragShaderStr.c_str() + '\0';
 
 	glShaderSource(vShader, 1, &vertShaderSrc, NULL);
 	glShaderSource(fShader, 1, &fragShaderSrc, NULL);
@@ -252,7 +275,7 @@ GLuint Utils::createShaderProgram(const char* vp, const char* fp) {
 
 	glCompileShader(fShader);
 
-	
+
 
 	GLuint vfProgram = glCreateProgram();
 	glAttachShader(vfProgram, vShader);
@@ -260,8 +283,6 @@ GLuint Utils::createShaderProgram(const char* vp, const char* fp) {
 	glLinkProgram(vfProgram);
 	return vfProgram;
 
-	
+
 }
-
-
 
