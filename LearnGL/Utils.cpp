@@ -24,6 +24,8 @@ void Utils::UpdateInterpolationIndex(animJoint& in, float timestamp) {
 		in.scalIndex = 0;
 	}
 
+	
+
 	float beginTrans = in.transTimes[in.transIndex];
 	float endTrans = in.transTimes[in.transIndex + 1];
 

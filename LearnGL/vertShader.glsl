@@ -87,9 +87,17 @@ posFour = transform_matrix * posFour;
 
 vec4 tmpPos = proj_matrix * mv_matrix * posFour;
 
+float object_distance = clamp(tmpPos.w,-1,1000);
+
+
 
 
 gl_Position = tmpPos;
+
+if(true){
+gl_Position.xy = round(gl_Position.xy*(256.0/object_distance))/object_distance;
+}
+
 
 tc=texCoord;
 
