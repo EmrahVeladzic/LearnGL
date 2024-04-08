@@ -29,7 +29,7 @@ struct Block {
 struct WL
 {
 	uint8_t magic;
-	uint16_t block_count;
+	uint32_t block_count;
 	uint16_t sample_rate;
 
 	Block* data;

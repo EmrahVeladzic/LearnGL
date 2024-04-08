@@ -28,7 +28,7 @@ const float[8][8] bayerMatrix ={
 float dither (vec2 position){
 int dith_x = int(mod(int(position.x*128),8));
 int dith_y = int(mod(int(position.y*128),8));
-return bayerMatrix[dith_x][dith_y]/192;
+return bayerMatrix[dith_x][dith_y]/256;
 };
 
 
@@ -114,6 +114,9 @@ vec4 simple_color=texture(cltsamp,clr_ind);
 
 		float dith = dither(tc);
 
+		
+		simple_color.g+=(simple_color.r-simple_color.g)/5;
+		simple_color.b+=(simple_color.r-simple_color.b)/5;
 		
 		simple_color=(simple_color-dith);
 

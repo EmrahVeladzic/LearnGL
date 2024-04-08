@@ -64,5 +64,8 @@
     <ClInclude Include="Animation.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FixedPointMath.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -10,16 +10,16 @@
 
 
 
-
 #define SAMPLES_PER_BLOCK 28
+
+
+const uint16_t rounding_table[SAMPLES_PER_BLOCK] = { 0,3,3,3,3,3,3, 2,2,2,2,2,2,2, 2,2,1,1,1,1,1, 1,1,1,1,1,1,0 };
 
 class Audio_Handler {
 private:
 	int16_t* rawAudio;
 
-	int16_t WL_frame_count;
 
-	int16_t Sample_rate;
 
 	WL uninitialised;
 

@@ -512,6 +512,9 @@ MessageCallback(GLenum source,
 	const GLchar* message,
 	const void* userParam)
 {
+
+	//Commented out due to Intel drivers causing a issue despite sucessful render.
+
 	/*fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
 		(type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
 		type, severity, message);
@@ -548,7 +551,7 @@ int main(void) {
 	Models.push_back(ImportedModel("skele.gltf", "skele.rpf", glm::vec3(0.0f, 0.0f, -5.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
 	Models.push_back(ImportedModel("skele.gltf", "skele.rpf", glm::vec3(1.0f, 0.0f, -6.0f),glm::quat(1.8f, 0.0f, 1.0f, 0.0f)));
 	Models.push_back(ImportedModel("raven.gltf", "raven.rpf", glm::vec3(-5.0f, 0.0f, -7.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
-	Models.push_back(ImportedModel("ground.gltf", "Test.rpf", glm::vec3(2.0f, -2.85f, 0.0f), glm::quat((3.14159f/2.0f), 1.0f, 0.0f, 0.0f)));
+	Models.push_back(ImportedModel("ground.gltf", "ground.rpf", glm::vec3(2.0f, -2.85f, 0.0f), glm::quat((3.14159f/2.0f), 1.0f, 0.0f, 0.0f)));
 	
 
 	glfwSetKeyCallback(window,key_callback);
@@ -562,7 +565,7 @@ int main(void) {
 	
 
 
-	sfx = global_audio.load_WL("Ske.wl");
+	sfx = global_audio.load_WL("raven.wl");
 	
 
 	ALuint src;
@@ -575,7 +578,7 @@ int main(void) {
 
 	alSourcei(src, AL_LOOPING, AL_TRUE);
 
-	alSourcef(src, AL_GAIN, 0.125f);
+	alSourcef(src, AL_GAIN, 0.25f);
 
 	alSourcePlay(src);
 	
@@ -591,6 +594,7 @@ int main(void) {
 	while (!glfwWindowShouldClose(window)){
 		
 		beg_time =(float) glfwGetTime();
+		end_time += beg_time;
 
 		animate(window,glfwGetTime(),Models);
 		display(window,Models);
