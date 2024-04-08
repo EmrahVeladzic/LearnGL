@@ -9,7 +9,7 @@
 #pragma pack(push,1)
 struct Four_bit {
 
-	int8_t value : 4;
+	uint8_t value : 4;
 
 };
 #pragma pack(pop)

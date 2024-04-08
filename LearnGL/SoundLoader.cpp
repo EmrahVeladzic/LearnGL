@@ -27,7 +27,7 @@ ALuint Audio_Handler::load_WL(const char* filepathRel) {
 
 
 
-	int8_t reader;
+	uint8_t reader;
 	for (size_t i = 0; i < (size_t) uninitialised.block_count; i++)
 	{
 		filestr.read(reinterpret_cast<char*>(&uninitialised.data[i].shift_filter), sizeof(uint8_t));
@@ -35,10 +35,12 @@ ALuint Audio_Handler::load_WL(const char* filepathRel) {
 
 		for (size_t j = 0; j < SAMPLES_PER_BLOCK; j+=2)
 		{
-			filestr.read(reinterpret_cast<char*>(&reader),sizeof(int8_t));
 
-			uninitialised.data[i].Samples[j*2].value = (reader >> 0) & 0x08;
-			uninitialised.data[i].Samples[(j*2)+1].value = (reader >> 4) & 0x08;
+			filestr.read(reinterpret_cast<char*>(&reader), sizeof(uint8_t));
+
+			uninitialised.data[i].Samples[j].value = (reader >> 0) & 0xF;
+			uninitialised.data[i].Samples[j + 1].value = (reader >> 4) & 0xF;
+
 
 
 		}
@@ -62,19 +64,18 @@ ALuint Audio_Handler::load_WL(const char* filepathRel) {
 		temp16 = (uint16_t)(uninitialised.data[i / SAMPLES_PER_BLOCK].Samples[i % SAMPLES_PER_BLOCK].value);
 
 
-		temp16 += rounding_table[i % SAMPLES_PER_BLOCK];
-
+		
 
 		temp16 = temp16 << sh_val;
 
-		
+		temp16 += rounding_table[i % SAMPLES_PER_BLOCK];
+
 
 
 		rawAudio[i] = (int16_t)temp16;
 
 	}
 	
-	std::cout << "HI";
 
 	
 
