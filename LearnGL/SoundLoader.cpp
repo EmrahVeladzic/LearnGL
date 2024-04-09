@@ -11,84 +11,76 @@
 ALuint Audio_Handler::load_WL(const char* filepathRel) {
 	ALuint out;
 
-	std::string filepath = "Assets/" + (std::string)filepathRel;
-
-	std::ifstream filestr = std::ifstream(filepath,std::ios::in);
-
-	filestr.read(reinterpret_cast<char*>(&uninitialised.magic),sizeof(uint8_t));
-	filestr.read(reinterpret_cast<char*>(&uninitialised.block_count), sizeof(uint32_t));
-	filestr.read(reinterpret_cast<char*>(&uninitialised.sample_rate), sizeof(uint16_t));
-
+	uint16_t last_value = 0;
 	
+	const std::string filePath = "Assets/" + (std::string)filepathRel;
+
+	std::ifstream stream(filePath,std::ios::binary);
+
+	stream.read(reinterpret_cast<char*>(&uninitialised.magic),sizeof(uint8_t));
+	stream.read(reinterpret_cast<char*>(&uninitialised.block_count), sizeof(uint32_t));
+	stream.read(reinterpret_cast<char*>(&uninitialised.sample_rate), sizeof(uint16_t));
+
+	const uint32_t pcm_sample_count = SAMPLES_PER_BLOCK * uninitialised.block_count;
 
 	uninitialised.data = new Block[uninitialised.block_count];
 
-	rawAudio = new int16_t[uninitialised.block_count * SAMPLES_PER_BLOCK];
+	rawAudio = new int16_t[pcm_sample_count];
 
+	uint8_t temp = 0;
 
-
-	uint8_t reader;
-	for (size_t i = 0; i < (size_t) uninitialised.block_count; i++)
+	for (size_t i = 0; i < uninitialised.block_count; i++)
 	{
-		filestr.read(reinterpret_cast<char*>(&uninitialised.data[i].shift_filter), sizeof(uint8_t));
-		filestr.read(reinterpret_cast<char*>(&uninitialised.data[i].flags), sizeof(uint8_t));
+		stream.read(reinterpret_cast<char*>(&uninitialised.data[i].shift_filter), sizeof(uint8_t));
+		stream.read(reinterpret_cast<char*>(&uninitialised.data[i].flags), sizeof(uint8_t));
 
 		for (size_t j = 0; j < SAMPLES_PER_BLOCK; j+=2)
 		{
+			stream.read(reinterpret_cast<char*>(&temp), sizeof(uint8_t));
 
-			filestr.read(reinterpret_cast<char*>(&reader), sizeof(uint8_t));
-
-			uninitialised.data[i].Samples[j].value = (reader >> 0) & 0xF;
-			uninitialised.data[i].Samples[j + 1].value = (reader >> 4) & 0xF;
-
-
+			uninitialised.data[i].Samples[j].value = ((temp>>4)&0xF);
+			uninitialised.data[i].Samples[(j+1)].value = (temp & 0xF);
 
 		}
 	}
 
+	uint16_t newval = 0;
 
-
-	
-
-	uint16_t temp16 = 0;
-	uint8_t sh_val = 0;
-
-	for (size_t i = 0; i < uninitialised.block_count * SAMPLES_PER_BLOCK; i++)
+	for (size_t i = 0; i < pcm_sample_count; i++)
 	{
+		temp = (uninitialised.data[i / SAMPLES_PER_BLOCK].shift_filter >> 4);
 
-		sh_val = (uninitialised.data[i / SAMPLES_PER_BLOCK].shift_filter);
+		newval = (((uint16_t)uninitialised.data[i/SAMPLES_PER_BLOCK].Samples[i%SAMPLES_PER_BLOCK].value) <<temp);
 
-		sh_val >>= 4;
-
-
-		temp16 = (uint16_t)(uninitialised.data[i / SAMPLES_PER_BLOCK].Samples[i % SAMPLES_PER_BLOCK].value);
-
+		if (i > 0) {
+			last_value = (uint16_t)rawAudio[i - 1];
+		}
 
 		
+		if (last_value - newval < DIFF_THRESHOLD) {
 
-		temp16 = temp16 << sh_val;
+			if (newval >= PICK_UP_TRESHOLD) {
+				newval -= rounding_table[i % 28];
+			}
+		}
 
-		temp16 += rounding_table[i % SAMPLES_PER_BLOCK];
+		else if (newval - last_value < DIFF_THRESHOLD)
+		{
+			if (newval >= PICK_UP_TRESHOLD) {
+				newval += rounding_table[i % 28];
+			}
+		}
 
 
-
-		rawAudio[i] = (int16_t)temp16;
+		rawAudio[i] = (int16_t)newval;
 
 	}
-	
-
-	
 
 
-	delete[] uninitialised.data;
-
-	alGenBuffers(1,&out);
-	alBufferData(out,AL_FORMAT_MONO16,rawAudio,sizeof(int16_t)*(uninitialised.block_count* SAMPLES_PER_BLOCK),uninitialised.sample_rate);
-
-
-
-
+	alGenBuffers(1, &out);
+	alBufferData(out, AL_FORMAT_MONO16, rawAudio, (pcm_sample_count * sizeof(int16_t)), uninitialised.sample_rate);
 	delete[] rawAudio;
+	delete[] uninitialised.data;
 
 	return out;
 }
