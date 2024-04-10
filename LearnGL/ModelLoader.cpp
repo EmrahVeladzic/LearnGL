@@ -79,7 +79,10 @@ ImportedModel::ImportedModel(const char* filePath, const char* ImagePath, glm::v
 	clut = temptext[1];
 
 
-	int Mode = temptext[2];
+	unsigned int Mode = temptext[2];
+
+	tex_width = temptext[3];
+	tex_height = temptext[4];
 
 
 	clut_multiplier = 256.0f / (float)Mode;
@@ -919,7 +922,7 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
 	int temph = (int)rpf.magic[3] + 1;
 
-	Mode = rpf.magic[1]+1;
+	Mode = (GLuint)rpf.magic[1]+1;
 
 
 	int temp = tempw * temph;
@@ -949,11 +952,13 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 
-	GLuint* rtn = new GLuint[3];
+	GLuint* rtn = new GLuint[5];
 
 	rtn[0] = text;
 	rtn[1] = clt;
 	rtn[2] = Mode;
+	rtn[3] = (GLuint)rpf.magic[2] + 1;
+	rtn[4] = (GLuint)rpf.magic[3] + 1;
 
 
 	delete[] rpf.CLUT;
