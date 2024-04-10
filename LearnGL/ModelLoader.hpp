@@ -233,6 +233,9 @@ struct ImportedModel {
 	GLuint texture;
 	GLuint clut;
 
+	GLuint tex_width;
+	GLuint tex_height;
+
 	float clut_multiplier;
 
 	ImportedModel()

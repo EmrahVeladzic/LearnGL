@@ -22,8 +22,10 @@
 #define numVBOs 3
 #define numEBOs 1
 
-#define TARGET_FPS 60.0f
+#define TARGET_FPS 60
 #define SECOND_F 1000.0f
+
+
 
 float cameraX, cameraY, cameraZ;
 
@@ -38,7 +40,7 @@ GLuint renderingProgram;
 GLuint vao[numVAOs];
 GLuint vbo[numVBOs];
 
-GLuint projLoc, vLoc, tfLoc, mvLoc, invBindLoc, transLoc, offsetLoc, clutMultLoc;
+GLuint projLoc, vLoc, tfLoc, mvLoc, invBindLoc, transLoc, offsetLoc, clutMultLoc ,tWidthLoc,tHeightLoc;
 int width, height;
 float aspect, timeFactor;
 glm::mat4 pMat, vMat, mMat, mvMat;
@@ -58,9 +60,9 @@ LightGeneric ambient(glm::vec4(0.1f, 0.1f, 0.1f, 1.0f),
 	glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
 	glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
-LightPositional light(glm::vec4(0.25f, 0.25f, 0.25f, 1.0f),
-	glm::vec4(0.7f, 0.7f, 0.7f, 1.0f),
-	glm::vec4(0.5f, 0.5f, 0.5f, 1.0f), 
+LightPositional light(glm::vec4(0.125f, 0.125f, 0.125f, 1.0f),
+	glm::vec4(0.5f, 0.5f, 0.5f, 1.0f),
+	glm::vec4(0.25f, 0.25f, 0.25f, 1.0f), 
 	glm::vec3(5.0f, 5.0f,-5.0f), 
 	0.5f, 0.1f, 0.1f);
 
@@ -150,7 +152,8 @@ void init(GLFWwindow* window, std::vector<ImportedModel>& models) {
 	mvLoc = glGetUniformLocation(renderingProgram, "mv_matrix");
 	clutMultLoc = glGetUniformLocation(renderingProgram, "clut_multiplier");
 
-
+	tWidthLoc = glGetUniformLocation(renderingProgram, "tex_width");
+	tHeightLoc = glGetUniformLocation(renderingProgram, "tex_height");
 
 	
 
@@ -302,7 +305,8 @@ void display(GLFWwindow* window ,std::vector<ImportedModel>& models) {
 
 		lightingConfig(vMat);
 
-		
+		glUniform1ui(tWidthLoc,model.tex_width);
+		glUniform1ui(tHeightLoc, model.tex_height);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, model.texture);		
@@ -489,6 +493,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		Models[0].rotation = tmq;
 
 	}
+
+
+	
 }
 
 void window_reshape_callback(GLFWwindow* window, int newWidth, int newHeight) {
@@ -513,7 +520,6 @@ MessageCallback(GLenum source,
 	const void* userParam)
 {
 
-	//Commented out due to Intel drivers causing a issue despite sucessful render.
 
 	/*fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
 		(type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
@@ -533,7 +539,13 @@ int main(void) {
 	ALCdevice* audio_device = alcOpenDevice(nullptr);
 	ALCcontext* audio_context = alcCreateContext(audio_device,nullptr);
 	 
-	GLFWwindow* window = glfwCreateWindow(800, 450, "OpenGL3D", NULL, NULL);
+	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+	GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "OpenGL3D", monitor, NULL);
+	
+
+
 	glfwMakeContextCurrent(window);
 
 	alcMakeContextCurrent(audio_context);
@@ -545,7 +557,7 @@ int main(void) {
 	
 
 	if (glewInit() != GLEW_OK) { exit(EXIT_FAILURE); }
-	glfwSwapInterval(1);
+	glfwSwapInterval(mode->refreshRate/TARGET_FPS);
 
 	
 	Models.push_back(ImportedModel("skele.gltf", "skele.rpf", glm::vec3(0.0f, 0.0f, -5.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
@@ -565,7 +577,7 @@ int main(void) {
 	
 
 
-	sfx = global_audio.load_WL("Raven.wl");
+	sfx = global_audio.load_WL("raven.wl");
 	
 
 	ALuint src;

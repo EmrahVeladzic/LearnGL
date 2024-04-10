@@ -24,11 +24,14 @@ const float[8][8] bayerMatrix ={
 
 
 
+uniform uint tex_width;
+uniform uint tex_height;
+
 
 float dither (vec2 position){
-int dith_x = int(mod(int(position.x*128),8));
-int dith_y = int(mod(int(position.y*128),8));
-return bayerMatrix[dith_x][dith_y]/256;
+int dith_x = int(mod(int(position.x*tex_width),8));
+int dith_y = int(mod(int(position.y*tex_height),8));
+return bayerMatrix[dith_x][dith_y]/64;
 };
 
 
@@ -68,6 +71,7 @@ uniform mat4 norm_matrix;
 uniform float tf;
 
 uniform float clut_multiplier;
+
 
 
 layout (binding=0) uniform sampler2D samp;
@@ -111,16 +115,37 @@ vec4 simple_color=texture(cltsamp,clr_ind);
 
 	}
 	
+		float lum = (simple_color.r+simple_color.g+simple_color.b)/3.0;
 
-		float dith = dither(tc);
+		float dith = dither(tc)*(lum/7.5);
 
-		
-		simple_color.g+=(simple_color.r-simple_color.g)/5;
-		simple_color.b+=(simple_color.r-simple_color.b)/5;
+		float sat = 0.5;
+
 		
 		simple_color=(simple_color-dith);
 
-	
+		if(simple_color.r>lum){
+			simple_color.r -= (simple_color.r-lum)*sat;
+		}
+
+		else if(simple_color.r<lum){
+			simple_color.r += (simple_color.r-lum)*sat;
+		}
+
+		if(simple_color.g>lum){
+			simple_color.g -= (simple_color.r-lum)*sat;
+		}
+		else if(simple_color.g<lum){
+			simple_color.g += (simple_color.r-lum)*sat;
+		}
+
+		if(simple_color.b>lum){
+			simple_color.b -= (simple_color.r-lum)*sat;
+		}
+
+		else if(simple_color.b<lum){
+			simple_color.b += (simple_color.r-lum)*sat;
+		}
 
 	color=simple_color*light;
 }

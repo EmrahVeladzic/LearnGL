@@ -828,8 +828,8 @@
 	"images":[
 		{
 			"mimeType":"image/png",
-			"name":"Raven",
-			"uri":"Raven.png"
+			"name":"Raven.png",
+			"uri":"Raven_png.png"
 		}
 	],
 	"skins":[
