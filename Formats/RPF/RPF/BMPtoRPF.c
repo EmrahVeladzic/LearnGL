@@ -112,7 +112,7 @@ int BMPimport() {
 
 	SCALEX = IMPORTED.width;
 	SCALEY = IMPORTED.height;
-	DEPTH = 75;
+	DEPTH = 256;
 
 	if (SCALEX > 256 || SCALEY > 256 || DEPTH > 256 || SCALEX < 1 || SCALEY < 1 || DEPTH < 1 || SCALEX%2!=0||SCALEY%2!=0)
 	{
@@ -150,6 +150,7 @@ int BMPimport() {
 	Compressor.Occurence_Table = (Occurence_Entry*)malloc(sizeof(Occurence_Entry));
 	Compressor.Occurence_Table[0].Value = Compressor.ALPHA15;
 	Compressor.Occurence_Table[0].Occurence = 0;
+	Compressor.Occurence_Table[0].Live.value = 1;
 
 	Compressor.SwapCount = 0;
 

@@ -559,6 +559,8 @@ int main(void) {
 	if (glewInit() != GLEW_OK) { exit(EXIT_FAILURE); }
 	glfwSwapInterval(mode->refreshRate/TARGET_FPS);
 
+
+	
 	
 	Models.push_back(ImportedModel("skele.gltf", "skele.rpf", glm::vec3(0.0f, 0.0f, -5.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
 	Models.push_back(ImportedModel("skele.gltf", "skele.rpf", glm::vec3(1.0f, 0.0f, -6.0f),glm::quat(1.8f, 0.0f, 1.0f, 0.0f)));
