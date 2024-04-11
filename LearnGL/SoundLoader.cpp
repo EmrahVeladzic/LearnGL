@@ -57,17 +57,10 @@ ALuint Audio_Handler::load_WL(const char* filepathRel) {
 		}
 
 		
-		if (last_value - newval < DIFF_THRESHOLD) {
+		if (abs(abs((int16_t)last_value) - abs((int16_t)newval)) < DIFF_THRESHOLD) {
 
-			if (newval >= PICK_UP_TRESHOLD) {
-				newval -= rounding_table[i % 28];
-			}
-		}
-
-		else if (newval - last_value < DIFF_THRESHOLD)
-		{
-			if (newval >= PICK_UP_TRESHOLD) {
-				newval += rounding_table[i % 28];
+			if (abs((int16_t)newval) >= PICK_UP_TRESHOLD && newval != 0) {
+				newval = (uint16_t)((int16_t)newval - ((int16_t)newval / abs((int16_t)newval)) * rounding_table[i % 28]);
 			}
 		}
 

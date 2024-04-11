@@ -104,6 +104,8 @@ if(true){
 
 float clr_ind = texture(samp,affine_tc).r * clut_multiplier;
 
+
+
 vec4 simple_color=texture(cltsamp,clr_ind);
 
 
@@ -122,7 +124,7 @@ vec4 simple_color=texture(cltsamp,clr_ind);
 		float sat = 0.5;
 
 		
-		simple_color=(simple_color-dith);
+		simple_color-=dith;
 
 		if(simple_color.r>lum){
 			simple_color.r -= (simple_color.r-lum)*sat;
@@ -147,7 +149,10 @@ vec4 simple_color=texture(cltsamp,clr_ind);
 			simple_color.b += (simple_color.r-lum)*sat;
 		}
 
+		
+
 	color=simple_color*light;
+
 }
 
 else{

@@ -166,26 +166,13 @@ int Decode() {
 
 		temp16 = temp16 << sh_val;
 
-		if (last_value - temp16 < DIFF_THRESHOLD) {
+		if (abs(abs((int16_t)last_value) - abs((int16_t)temp16)) < DIFF_THRESHOLD) {
 
-			if (temp16 >= PICK_UP_TRESHOLD) {
-				temp16 -= rounding_table[i % 28];
+			if (abs((int16_t)temp16) >= PICK_UP_TRESHOLD && temp16!=0) {
+				temp16 =(uint16_t)((int16_t)temp16 - ((int16_t)temp16/abs((int16_t)temp16))*rounding_table[i % 28]);
 			}
 		}
 		
-		else if (temp16 - last_value < DIFF_THRESHOLD)
-		{
-			if (temp16 >= PICK_UP_TRESHOLD) {
-				temp16 += rounding_table[i % 28];
-			}
-		}
-		
-		
-
-		
-		
-		
-
 
 		Encoder.sample_buffer[i].data = (int16_t)temp16;
 		

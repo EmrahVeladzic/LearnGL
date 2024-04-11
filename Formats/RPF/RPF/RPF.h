@@ -74,6 +74,7 @@ typedef struct rpf {
 typedef struct oe {
 	Pixel15 Value; //Pixel value - specifies which color 
 	uint32_t Occurence; //Times the above color was found in the image
+
 }Occurence_Entry;
 //When looping, if a Pixel is not found, it will create a new entry. Otherwise it will increment the Occurence
 
@@ -108,6 +109,8 @@ typedef struct com {
 	Pixel ALPHA;//255 0 255 - Must be index 0 in new CLUT
 	Pixel15 ALPHA15;//ALPHA scaled down to 16 bits
 
+
+
 }RPF_Compressor;
 
 RPF NewRPF;
@@ -129,6 +132,7 @@ typedef struct vec3
 
 double vec_dist(PIX3D a, PIX3D b);
 int BMPimport();
+
 char* string_in();
 
 char* fileName;
