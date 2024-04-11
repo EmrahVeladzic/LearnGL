@@ -150,7 +150,8 @@ int BMPimport() {
 	Compressor.Occurence_Table = (Occurence_Entry*)malloc(sizeof(Occurence_Entry));
 	Compressor.Occurence_Table[0].Value = Compressor.ALPHA15;
 	Compressor.Occurence_Table[0].Occurence = 0;
-	Compressor.Occurence_Table[0].Live.value = 1;
+
+
 
 	Compressor.SwapCount = 0;
 

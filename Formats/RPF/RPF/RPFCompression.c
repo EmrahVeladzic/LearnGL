@@ -25,7 +25,7 @@ BIT Compare15(Pixel15 a, Pixel15 b) {
 
 	answer.value = (a.a == b.a && a.r == b.r && a.g == b.g && a.b == b.b) ? 1 : 0;
 
-	
+
 	return answer;
 
 }
@@ -54,15 +54,14 @@ int Resize_Occurence() {
 	Occurence_Entry* temp = NULL;
 	size_t newsize = sizeof(Occurence_Entry) * (Compressor.UNIQUE_PIXEL_COUNT + 1);
 
-	
+
 
 	temp = (Occurence_Entry*)realloc(Compressor.Occurence_Table, newsize);
 
 	Compressor.Occurence_Table = temp;
 	Compressor.UNIQUE_PIXEL_COUNT++;
-	
 
-	
+
 
 	return 0;
 }
@@ -95,28 +94,29 @@ int Resize_Swap() {
 
 int sortOccurence() {
 
-	uint8_t sorted = 0;
+	BIT sorted;
+	sorted.value = 0;
 
-	while (sorted==0)
+	while (sorted.value == 0)
 	{
-		sorted = 1;
-	
+		sorted.value = 1;
+
 
 		for (size_t i = 1; i < (size_t)(Compressor.UNIQUE_PIXEL_COUNT - 1); i++)
 		{
-			if (Compressor.Occurence_Table[i-1].Occurence > Compressor.Occurence_Table[i].Occurence) {
+			if (Compressor.Occurence_Table[i - 1].Occurence > Compressor.Occurence_Table[i].Occurence) {
 
-				SwitchOccurenceEntry((int)(i-1), (int)(i));
-				sorted = 0;
+				SwitchOccurenceEntry((int)(i - 1), (int)(i));
+				sorted.value = 0;
 			}
 
 		}
 
-		if (sorted == 1) {
+		if (sorted.value == 1) {
 			break;
 		}
 	}
-	
+
 
 	return 0;
 }
@@ -127,7 +127,6 @@ int newColor(Pixel15 a) {
 	Resize_Occurence();
 	Compressor.Occurence_Table[Compressor.UNIQUE_PIXEL_COUNT - 1].Value = a;
 	Compressor.Occurence_Table[Compressor.UNIQUE_PIXEL_COUNT - 1].Occurence = 1;
-	Compressor.Occurence_Table[Compressor.UNIQUE_PIXEL_COUNT - 1].Live.value = 1;
 	return 0;
 }
 
@@ -138,8 +137,6 @@ int overrideSwaps(Pixel15 a, Pixel15 b) {
 		if ((chk = Compare15(a, Compressor.Swap_Table[i].Donor)).value == 1) {
 
 			Compressor.Swap_Table[i].Donor = b;
-
-		
 
 		}
 
@@ -164,6 +161,7 @@ int createSwapEntry(Pixel15 a, Pixel15 b) {
 
 int determine_best_swap(int input_index) {
 
+	
 
 	Pixel15 input = Compressor.Occurence_Table[input_index].Value;
 
@@ -175,12 +173,11 @@ int determine_best_swap(int input_index) {
 
 	size_t chosen_index = 0;
 
-
 	double distance = INFINITY;
 	double new_distance = distance;
 
 
-	for (size_t i = Compressor.MAX_PIXEL_COUNT; i > 1; i--)
+	for (size_t i = Compressor.UNIQUE_PIXEL_COUNT; i > 1; i--)
 	{
 
 		compare = Compressor.Occurence_Table[i].Value;
@@ -191,11 +188,10 @@ int determine_best_swap(int input_index) {
 
 		new_distance = vec_dist(potential_donor, potential_recipient);
 
-		if (new_distance < distance && new_distance>0.000f && compare.a==1&&Compressor.Occurence_Table[i].Live.value==1) {
+		if (new_distance < distance && new_distance>0.000f) {
 
 			distance = new_distance;
 			chosen_index = i;
-
 		}
 
 	}
@@ -205,9 +201,9 @@ int determine_best_swap(int input_index) {
 	if (compare.a == 1 && input.a == 1)
 	{
 		createSwapEntry(compare, input);
-		Compressor.Occurence_Table[input_index].Live.value = 0;
-		Compressor.Occurence_Table[chosen_index].Occurence += Compressor.Occurence_Table[input_index].Occurence;;
+		Compressor.Occurence_Table[chosen_index].Occurence += Compressor.Occurence_Table[input_index].Occurence;
 		sortOccurence();
+
 	}
 
 
@@ -240,7 +236,7 @@ int Init() {
 
 		if (write_new.value == 1) {
 			newColor(new_p);
-			
+
 		}
 	}
 
@@ -248,28 +244,40 @@ int Init() {
 
 	return 0;
 }
-
-
-
-
 Pixel15 determine_best_fit() {
 
 	Pixel15 temp = Compressor.ALPHA15;
 
 
-	for (size_t i = 0; i < Compressor.MAX_PIXEL_COUNT; i++)
-	{
-		if (Compressor.Occurence_Table[i].Live.value == 1) {
-			temp = Compressor.Occurence_Table[i].Value;
-			Compressor.Occurence_Table[i].Live.value = 0;
 
+	BIT original;
+
+
+	for (size_t i = (size_t)(Compressor.MAX_PIXEL_COUNT-1); i >= 0; i--)
+	{
+		
+		temp = Compressor.Occurence_Table[i].Value;
+		original.value = 1;
+
+		for (size_t j = 0; j < (size_t)Compressor.resized_clut_occupied; j++)
+		{
+
+			if ((chk = Compare15(temp, Compressor.RESIZED_CLUT[j])).value == 1) {
+				original.value = 0;
+			}
+
+
+		}
+
+		if (original.value == 1) {
 			break;
 		}
+
 	}
 
-	
+
+
 	return temp;
-	
 }
 
 uint8_t settle(Pixel15 in) {
@@ -316,12 +324,12 @@ uint8_t write_CLUT_to_data4bpp(int index) {
 	uint8_t msb = 0;
 	uint8_t lsb = 0;
 
-	Pixel15 true_valuemsb = Compressor.LARGE_CLUT15[(2*index)];
-	Pixel15 true_valuelsb = Compressor.LARGE_CLUT15[(2*index)+1];
+	Pixel15 true_valuemsb = Compressor.LARGE_CLUT15[(2 * index)];
+	Pixel15 true_valuelsb = Compressor.LARGE_CLUT15[(2 * index) + 1];
 
 
 
-	
+
 
 	for (size_t i = 0; i < (size_t)Compressor.SwapCount; i++)
 	{
@@ -338,8 +346,8 @@ uint8_t write_CLUT_to_data4bpp(int index) {
 			{
 				if ((chk = Compare15(true_valuemsb, Compressor.RESIZED_CLUT[j])).value == 1) {
 					msb = (uint8_t)j;
-					
-					
+
+
 				}
 			}
 
@@ -356,7 +364,7 @@ uint8_t write_CLUT_to_data4bpp(int index) {
 				if ((chk = Compare15(true_valuelsb, Compressor.RESIZED_CLUT[j])).value == 1) {
 					lsb = (uint8_t)j;
 
-					
+
 				}
 			}
 
@@ -365,8 +373,8 @@ uint8_t write_CLUT_to_data4bpp(int index) {
 
 		else {
 			msb = settle(true_valuemsb);
-			
-			
+
+
 			break;
 		}
 
@@ -424,13 +432,13 @@ uint8_t write_CLUT_to_data4bpp(int index) {
 	}
 
 
-	
 
-	temp = ((msb &0x0F) << 4) | (lsb &0x0F);
 
-	
+	temp = ((msb & 0x0F) << 4) | (lsb & 0x0F);
 
-	
+
+
+
 
 
 
@@ -443,7 +451,7 @@ uint8_t write_CLUT_to_data(int index) {
 	uint8_t temp = 0;
 	Pixel15 true_value = Compressor.LARGE_CLUT15[index];
 
-	
+
 
 
 	for (size_t i = 0; i < (size_t)Compressor.SwapCount; i++)
@@ -461,7 +469,7 @@ uint8_t write_CLUT_to_data(int index) {
 				if ((chk = Compare15(true_value, Compressor.RESIZED_CLUT[j])).value == 1) {
 					temp = (uint8_t)j;
 
-					
+
 				}
 			}
 
@@ -495,7 +503,6 @@ uint8_t write_CLUT_to_data(int index) {
 
 
 
-
 	return temp;
 }
 
@@ -513,16 +520,16 @@ Pixel15 Convert_to_15Bit(Pixel in) {
 	else
 	{
 		temp.a = 1;
-		temp.r = in.r>>3;
-		temp.g = in.g>> 3;
-		temp.b = in.b>> 3;
+		temp.r = in.r >> 3;
+		temp.g = in.g >> 3;
+		temp.b = in.b >> 3;
 	}
 
 	if (temp.r == Compressor.ALPHA15.r && temp.g == Compressor.ALPHA15.g && temp.b == Compressor.ALPHA15.b) {
 		temp.a = 0;
 	}
 
-	
+
 
 	return temp;
 }
@@ -533,41 +540,40 @@ int Commit() {
 	Pixel15 new_addition = Compressor.ALPHA15;
 
 	NewRPF.magic[0] = (char)82;//R
-	NewRPF.magic[1] =(Compressor.MAX_PIXEL_COUNT>DEPTH)? (char)DEPTH - 1:Compressor.MAX_PIXEL_COUNT -1;
+	NewRPF.magic[1] = (Compressor.MAX_PIXEL_COUNT > DEPTH) ? (char)DEPTH - 1 : Compressor.MAX_PIXEL_COUNT - 1;
 	NewRPF.magic[2] = (char)SCALEX - 1;
 	NewRPF.magic[3] = (char)SCALEY - 1;
 
-	
 
 
-	for (size_t i = 1; i < (size_t)NewRPF.magic[1]+1; i++){
+
+	for (size_t i = 1; i < (size_t)NewRPF.magic[1] + 1; i++) {
 
 
 		new_addition = determine_best_fit();
 
-
 		Compressor.RESIZED_CLUT[i] = new_addition;
 		Compressor.resized_clut_occupied++;
 	}
-	
-	
 
-	if ((NewRPF.magic[1]+1) > 16) {
+
+
+	if ((NewRPF.magic[1] + 1) > 16) {
 
 		for (size_t i = 0; i < (size_t)(SCALEX * SCALEY); i++)
 		{
 			NewRPF.data[i] = write_CLUT_to_data((int)i);
 
-			
+
 		}
 
 	}
 
 	else
 	{
-		for (size_t i = 0; i < (size_t)((SCALEX * SCALEY)/2); i++)
+		for (size_t i = 0; i < (size_t)((SCALEX * SCALEY) / 2); i++)
 		{
-			
+
 			NewRPF.data16max[i] = write_CLUT_to_data4bpp((int)i);
 
 		}
@@ -575,40 +581,53 @@ int Commit() {
 
 	NewRPF.CLUT = Compressor.RESIZED_CLUT;
 
-	
+
 
 	return 0;
 }
 
 int Compress() {
 	Init();
-	
+
 
 	sortOccurence();
 
 	Compressor.MAX_PIXEL_COUNT = Compressor.UNIQUE_PIXEL_COUNT;
 
-	
+	if (Compressor.MAX_PIXEL_COUNT > DEPTH) {
+		Compressor.MAX_PIXEL_COUNT = DEPTH;
+	}
 
 	printf("\nCompressing\n");
 
 	if (Compressor.UNIQUE_PIXEL_COUNT > (int32_t)DEPTH) {
 
-		while (Compressor.UNIQUE_PIXEL_COUNT > (int32_t)DEPTH)
+		
+
+		while (Compressor.UNIQUE_PIXEL_COUNT > DEPTH)
 		{
+			
+
 
 			for (size_t i = 0; i < (size_t)(Compressor.MAX_PIXEL_COUNT); i++)
 			{
 
 
 				determine_best_swap((int)i);
+						
+
+				if (Compressor.UNIQUE_PIXEL_COUNT <= DEPTH) {
+					
+					break;
+				
+				}
 
 				
 
-				if (Compressor.UNIQUE_PIXEL_COUNT <= (int32_t)DEPTH) {
-					break;
-				}
+				
 			}
+
+			
 
 
 		}
@@ -617,15 +636,15 @@ int Compress() {
 
 	else
 	{
-		
-		
+
+
 
 		for (size_t i = 0; i < Compressor.MAX_PIXEL_COUNT; i++)
 		{
 
 			createSwapEntry(Compressor.Occurence_Table[i].Value, Compressor.Occurence_Table[i].Value);
-			
-			
+
+
 		}
 
 
