@@ -253,10 +253,10 @@ Pixel15 determine_best_fit() {
 	BIT original;
 
 
-	for (size_t i = (size_t)(Compressor.MAX_PIXEL_COUNT-1); i >= 0; i--)
+	for (size_t i = (size_t)(Compressor.MAX_PIXEL_COUNT); i > 0; i--)
 	{
 		
-		temp = Compressor.Occurence_Table[i].Value;
+		temp = Compressor.Occurence_Table[i-1].Value;
 		original.value = 1;
 
 		for (size_t j = 0; j < (size_t)Compressor.resized_clut_occupied; j++)
@@ -556,12 +556,13 @@ int Commit() {
 		Compressor.resized_clut_occupied++;
 	}
 
-
+	
 
 	if ((NewRPF.magic[1] + 1) > 16) {
 
 		for (size_t i = 0; i < (size_t)(SCALEX * SCALEY); i++)
 		{
+
 			NewRPF.data[i] = write_CLUT_to_data((int)i);
 
 
@@ -572,7 +573,7 @@ int Commit() {
 	else
 	{
 		for (size_t i = 0; i < (size_t)((SCALEX * SCALEY) / 2); i++)
-		{
+		{	
 
 			NewRPF.data16max[i] = write_CLUT_to_data4bpp((int)i);
 
