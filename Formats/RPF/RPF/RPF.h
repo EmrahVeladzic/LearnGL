@@ -9,21 +9,27 @@
 #include <stdlib.h>
 #include <math.h>
 
-int32_t SCALEX;
-int32_t SCALEY;
+size_t SCALEX;
+size_t SCALEY;
 
-int16_t DEPTH;
+#define DEPTH 256
 
-#pragma pack(push,4)
+#define PROTECTED_BUFFER_SIZE 8
+
+size_t ProtectedBufferAccess;
+
+uint8_t* mode_in;
+
 
 typedef struct bit
 {
 	unsigned int value : 1;
 }BIT;
-#pragma pack(pop)
 
 
-#pragma pack(push,4)
+
+
+
 //24-bit Pixel value.
 typedef struct px {
 
@@ -35,11 +41,11 @@ typedef struct px {
 	uint8_t b;//blue
 
 }Pixel;
-#pragma pack(pop)
+
 
 
 //15 bit value (16-bits, the 1st being alpha);
-#pragma pack(push,4)
+
 typedef struct px16 {
 
 	uint16_t a : 1;
@@ -48,12 +54,12 @@ typedef struct px16 {
 	uint16_t b : 5;
 
 }Pixel15;
-#pragma pack(pop)
+
+
+Pixel15* ProtectedBuffer;
 
 
 
-
-#pragma pack(push, 4)
 typedef struct rpf {
 
 
@@ -65,10 +71,10 @@ typedef struct rpf {
 
 	uint8_t* data;//max 256 values of color
 
-	uint8_t* data16max;
+	
 
 }RPF;
-#pragma pack(pop)
+
 
 
 typedef struct oe {
@@ -95,11 +101,11 @@ typedef struct com {
 	Pixel15* LARGE_CLUT15;
 
 
-	uint8_t resized_clut_occupied;
+	
 	Pixel15* RESIZED_CLUT;//Will store a dynamic amount of pixels
 
-	int32_t UNIQUE_PIXEL_COUNT;//Number detailing unique pixels found. Iterations stop when it falls below DEPTH
-	int32_t MAX_PIXEL_COUNT;//Meant to resolve a edge case where the input has fewer unique colours than DEPTH
+	uint32_t UNIQUE_PIXEL_COUNT;//Number detailing unique pixels found. Iterations stop when it falls below DEPTH
+	uint32_t MAX_PIXEL_COUNT;//Meant to resolve a edge case where the input has fewer unique colours than DEPTH
 	Occurence_Entry* Occurence_Table;//Internal array of occurence entries 
 
 	uint32_t SwapCount;
@@ -149,6 +155,8 @@ Pixel15 Convert_to_15Bit(Pixel in);
 BIT chk;
 
 BIT flow;
+
+BIT method;
 
 PIX3D potential_donor;
 PIX3D potential_recipient;

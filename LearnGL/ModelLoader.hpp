@@ -248,6 +248,8 @@ struct ImportedModel {
 		root = 0;
 		currentAnim = 0;
 		texture = 0;
+		tex_height = 0;
+		tex_width = 0;
 		clut = 0;
 		num_mats = 0;
 		clut_multiplier = 1.0f;

@@ -8,7 +8,7 @@
 #include <stdint.h>
 
 
-#pragma pack(push, 4) // Ensure structure packing
+ // Ensure structure packing
 typedef struct bmp {
 
 	uint16_t magic;
@@ -36,6 +36,6 @@ typedef struct bmp {
 
 
 }BMP;
-#pragma pack(pop) // Ensure structure packing
+// Ensure structure packing
 
 #endif // !BMP_HEADER

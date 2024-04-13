@@ -30,23 +30,173 @@ BIT Compare15(Pixel15 a, Pixel15 b) {
 
 }
 
+Pixel15 GetHue(Pixel15 in) {
+	Pixel15 out;
+	
 
-int SwitchOccurenceEntry(int index_a, int index_b) {
-	Pixel15 TempVal;
-	int TempOcc;
+	if (in.r >= 16) {
+		out.r = 31;
+	}
+	else
+	{
+		out.r = 0;
+	}
+	if (in.g >= 16) {
+		out.g = 31;
+	}
+	else
+	{
+		out.g = 0;
+	}
+	if (in.b >= 16) {
+		out.b = 31;
+	}
+	else
+	{
+		out.b = 0;
+	}
 
 
-	TempVal = Compressor.Occurence_Table[index_a].Value;
-	TempOcc = Compressor.Occurence_Table[index_a].Occurence;
 
-	Compressor.Occurence_Table[index_a].Value = Compressor.Occurence_Table[index_b].Value;
-	Compressor.Occurence_Table[index_a].Occurence = Compressor.Occurence_Table[index_b].Occurence;
+	return out;
+}
 
-	Compressor.Occurence_Table[index_b].Value = TempVal;
-	Compressor.Occurence_Table[index_b].Occurence = TempOcc;
+PIX3D GetHueAsVector(Pixel15 in) {
+	PIX3D out;
+
+
+	if (in.r >= 16) {
+		out.r = 31.0f;
+	}
+	else
+	{
+		out.r = 0.0f;
+	}
+	if (in.g >= 16) {
+		out.g = 31.0f;
+	}
+	else
+	{
+		out.g = 0.0f;
+	}
+	if (in.b >= 16) {
+		out.b = 31.0f;
+	}
+	else
+	{
+		out.b = 0.0f;
+	}
+
+
+
+	return out;
+}
+
+BIT CheckHue(Pixel15 a, Pixel15 b) {
+	BIT out;
+	out.value = 0;
+
+	Pixel15 aNorm = GetHue(a);
+	Pixel15 bNorm = GetHue(b);
+
+	if ((chk = Compare15(aNorm, bNorm)).value == 1) {
+
+		out.value = 1;
+
+	}
+
+
+
+
+
+	return out;
+}
+
+
+BIT Ensure_DUAL(Pixel15 a, Pixel15 b) {
+	BIT out;
+	out.value = 1;
+
+
+	if ((chk = Compare15(a, Compressor.ALPHA15)).value == 0 && (chk = Compare15(b, Compressor.ALPHA15)).value == 0 && (chk = Compare15(b, a)).value == 0 && (chk=CheckHue(a,b)).value==1) {
+		out.value=1;
+
+
+		if (PROTECTED_BUFFER_SIZE <= 0) {
+
+			return out;
+		}
+
+		else
+		{
+			for (size_t i = 0; i < PROTECTED_BUFFER_SIZE; i++)
+			{
+				if ((chk = Compare15(a, ProtectedBuffer[i])).value == 1 || (chk = Compare15(b, ProtectedBuffer[i])).value == 1) {
+
+					out.value = 0;
+					break;
+				}
+
+
+			}
+		}
+
+		
+
+	}
+
+	else
+	{
+		out.value = 0;
+	}
+
+
+	
+
+	return out;
+}
+
+
+BIT EnsureSINGLE(Pixel15 a, Pixel15 b) {
+	BIT out;
+	out.value = 1;
+
+
+	if ((chk = Compare15(a, Compressor.ALPHA15)).value == 0 && (chk = Compare15(b, Compressor.ALPHA15)).value == 0 && (chk = Compare15(b, a)).value == 0) {
+		out.value = 1;
+
+	}
+
+	else
+	{
+		out.value = 0;
+	}
+
+	return out;
+}
+
+
+
+
+int Protect(Pixel15 recentDonor) {
+
+	if (PROTECTED_BUFFER_SIZE <= 0) {
+		return 0;
+	}
+
+	size_t index = ProtectedBufferAccess % PROTECTED_BUFFER_SIZE;
+
+	if (index < PROTECTED_BUFFER_SIZE) {
+
+		ProtectedBuffer[index] = recentDonor;
+
+		ProtectedBufferAccess++;
+	}
 
 	return 0;
 }
+
+
 
 
 
@@ -92,6 +242,25 @@ int Resize_Swap() {
 
 
 
+
+int SwitchOccurenceEntry(int index_a, int index_b) {
+	Pixel15 TempVal;
+	int TempOcc;
+
+
+	TempVal = Compressor.Occurence_Table[index_a].Value;
+	TempOcc = Compressor.Occurence_Table[index_a].Occurence;
+
+	Compressor.Occurence_Table[index_a].Value = Compressor.Occurence_Table[index_b].Value;
+	Compressor.Occurence_Table[index_a].Occurence = Compressor.Occurence_Table[index_b].Occurence;
+
+	Compressor.Occurence_Table[index_b].Value = TempVal;
+	Compressor.Occurence_Table[index_b].Occurence = TempOcc;
+
+	return 0;
+}
+
+
 int sortOccurence() {
 
 	BIT sorted;
@@ -102,12 +271,13 @@ int sortOccurence() {
 		sorted.value = 1;
 
 
-		for (size_t i = 1; i < (size_t)(Compressor.UNIQUE_PIXEL_COUNT - 1); i++)
+		for (size_t i = 1; i < (size_t)(Compressor.MAX_PIXEL_COUNT); i++)
 		{
 			if (Compressor.Occurence_Table[i - 1].Occurence > Compressor.Occurence_Table[i].Occurence) {
 
 				SwitchOccurenceEntry((int)(i - 1), (int)(i));
 				sorted.value = 0;
+				break;
 			}
 
 		}
@@ -177,7 +347,7 @@ int determine_best_swap(int input_index) {
 	double new_distance = distance;
 
 
-	for (size_t i = Compressor.UNIQUE_PIXEL_COUNT; i > 1; i--)
+	for (size_t i = Compressor.MAX_PIXEL_COUNT-Compressor.UNIQUE_PIXEL_COUNT; i < Compressor.MAX_PIXEL_COUNT; i++)
 	{
 
 		compare = Compressor.Occurence_Table[i].Value;
@@ -188,7 +358,7 @@ int determine_best_swap(int input_index) {
 
 		new_distance = vec_dist(potential_donor, potential_recipient);
 
-		if (new_distance < distance && new_distance>0.000f) {
+		if (new_distance < distance && (chk=EnsureSINGLE(input, compare)).value==1) {
 
 			distance = new_distance;
 			chosen_index = i;
@@ -198,19 +368,203 @@ int determine_best_swap(int input_index) {
 
 	compare = Compressor.Occurence_Table[chosen_index].Value;
 
-	if (compare.a == 1 && input.a == 1)
-	{
-		createSwapEntry(compare, input);
+	
+		
 		Compressor.Occurence_Table[chosen_index].Occurence += Compressor.Occurence_Table[input_index].Occurence;
-		sortOccurence();
-
-	}
+		Compressor.Occurence_Table[input_index].Occurence = 0;
+		createSwapEntry(input, compare);
+		
+		
+	
 
 
 	return 0;
 }
 
 
+int determine_best_swap_with_profile() {
+
+
+	Pixel15 input =Compressor.ALPHA15;
+
+	potential_recipient.r = (double)input.r;
+	potential_recipient.g = (double)input.g;
+	potential_recipient.b = (double)input.b;
+
+	Pixel15 compare = Compressor.ALPHA15;
+
+	size_t chosen_compare = 0;
+	size_t chosen_input = 0;
+
+
+	double distance = INFINITY;
+	double new_distance = distance;
+
+	for (size_t r = 0; r < (PROTECTED_BUFFER_SIZE+1); r++)
+	{
+
+		if (r == PROTECTED_BUFFER_SIZE) {
+			Protect(Compressor.ALPHA15);
+		}
+
+
+		for (size_t i = Compressor.MAX_PIXEL_COUNT - Compressor.UNIQUE_PIXEL_COUNT; i < Compressor.MAX_PIXEL_COUNT; i++)
+		{
+
+			input = Compressor.Occurence_Table[i].Value;
+
+
+
+			potential_recipient.r = (double)input.r;
+			potential_recipient.g = (double)input.g;
+			potential_recipient.b = (double)input.b;
+
+
+
+			for (size_t j = Compressor.MAX_PIXEL_COUNT - Compressor.UNIQUE_PIXEL_COUNT; j < Compressor.MAX_PIXEL_COUNT; j++)
+			{
+
+
+
+				compare = Compressor.Occurence_Table[j].Value;
+
+				potential_donor.r = (float)compare.r;
+				potential_donor.g = (float)compare.g;
+				potential_donor.b = (float)compare.b;
+
+				new_distance = vec_dist(potential_donor, potential_recipient);
+
+				
+
+
+				if (r < PROTECTED_BUFFER_SIZE) {
+
+					if (new_distance < distance && (chk = Ensure_DUAL(input, compare)).value == 1) {
+
+						distance = new_distance;
+						chosen_compare = j;
+						chosen_input = i;
+					}
+
+				}
+
+				else
+				{
+					if (new_distance < distance && (chk = EnsureSINGLE(input, compare)).value == 1) {
+
+						distance = new_distance;
+						chosen_compare = j;
+						chosen_input = i;
+					}
+				}
+
+			}
+
+		}
+
+		compare = Compressor.Occurence_Table[chosen_compare].Value;
+		input = Compressor.Occurence_Table[chosen_input].Value;
+
+		if ((chk = Ensure_DUAL(input, compare)).value == 1) {
+
+			break;
+		}
+
+	}
+
+	
+
+	compare = Compressor.Occurence_Table[chosen_compare].Value;
+	input = Compressor.Occurence_Table[chosen_input].Value;
+
+	if ((chk = Ensure_DUAL(input, compare)).value == 1) {
+
+		input.a = 1;
+		compare.a = 1;
+
+
+		PIX3D sat = GetHueAsVector(input);
+
+		potential_recipient.r = (double)input.r;
+		potential_recipient.g = (double)input.g;
+		potential_recipient.b = (double)input.b;
+
+
+
+		potential_donor.r = (double)compare.r;
+		potential_donor.g = (double)compare.g;
+		potential_donor.b = (double)compare.b;
+
+
+		distance = vec_dist(sat, potential_recipient);
+		new_distance = vec_dist(sat, potential_donor);
+
+
+		if (new_distance < distance) {
+
+			Compressor.Occurence_Table[chosen_compare].Occurence += Compressor.Occurence_Table[chosen_input].Occurence;
+			Compressor.Occurence_Table[chosen_input].Occurence = 0;
+			Protect(compare);
+			createSwapEntry(input, compare);
+			return 0;
+
+		}
+
+
+
+		else
+		{
+
+
+			Compressor.Occurence_Table[chosen_input].Occurence += Compressor.Occurence_Table[chosen_compare].Occurence;
+			Compressor.Occurence_Table[chosen_compare].Occurence = 0;
+			Protect(input);
+			createSwapEntry(compare, input);
+
+
+			return 0;
+		}
+
+
+
+
+	}
+	
+	else if ((chk = EnsureSINGLE(input,compare)).value==1){
+
+		input.a = 1;
+		compare.a = 1;
+
+
+		if(Compressor.Occurence_Table[chosen_input].Occurence>=Compressor.Occurence_Table[chosen_compare].Occurence) {
+		
+
+			Compressor.Occurence_Table[chosen_input].Occurence += Compressor.Occurence_Table[chosen_compare].Occurence;
+			Compressor.Occurence_Table[chosen_compare].Occurence = 0;
+			Protect(input);
+			createSwapEntry(compare, input);
+
+
+			return 0;
+		}
+
+
+		else
+		{
+			Compressor.Occurence_Table[chosen_compare].Occurence += Compressor.Occurence_Table[chosen_input].Occurence;
+			Compressor.Occurence_Table[chosen_input].Occurence = 0;
+			Protect(compare);
+			createSwapEntry(input, compare);
+			return 0;
+
+		}
+
+
+
+	}
+
+		return 0;
+}
 
 
 int Init() {
@@ -219,7 +573,7 @@ int Init() {
 	Pixel15 new_p = Compressor.ALPHA15;
 	BIT write_new;
 
-	for (size_t i = 0; i < (size_t)(SCALEX * SCALEY); i++)
+	for (size_t i = 0; i < (SCALEX * SCALEY); i++)
 	{
 		new_p = Compressor.LARGE_CLUT15[i];
 		write_new.value = 1;
@@ -244,41 +598,7 @@ int Init() {
 
 	return 0;
 }
-Pixel15 determine_best_fit() {
 
-	Pixel15 temp = Compressor.ALPHA15;
-
-
-
-	BIT original;
-
-
-	for (size_t i = (size_t)(Compressor.MAX_PIXEL_COUNT); i > 0; i--)
-	{
-		
-		temp = Compressor.Occurence_Table[i-1].Value;
-		original.value = 1;
-
-		for (size_t j = 0; j < (size_t)Compressor.resized_clut_occupied; j++)
-		{
-
-			if ((chk = Compare15(temp, Compressor.RESIZED_CLUT[j])).value == 1) {
-				original.value = 0;
-			}
-
-
-		}
-
-		if (original.value == 1) {
-			break;
-		}
-
-	}
-
-
-
-	return temp;
-}
 
 uint8_t settle(Pixel15 in) {
 	uint8_t tmp = 0;
@@ -292,7 +612,7 @@ uint8_t settle(Pixel15 in) {
 
 	Pixel15 compare;
 
-	for (size_t i = 0; i < (size_t)Compressor.MAX_PIXEL_COUNT; i++)
+	for (size_t i = 0; i < (size_t)NewRPF.magic[1]+1; i++)
 	{
 		compare = Compressor.RESIZED_CLUT[i];
 
@@ -342,7 +662,7 @@ uint8_t write_CLUT_to_data4bpp(int index) {
 			true_valuemsb = Compressor.Swap_Table[i].Donor;
 
 
-			for (size_t j = 0; j < (size_t)Compressor.MAX_PIXEL_COUNT; j++)
+			for (size_t j = 0; j < (size_t)NewRPF.magic[1] + 1; j++)
 			{
 				if ((chk = Compare15(true_valuemsb, Compressor.RESIZED_CLUT[j])).value == 1) {
 					msb = (uint8_t)j;
@@ -359,7 +679,7 @@ uint8_t write_CLUT_to_data4bpp(int index) {
 			true_valuemsb = Compressor.Swap_Table[i].Donor;
 
 
-			for (size_t j = 0; j < (size_t)Compressor.MAX_PIXEL_COUNT; j++)
+			for (size_t j = 0; j < (size_t)NewRPF.magic[1] + 1; j++)
 			{
 				if ((chk = Compare15(true_valuelsb, Compressor.RESIZED_CLUT[j])).value == 1) {
 					lsb = (uint8_t)j;
@@ -393,7 +713,7 @@ uint8_t write_CLUT_to_data4bpp(int index) {
 			true_valuelsb = Compressor.Swap_Table[i].Donor;
 
 
-			for (size_t j = 0; j < (size_t)Compressor.MAX_PIXEL_COUNT; j++)
+			for (size_t j = 0; j < (size_t)NewRPF.magic[1] + 1; j++)
 			{
 				if ((chk = Compare15(true_valuelsb, Compressor.RESIZED_CLUT[j])).value == 1) {
 					lsb = (uint8_t)j;
@@ -410,7 +730,7 @@ uint8_t write_CLUT_to_data4bpp(int index) {
 			true_valuelsb = Compressor.Swap_Table[i].Donor;
 
 
-			for (size_t j = 0; j < (size_t)Compressor.MAX_PIXEL_COUNT; j++)
+			for (size_t j = 0; j < (size_t)NewRPF.magic[1] + 1; j++)
 			{
 				if ((chk = Compare15(true_valuelsb, Compressor.RESIZED_CLUT[j])).value == 1) {
 					lsb = (uint8_t)j;
@@ -464,7 +784,7 @@ uint8_t write_CLUT_to_data(int index) {
 			true_value = Compressor.Swap_Table[i].Donor;
 
 
-			for (size_t j = 0; j < (size_t)Compressor.MAX_PIXEL_COUNT; j++)
+			for (size_t j = 0; j < (size_t)NewRPF.magic[1] + 1; j++)
 			{
 				if ((chk = Compare15(true_value, Compressor.RESIZED_CLUT[j])).value == 1) {
 					temp = (uint8_t)j;
@@ -481,7 +801,7 @@ uint8_t write_CLUT_to_data(int index) {
 			true_value = Compressor.Swap_Table[i].Donor;
 
 
-			for (size_t j = 0; j < (size_t)Compressor.MAX_PIXEL_COUNT; j++)
+			for (size_t j = 0; j < (size_t)NewRPF.magic[1] + 1; j++)
 			{
 				if ((chk = Compare15(true_value, Compressor.RESIZED_CLUT[j])).value == 1) {
 					temp = (uint8_t)j;
@@ -537,7 +857,7 @@ Pixel15 Convert_to_15Bit(Pixel in) {
 int Commit() {
 	printf("\nWriting to structure\n");
 
-	Pixel15 new_addition = Compressor.ALPHA15;
+	
 
 	NewRPF.magic[0] = (char)82;//R
 	NewRPF.magic[1] = (Compressor.MAX_PIXEL_COUNT > DEPTH) ? (char)DEPTH - 1 : Compressor.MAX_PIXEL_COUNT - 1;
@@ -547,20 +867,17 @@ int Commit() {
 
 
 
-	for (size_t i = 1; i < (size_t)NewRPF.magic[1] + 1; i++) {
+	for (size_t i = 0; i < (size_t)NewRPF.magic[1]+1; i++) {
 
-
-		new_addition = determine_best_fit();
-
-		Compressor.RESIZED_CLUT[i] = new_addition;
-		Compressor.resized_clut_occupied++;
+		Compressor.RESIZED_CLUT[i] = Compressor.Occurence_Table[Compressor.MAX_PIXEL_COUNT-i-1].Value;
+		
 	}
 
 	
 
 	if ((NewRPF.magic[1] + 1) > 16) {
 
-		for (size_t i = 0; i < (size_t)(SCALEX * SCALEY); i++)
+		for (size_t i = 0; i < (SCALEX * SCALEY); i++)
 		{
 
 			NewRPF.data[i] = write_CLUT_to_data((int)i);
@@ -572,10 +889,10 @@ int Commit() {
 
 	else
 	{
-		for (size_t i = 0; i < (size_t)((SCALEX * SCALEY) / 2); i++)
+		for (size_t i = 0; i < ((SCALEX * SCALEY) / 2); i++)
 		{	
 
-			NewRPF.data16max[i] = write_CLUT_to_data4bpp((int)i);
+			NewRPF.data[i] = write_CLUT_to_data4bpp((int)i);
 
 		}
 	}
@@ -587,21 +904,30 @@ int Commit() {
 	return 0;
 }
 
+int progress() {
+
+	double prg = ((double)(Compressor.MAX_PIXEL_COUNT- Compressor.UNIQUE_PIXEL_COUNT)/(double)(Compressor.MAX_PIXEL_COUNT-DEPTH))*100.0f;
+
+	printf("\r%d%%", (int)prg);
+
+		return 0;
+}
+
 int Compress() {
 	Init();
 
 
-	sortOccurence();
+
+	
 
 	Compressor.MAX_PIXEL_COUNT = Compressor.UNIQUE_PIXEL_COUNT;
 
-	if (Compressor.MAX_PIXEL_COUNT > DEPTH) {
-		Compressor.MAX_PIXEL_COUNT = DEPTH;
-	}
+	sortOccurence();
 
 	printf("\nCompressing\n");
 
-	if (Compressor.UNIQUE_PIXEL_COUNT > (int32_t)DEPTH) {
+	if (Compressor.UNIQUE_PIXEL_COUNT > (uint32_t)DEPTH) {
+
 
 		
 
@@ -613,9 +939,22 @@ int Compress() {
 			for (size_t i = 0; i < (size_t)(Compressor.MAX_PIXEL_COUNT); i++)
 			{
 
+				if (method.value == 0) {
+					determine_best_swap((int)i);
+				}
 
-				determine_best_swap((int)i);
-						
+				else
+				{
+					determine_best_swap_with_profile();
+				}
+
+				
+				
+
+				sortOccurence();
+				progress();
+
+
 
 				if (Compressor.UNIQUE_PIXEL_COUNT <= DEPTH) {
 					
@@ -652,8 +991,6 @@ int Compress() {
 
 	}
 
-
-	NewRPF.CLUT = Compressor.RESIZED_CLUT;
 
 
 	Commit();
