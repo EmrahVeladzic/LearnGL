@@ -129,7 +129,7 @@ int BMPimport() {
 
 
 	NewRPF.data = (uint8_t*)malloc(sizeof(uint8_t) * (SCALEX * SCALEY));
-	NewRPF.data16max = (uint8_t*)malloc(sizeof(uint8_t) * ((SCALEX*SCALEY)/2));
+	
 
 	Compressor.RESIZED_CLUT = (Pixel15*)malloc(sizeof(Pixel15) * DEPTH);
 	for (int16_t i = 0; i < DEPTH; i++)
@@ -159,7 +159,7 @@ int BMPimport() {
 	Compressor.UNIQUE_PIXEL_COUNT = 1;
 
 	Compressor.RESIZED_CLUT[0] = Compressor.ALPHA15;
-	Compressor.resized_clut_occupied = 1;
+	
 
 
 
@@ -175,7 +175,7 @@ int BMPimport() {
 
 	fclose(fileloc);
 
-
+	ProtectedBufferAccess = 0;
 
 	return 0;
 }
@@ -213,7 +213,7 @@ int Export() {
 
 	if ((NewRPF.magic[1] + 1 )<= 16)
 	{
-		fwrite(NewRPF.data16max, sizeof(uint8_t), ((SCALEX  * SCALEY )/2), tempoutf);
+		fwrite(NewRPF.data, sizeof(uint8_t), ((SCALEX  * SCALEY )/2), tempoutf);
 
 
 		

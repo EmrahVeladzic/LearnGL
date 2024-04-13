@@ -49,9 +49,7 @@ int main() {
 		free(NewRPF.data);
 	}
 
-	if (NewRPF.data16max != NULL) {
-		free(NewRPF.data16max);
-	}
+	
 
 	if (Compressor.LARGE_CLUT != NULL) {
 

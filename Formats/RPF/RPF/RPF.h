@@ -14,6 +14,12 @@ int32_t SCALEY;
 
 int16_t DEPTH;
 
+#define ProtectedBufferSize 16
+
+size_t ProtectedBufferAccess;
+
+
+
 #pragma pack(push,4)
 
 typedef struct bit
@@ -50,7 +56,7 @@ typedef struct px16 {
 }Pixel15;
 #pragma pack(pop)
 
-
+Pixel15 ProtectedBuffer[ProtectedBufferSize];
 
 
 #pragma pack(push, 4)
@@ -65,7 +71,7 @@ typedef struct rpf {
 
 	uint8_t* data;//max 256 values of color
 
-	uint8_t* data16max;
+	
 
 }RPF;
 #pragma pack(pop)
@@ -95,7 +101,7 @@ typedef struct com {
 	Pixel15* LARGE_CLUT15;
 
 
-	uint8_t resized_clut_occupied;
+	
 	Pixel15* RESIZED_CLUT;//Will store a dynamic amount of pixels
 
 	int32_t UNIQUE_PIXEL_COUNT;//Number detailing unique pixels found. Iterations stop when it falls below DEPTH
