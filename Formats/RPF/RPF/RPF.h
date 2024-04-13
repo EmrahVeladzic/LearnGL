@@ -9,22 +9,23 @@
 #include <stdlib.h>
 #include <math.h>
 
-int32_t SCALEX;
-int32_t SCALEY;
+size_t SCALEX;
+size_t SCALEY;
 
-int16_t DEPTH;
+#define DEPTH 256
 
-#define ProtectedBufferSize 16
+#define PROTECTED_BUFFER_SIZE 8
 
 size_t ProtectedBufferAccess;
 
-
+uint8_t* mode_in;
 
 
 typedef struct bit
 {
 	unsigned int value : 1;
 }BIT;
+
 
 
 
@@ -55,7 +56,7 @@ typedef struct px16 {
 }Pixel15;
 
 
-Pixel15 ProtectedBuffer[ProtectedBufferSize];
+Pixel15* ProtectedBuffer;
 
 
 
@@ -103,8 +104,8 @@ typedef struct com {
 	
 	Pixel15* RESIZED_CLUT;//Will store a dynamic amount of pixels
 
-	int32_t UNIQUE_PIXEL_COUNT;//Number detailing unique pixels found. Iterations stop when it falls below DEPTH
-	int32_t MAX_PIXEL_COUNT;//Meant to resolve a edge case where the input has fewer unique colours than DEPTH
+	uint32_t UNIQUE_PIXEL_COUNT;//Number detailing unique pixels found. Iterations stop when it falls below DEPTH
+	uint32_t MAX_PIXEL_COUNT;//Meant to resolve a edge case where the input has fewer unique colours than DEPTH
 	Occurence_Entry* Occurence_Table;//Internal array of occurence entries 
 
 	uint32_t SwapCount;
@@ -154,6 +155,8 @@ Pixel15 Convert_to_15Bit(Pixel in);
 BIT chk;
 
 BIT flow;
+
+BIT method;
 
 PIX3D potential_donor;
 PIX3D potential_recipient;

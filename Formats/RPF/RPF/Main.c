@@ -19,7 +19,7 @@ int main() {
 
 	else
 	{
-		printf("\nError processing image.\nMake sure that the image is a BMP file, with a maximum size of 256x256 and a bit depth of 24.\n");
+		printf("\nError processing image.\nMake sure that the image is a BMP file, with a maximum size of 256x256 and a bit depth of 24, and that you selected a valid method.\n");
 		char end = getchar();
 		return 1;
 	}
@@ -68,7 +68,23 @@ int main() {
 	}
 
 
+	if (ProtectedBuffer != NULL) {
+		free(ProtectedBuffer);
+	}
 
+	if (fileName != NULL) {
+		free(fileName);
+	}
+	if (fileexnm != NULL) {
+
+		free(fileexnm);
+	}
+
+
+	if (mode_in != NULL) {
+
+		free(mode_in);
+	}
 
 
 	return 0;

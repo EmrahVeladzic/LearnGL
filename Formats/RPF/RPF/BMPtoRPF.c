@@ -112,7 +112,7 @@ int BMPimport() {
 
 	SCALEX = IMPORTED.width;
 	SCALEY = IMPORTED.height;
-	DEPTH = 16;
+	
 
 	if (SCALEX > 256 || SCALEY > 256 || DEPTH > 256 || SCALEX < 1 || SCALEY < 1 || DEPTH < 1 || SCALEX%2!=0||SCALEY%2!=0)
 	{
@@ -132,7 +132,7 @@ int BMPimport() {
 	
 
 	Compressor.RESIZED_CLUT = (Pixel15*)malloc(sizeof(Pixel15) * DEPTH);
-	for (int16_t i = 0; i < DEPTH; i++)
+	for (size_t i = 0; i < (size_t)DEPTH; i++)
 	{
 		Compressor.RESIZED_CLUT[i] = Compressor.ALPHA15;
 	}
@@ -141,7 +141,7 @@ int BMPimport() {
 	Compressor.LARGE_CLUT = (Pixel*)malloc(sizeof(Pixel) * (SCALEX * SCALEY));
 	Compressor.LARGE_CLUT15 = (Pixel15*)malloc(sizeof(Pixel15) * (SCALEX * SCALEY));
 
-	for (int32_t i = 0; i < (SCALEX * SCALEY); i++)
+	for (size_t i = 0; i < (SCALEX * SCALEY); i++)
 	{
 		Compressor.LARGE_CLUT[i] = Compressor.ALPHA;
 		Compressor.LARGE_CLUT15[i] = Compressor.ALPHA15;
@@ -160,7 +160,7 @@ int BMPimport() {
 
 	Compressor.RESIZED_CLUT[0] = Compressor.ALPHA15;
 	
-
+	ProtectedBuffer = (Pixel15*)malloc(PROTECTED_BUFFER_SIZE * sizeof(Pixel15));
 
 
 	for (int i = 0; i < (SCALEX * SCALEY); i++)
@@ -176,6 +176,31 @@ int BMPimport() {
 	fclose(fileloc);
 
 	ProtectedBufferAccess = 0;
+
+
+	
+
+	printf("\nPlease select a method for compressing.\n0 - Popularity method \t 1 - Proximity method\n");
+
+	mode_in = string_in();
+
+	if (mode_in[0] == '0') {
+
+		method.value = 0;
+	}
+	else if(mode_in[0] == '1')
+	{
+		method.value = 1;
+	}
+	else
+	{
+		return 1;
+	}
+
+
+
+		
+
 
 	return 0;
 }
@@ -195,7 +220,7 @@ int Export() {
 
 	
 
-	for (int i = 0; i < NewRPF.magic[1]+1; i++)
+	for (size_t i = 0; i < (size_t)NewRPF.magic[1]+1; i++)
 	{
 
 
