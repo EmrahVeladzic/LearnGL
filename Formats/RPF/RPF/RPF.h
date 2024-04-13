@@ -20,16 +20,15 @@ size_t ProtectedBufferAccess;
 
 
 
-#pragma pack(push,4)
 
 typedef struct bit
 {
 	unsigned int value : 1;
 }BIT;
-#pragma pack(pop)
 
 
-#pragma pack(push,4)
+
+
 //24-bit Pixel value.
 typedef struct px {
 
@@ -41,11 +40,11 @@ typedef struct px {
 	uint8_t b;//blue
 
 }Pixel;
-#pragma pack(pop)
+
 
 
 //15 bit value (16-bits, the 1st being alpha);
-#pragma pack(push,4)
+
 typedef struct px16 {
 
 	uint16_t a : 1;
@@ -54,12 +53,12 @@ typedef struct px16 {
 	uint16_t b : 5;
 
 }Pixel15;
-#pragma pack(pop)
+
 
 Pixel15 ProtectedBuffer[ProtectedBufferSize];
 
 
-#pragma pack(push, 4)
+
 typedef struct rpf {
 
 
@@ -74,7 +73,7 @@ typedef struct rpf {
 	
 
 }RPF;
-#pragma pack(pop)
+
 
 
 typedef struct oe {
