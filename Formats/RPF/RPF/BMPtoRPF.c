@@ -112,7 +112,7 @@ int BMPimport() {
 
 	SCALEX = IMPORTED.width;
 	SCALEY = IMPORTED.height;
-	DEPTH = 256;
+	DEPTH = 16;
 
 	if (SCALEX > 256 || SCALEY > 256 || DEPTH > 256 || SCALEX < 1 || SCALEY < 1 || DEPTH < 1 || SCALEX%2!=0||SCALEY%2!=0)
 	{
@@ -227,6 +227,8 @@ int Export() {
 	}
 
 	
+
+
 	
 
 	fclose(tempoutf);
