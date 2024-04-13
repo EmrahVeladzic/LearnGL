@@ -253,7 +253,7 @@ Pixel15 determine_best_fit() {
 	BIT original;
 
 
-	for (size_t i = (size_t)(Compressor.MAX_PIXEL_COUNT); i > 0; i--)
+	for (size_t i = (size_t)(NewRPF.magic[1] +1 ); i > 0; i--)
 	{
 		
 		temp = Compressor.Occurence_Table[i-1].Value;
@@ -292,7 +292,7 @@ uint8_t settle(Pixel15 in) {
 
 	Pixel15 compare;
 
-	for (size_t i = 0; i < (size_t)Compressor.MAX_PIXEL_COUNT; i++)
+	for (size_t i = 0; i < (size_t)NewRPF.magic[1]+1; i++)
 	{
 		compare = Compressor.RESIZED_CLUT[i];
 
@@ -342,7 +342,7 @@ uint8_t write_CLUT_to_data4bpp(int index) {
 			true_valuemsb = Compressor.Swap_Table[i].Donor;
 
 
-			for (size_t j = 0; j < (size_t)Compressor.MAX_PIXEL_COUNT; j++)
+			for (size_t j = 0; j < (size_t)NewRPF.magic[1] + 1; j++)
 			{
 				if ((chk = Compare15(true_valuemsb, Compressor.RESIZED_CLUT[j])).value == 1) {
 					msb = (uint8_t)j;
@@ -359,7 +359,7 @@ uint8_t write_CLUT_to_data4bpp(int index) {
 			true_valuemsb = Compressor.Swap_Table[i].Donor;
 
 
-			for (size_t j = 0; j < (size_t)Compressor.MAX_PIXEL_COUNT; j++)
+			for (size_t j = 0; j < (size_t)NewRPF.magic[1] + 1; j++)
 			{
 				if ((chk = Compare15(true_valuelsb, Compressor.RESIZED_CLUT[j])).value == 1) {
 					lsb = (uint8_t)j;
@@ -393,7 +393,7 @@ uint8_t write_CLUT_to_data4bpp(int index) {
 			true_valuelsb = Compressor.Swap_Table[i].Donor;
 
 
-			for (size_t j = 0; j < (size_t)Compressor.MAX_PIXEL_COUNT; j++)
+			for (size_t j = 0; j < (size_t)NewRPF.magic[1] + 1; j++)
 			{
 				if ((chk = Compare15(true_valuelsb, Compressor.RESIZED_CLUT[j])).value == 1) {
 					lsb = (uint8_t)j;
@@ -410,7 +410,7 @@ uint8_t write_CLUT_to_data4bpp(int index) {
 			true_valuelsb = Compressor.Swap_Table[i].Donor;
 
 
-			for (size_t j = 0; j < (size_t)Compressor.MAX_PIXEL_COUNT; j++)
+			for (size_t j = 0; j < (size_t)NewRPF.magic[1] + 1; j++)
 			{
 				if ((chk = Compare15(true_valuelsb, Compressor.RESIZED_CLUT[j])).value == 1) {
 					lsb = (uint8_t)j;
@@ -464,7 +464,7 @@ uint8_t write_CLUT_to_data(int index) {
 			true_value = Compressor.Swap_Table[i].Donor;
 
 
-			for (size_t j = 0; j < (size_t)Compressor.MAX_PIXEL_COUNT; j++)
+			for (size_t j = 0; j < (size_t)NewRPF.magic[1] + 1; j++)
 			{
 				if ((chk = Compare15(true_value, Compressor.RESIZED_CLUT[j])).value == 1) {
 					temp = (uint8_t)j;
@@ -481,7 +481,7 @@ uint8_t write_CLUT_to_data(int index) {
 			true_value = Compressor.Swap_Table[i].Donor;
 
 
-			for (size_t j = 0; j < (size_t)Compressor.MAX_PIXEL_COUNT; j++)
+			for (size_t j = 0; j < (size_t)NewRPF.magic[1] + 1; j++)
 			{
 				if ((chk = Compare15(true_value, Compressor.RESIZED_CLUT[j])).value == 1) {
 					temp = (uint8_t)j;
@@ -595,9 +595,7 @@ int Compress() {
 
 	Compressor.MAX_PIXEL_COUNT = Compressor.UNIQUE_PIXEL_COUNT;
 
-	if (Compressor.MAX_PIXEL_COUNT > DEPTH) {
-		Compressor.MAX_PIXEL_COUNT = DEPTH;
-	}
+	
 
 	printf("\nCompressing\n");
 
