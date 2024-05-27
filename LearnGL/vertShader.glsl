@@ -70,9 +70,16 @@ float roundToPrecision(float value, float precis) {
 
 void main(void)
 {
+
+vec4 nrmFour = vec4(normals,1.0);
+
+nrmFour = inv_bind_matrix * nrmFour;
+
+nrmFour = transform_matrix * nrmFour;
+
 varyingVertPos=round(mv_matrix*vec4(position,1.0f)).xyz;
 varyingLightDir=pos_light.position-varyingVertPos;
-varyingNormal= normalize(mat3(transpose(inverse(mv_matrix))) * vec4(normals,1.0f).xyz);
+varyingNormal= normalize(mat3(transpose(inverse(mv_matrix))) * nrmFour.xyz);
 
 varyingHalfVector = (varyingLightDir+(-varyingVertPos)).xyz;
 

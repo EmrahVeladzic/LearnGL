@@ -403,7 +403,7 @@ int determine_best_swap_with_profile() {
 	for (size_t r = 0; r < (PROTECTED_BUFFER_SIZE+1); r++)
 	{
 
-		if (r == PROTECTED_BUFFER_SIZE) {
+		if (r > 0) {
 			Protect(Compressor.ALPHA15);
 		}
 

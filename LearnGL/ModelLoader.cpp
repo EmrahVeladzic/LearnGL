@@ -71,6 +71,8 @@ ImportedModel::ImportedModel(const char* filePath, const char* ImagePath, glm::v
 		
 	}
 
+	importer.clearData();
+	importer.clearRig();
 	
 
 	GLuint* temptext = importer.loadRPF(ImagePath);
@@ -118,7 +120,7 @@ void ModelImporter::parseGLTF(const char* filePathRel) {
 	uint16_t temp_ushort=0;
 	uint8_t temp_ubyte=0;
 
-	const std::string filePath = "Assets/" + (std::string)filePathRel;
+	const std::string filePath = "Assets/" + (std::string)filePathRel+ ".gltf";
 
 	std::ifstream gltf_file(filePath);
 
@@ -707,12 +709,393 @@ void ModelImporter::parseGLTF(const char* filePathRel) {
 		}
 
 		ImpMeshes.push_back(mtemp);
+		
+
+	}
+
+	GLTF_To_AST(filePathRel, 12, 127, 127,60);
+
+	bin_file.close();
+}
+
+
+
+
+void ModelImporter::GLTF_To_AST(const char* filePathRel , uint8_t scalingFactorBits, uint8_t maxTexWidth, uint8_t maxTexHeight, uint8_t FPS) {
+
+	fix tempFix;
+	uint8_t tempByte;
+	uint16_t tempShort;
+	glm::mat4x4 tempMat;
+	glm::vec4 tempVec;
+	float tempFloat;
+
+	const std::string vtPath = "Assets/" + (std::string)filePathRel + ".vt";
+	const std::string indPath = "Assets/" + (std::string)filePathRel + ".ind";
+	const std::string uvPath = "Assets/" + (std::string)filePathRel + ".uv";
+	const std::string nrmPath = "Assets/" + (std::string)filePathRel + ".nrm";
+	const std::string fkrPath = "Assets/" + (std::string)filePathRel + ".fkr";
+	const std::string anmPath = "Assets/" + (std::string)filePathRel + ".anm";	
+	
+
+	std::ofstream vtxStream;
+	vtxStream.open(vtPath,std::ios::binary);
+	
+
+	tempByte = (uint8_t)ImpMeshes.size();
+
+	vtxStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+
+	vtxStream.write(reinterpret_cast<char*>(&scalingFactorBits), sizeof(scalingFactorBits));
+
+	for (MImeshes msh : ImpMeshes)
+	{
+		tempByte = (uint8_t)msh.jointIndex;
+		
+		vtxStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+
+		tempShort = (uint16_t)msh.triangleVerts.size();
+		vtxStream.write(reinterpret_cast<char*>(&tempShort),sizeof(tempShort));
+
+		tempMat = matrices[msh.jointIndex];
+
+		for (uint16_t i = 0; i < tempShort; i+=3)
+		{
+			tempVec = glm::vec4(msh.triangleVerts[i], msh.triangleVerts[i+1], msh.triangleVerts[i+2],1.0f);
+			tempVec = tempMat * tempVec;
+
+			tempFix = F_TO_FIX(tempVec.x, scalingFactorBits);
+			vtxStream.write(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+
+			tempFix = F_TO_FIX(tempVec.y, scalingFactorBits);
+			vtxStream.write(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+
+			tempFix = F_TO_FIX(tempVec.z, scalingFactorBits);
+			vtxStream.write(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+
+		}
+
+
+	}
+
+	vtxStream.close();
+
+	std::ofstream indStream;
+
+	indStream.open(indPath,std::ios::binary);
+
+	tempByte = (uint8_t)ImpMeshes.size();
+
+	indStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+
+
+	for (MImeshes msh : ImpMeshes)
+	{
+		tempShort = (uint16_t)msh.indices.size();
+		indStream.write(reinterpret_cast<char*>(&tempShort), sizeof(tempShort));
+		uint16_t count = tempShort;
+		
+		for (uint16_t i = 0; i < count; i++)
+		{
+			tempShort = msh.indices[i];
+			indStream.write(reinterpret_cast<char*>(&tempShort), sizeof(tempShort));
+
+		}
+
+
+	}
+
+
+	indStream.close();
+
+
+	std::ofstream uvStream;
+	uvStream.open(uvPath,std::ios::binary);
+
+	tempByte = (uint8_t)ImpMeshes.size();
+
+	uvStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+
+
+	tempByte = maxTexWidth;
+
+	uvStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+
+	tempByte = maxTexHeight;
+
+	uvStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+
+	tempByte = (uint8_t)ImpMeshes.size();
+
+	uvStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+
+	for (MImeshes msh : ImpMeshes)
+	{
+		
+		
+		tempShort = (uint16_t)msh.textureCoords.size();
+		uvStream.write(reinterpret_cast<char*>(&tempShort), sizeof(tempShort));
+		
+
+		for (uint16_t i = 0; i < tempShort; i+=2)
+		{
+		
+			tempByte = (uint8_t)(msh.textureCoords[i]*(float)maxTexWidth);
+
+			uvStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+			
+			tempByte = (uint8_t)(255-(msh.textureCoords[i+1] * (float)maxTexHeight));
+			
+			uvStream.write(reinterpret_cast<char*>(&tempByte),sizeof(tempByte));
+		}
+		
+
+	}
+
+	uvStream.close();
+
+
+	std::ofstream nrmStream;
+	nrmStream.open(nrmPath, std::ios::binary);
+	
+
+	tempByte = (uint8_t)ImpMeshes.size();
+
+	nrmStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+
+	nrmStream.write(reinterpret_cast<char*>(&scalingFactorBits), sizeof(scalingFactorBits));
+
+	for (MImeshes msh : ImpMeshes)
+	{
+		tempShort = (uint16_t)msh.normals.size();
+		nrmStream.write(reinterpret_cast<char*>(&tempShort), sizeof(tempShort));
+
+		tempMat = matrices[msh.jointIndex];
+
+		for (uint16_t i = 0; i < tempShort; i += 3)
+		{
+			tempVec = glm::vec4(msh.normals[i], msh.normals[i+1], msh.normals[i+2],1.0f);
+			tempVec = tempMat * tempVec;
+
+			tempFix = F_TO_FIX(tempVec.x, scalingFactorBits);
+			nrmStream.write(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+
+			tempFix = F_TO_FIX(tempVec.y, scalingFactorBits);
+			nrmStream.write(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+
+			tempFix = F_TO_FIX(tempVec.z, scalingFactorBits);
+			nrmStream.write(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+
+		}
+
+
+	}
+
+	nrmStream.close();
+
+	std::ofstream fkrStream;
+	fkrStream.open(fkrPath, std::ios::binary);
+
+	tempByte = (uint8_t)bones.size();
+	fkrStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+
+	for (Bone b : bones)
+	{
+		tempFix = F_TO_FIX(b.InitTransform.translation.x, scalingFactorBits);
+		fkrStream.write(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+
+		tempFix = F_TO_FIX(b.InitTransform.translation.y, scalingFactorBits);
+		fkrStream.write(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+
+		tempFix = F_TO_FIX(b.InitTransform.translation.z, scalingFactorBits);
+		fkrStream.write(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+
+		tempFix = F_TO_FIX(b.InitTransform.rotation.x, scalingFactorBits);
+		fkrStream.write(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+
+		tempFix = F_TO_FIX(b.InitTransform.rotation.y, scalingFactorBits);
+		fkrStream.write(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+
+		tempFix = F_TO_FIX(b.InitTransform.rotation.z, scalingFactorBits);
+		fkrStream.write(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+
+		tempFix = F_TO_FIX(b.InitTransform.rotation.w, scalingFactorBits);
+		fkrStream.write(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+
+		tempFix = F_TO_FIX(b.InitTransform.scale.x, scalingFactorBits);
+		fkrStream.write(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+
+		tempFix = F_TO_FIX(b.InitTransform.scale.y, scalingFactorBits);
+		fkrStream.write(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+
+		tempFix = F_TO_FIX(b.InitTransform.scale.z, scalingFactorBits);
+		fkrStream.write(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+
+
+		tempByte = (uint8_t)b.children.size();
+		fkrStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+		
+		uint8_t count = tempByte;
+
+		for (uint8_t i = 0; i < count; i++)
+		{
+			tempByte = (uint8_t)b.children[i];
+			fkrStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+
+			
+		}
+		
+	}
+
+
+	fkrStream.close();
+
+	std::ofstream anmStream;
+
+	anmStream.open(anmPath,std::ios::binary);
+
+	tempByte = (uint8_t)bones.size();
+
+	anmStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+
+	for (Bone b : bones)
+	{
+		tempByte = (uint8_t)b.animations.size();
+		anmStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+
+		uint8_t count = tempByte;
+
+		for (uint8_t i = 0; i < count; i++)
+		{
+
+			tempByte = (uint8_t)b.animations[i].translations.size();
+			anmStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+			uint8_t TRS_count = tempByte;
+
+			for (uint8_t j = 0; j < TRS_count; j++)
+			{
+				tempFloat = (b.animations[i].transTimes[j] * (float)(FPS-1));
+
+				
+
+				tempByte = (uint8_t)(((int)tempFloat) % (int)(FPS));
+				anmStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+
+				
+
+
+				tempFix = F_TO_FIX(b.animations[i].translations[j].x, scalingFactorBits);
+				fkrStream.write(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+
+				tempFix = F_TO_FIX(b.animations[i].translations[j].y, scalingFactorBits);
+				fkrStream.write(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+
+				tempFix = F_TO_FIX(b.animations[i].translations[j].z, scalingFactorBits);
+				fkrStream.write(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+
+			}
+
+
+			tempByte = (uint8_t)b.animations[i].rotations.size();
+			anmStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+			TRS_count = tempByte;
+
+			for (uint8_t j = 0; j < TRS_count; j++)
+			{
+				tempFloat = (b.animations[i].rotTimes[j] * (float)(FPS - 1));
+
+				
+
+				tempByte = (uint8_t)(((int)tempFloat) % (int)(FPS));
+				anmStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+
+				
+
+
+				tempFix = F_TO_FIX(b.animations[i].rotations[j].x, scalingFactorBits);
+				fkrStream.write(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+
+				tempFix = F_TO_FIX(b.animations[i].rotations[j].y, scalingFactorBits);
+				fkrStream.write(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+
+				tempFix = F_TO_FIX(b.animations[i].rotations[j].z, scalingFactorBits);
+				fkrStream.write(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+
+				tempFix = F_TO_FIX(b.animations[i].rotations[j].w, scalingFactorBits);
+				fkrStream.write(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+			}
+
+
+
+
+
+
+			tempByte = (uint8_t)b.animations[i].scales.size();
+			anmStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+			TRS_count = tempByte;
+
+			for (uint8_t j = 0; j < TRS_count; j++)
+			{
+				tempFloat = (b.animations[i].scalTimes[j] * (float)(FPS - 1));
+
+
+
+				tempByte = (uint8_t)(((int)tempFloat) % (int)(FPS));
+				anmStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+
+				
+
+				tempFix = F_TO_FIX(b.animations[i].scales[j].x, scalingFactorBits);
+				fkrStream.write(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+
+				tempFix = F_TO_FIX(b.animations[i].scales[j].y, scalingFactorBits);
+				fkrStream.write(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+
+				tempFix = F_TO_FIX(b.animations[i].scales[j].z, scalingFactorBits);
+				fkrStream.write(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+
+			}
+
+
+
+		}
+
+	}
+	anmStream.close();
+
+}
+
+void ModelImporter::OpenAST(const char* filePathRel) {
+
+	fix tempFix;
+	uint8_t tempByte;
+	uint16_t tempShort;
+	glm::mat4x4 tempMat;
+	glm::vec4 tempVec;
+	float tempFloat;
+
+	const std::string vtPath = "Assets/" + (std::string)filePathRel + ".vt";
+	const std::string indPath = "Assets/" + (std::string)filePathRel + ".ind";
+	const std::string uvPath = "Assets/" + (std::string)filePathRel + ".uv";
+	const std::string nrmPath = "Assets/" + (std::string)filePathRel + ".nrm";
+	const std::string fkrPath = "Assets/" + (std::string)filePathRel + ".fkr";
+	const std::string anmPath = "Assets/" + (std::string)filePathRel + ".anm";
+
+	std::ifstream vtStream;
+
+	vtStream.open(vtPath,std::ios::binary);
+	vtStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+
+	uint8_t mshCount = tempByte;
+
+	for (uint8_t i = 0; i < mshCount; i++)
+	{
 
 	}
 
 
 
-	bin_file.close();
+
 }
 
 void ImportedModel::compute_pose(int boneI) {
@@ -758,7 +1141,7 @@ glm::mat4x4 ImportedModel::compute_transformJ(int boneI) {
 
 GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
-	std::string filePath = "Assets/" + (std::string)filePathRel;
+	std::string filePath = "Assets/" + (std::string)filePathRel +".rpf";
 
 	std::ifstream rpfloader(filePath, std::ios::binary);
 

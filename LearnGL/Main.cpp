@@ -287,7 +287,7 @@ void display(GLFWwindow* window ,std::vector<ImportedModel>& models) {
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glClear(GL_COLOR_BUFFER_BIT);
 	
-	glClearColor(0.15f,0.15f,0.15f,1.0f);
+	glClearColor(0.25f, 0.25f, 0.25f,1.0f);
 
 	glUseProgram(renderingProgram);
 
@@ -314,6 +314,7 @@ void display(GLFWwindow* window ,std::vector<ImportedModel>& models) {
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_1D, model.clut);
 
+		
 
 		if (model.num_joints>0)
 		{
@@ -380,7 +381,7 @@ void display(GLFWwindow* window ,std::vector<ImportedModel>& models) {
 
 
 
-		
+			
 
 
 			
@@ -545,14 +546,13 @@ int main(void) {
 	GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "OpenGL3D", monitor, NULL);
 	
 
-
 	glfwMakeContextCurrent(window);
 
 	alcMakeContextCurrent(audio_context);
 
 	if (!audio_context) {
 
-		exit(EXIT_FAILURE);
+		//exit(EXIT_FAILURE);
 	}
 	
 
@@ -560,10 +560,10 @@ int main(void) {
 	glfwSwapInterval(mode->refreshRate/TARGET_FPS);
 
 
-	Models.push_back(ImportedModel("chara.gltf", "char.rpf", glm::vec3(0.0f, 0.0f, -5.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
-	Models.push_back(ImportedModel("skele.gltf", "skele.rpf", glm::vec3(1.0f, 0.0f, -6.0f), glm::quat(1.8f, 0.0f, 1.0f, 0.0f)));	
-	Models.push_back(ImportedModel("raven.gltf", "raven.rpf", glm::vec3(-5.0f, 0.0f, -7.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
-	Models.push_back(ImportedModel("ground.gltf", "ground.rpf", glm::vec3(2.0f, -2.85f, 0.0f), glm::quat((3.14159f/2.0f), 1.0f, 0.0f, 0.0f)));
+	Models.push_back(ImportedModel("skele", "skele", glm::vec3(0.0f, 0.0f, -5.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
+	//Models.push_back(ImportedModel("chara", "char", glm::vec3(1.0f, 0.0f, -6.0f), glm::quat(1.8f, 0.0f, 1.0f, 0.0f)));	
+	//Models.push_back(ImportedModel("raven", "raven", glm::vec3(-5.0f, 0.0f, -7.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
+	//Models.push_back(ImportedModel("ground", "ground", glm::vec3(2.0f, -2.85f, 0.0f), glm::quat((3.14159f/2.0f), 1.0f, 0.0f, 0.0f)));
 	
 
 	glfwSetKeyCallback(window,key_callback);
@@ -575,9 +575,9 @@ int main(void) {
 	init(window,Models);
 
 	
+	
 
-
-	sfx = global_audio.load_WL("raven.wl");
+	sfx = global_audio.load_WL("raven");
 	
 
 	ALuint src;
@@ -590,7 +590,7 @@ int main(void) {
 
 	alSourcei(src, AL_LOOPING, AL_TRUE);
 
-	alSourcef(src, AL_GAIN, 0.25f);
+	alSourcef(src, AL_GAIN, 1.0f);
 
 	alSourcePlay(src);
 	
@@ -607,6 +607,8 @@ int main(void) {
 		
 		beg_time =(float) glfwGetTime();
 		end_time += beg_time;
+
+		
 
 		animate(window,glfwGetTime(),Models);
 		display(window,Models);

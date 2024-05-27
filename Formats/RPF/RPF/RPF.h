@@ -12,7 +12,7 @@
 size_t SCALEX;
 size_t SCALEY;
 
-#define DEPTH 256
+#define DEPTH 64
 
 #define PROTECTED_BUFFER_SIZE 8
 

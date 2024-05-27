@@ -9,7 +9,7 @@
 #include "CustomImageFormat.hpp"
 #include "nlohmann/json.hpp"
 #include "Animation.hpp"
-
+#include "FixedPointMath.h"
 
 
 
@@ -99,8 +99,6 @@ private:
 	std::vector<uint16_t> indices;
 
 
-
-
 public:
 
 	int root;
@@ -118,7 +116,9 @@ public:
 
 	
 	void parseGLTF(const char* filePathRel);
-	
+	void GLTF_To_AST(const char* filePathRel, uint8_t scalingFactorBits, uint8_t maxTexWidth, uint8_t maxTexHeight, uint8_t FPS);
+	void OpenAST(const char* filePathRel);
+
 	int findBoneByNode(int node);
 	int findBoneByJointVal(int jointVal);
 	int getNumVertices(int m);
