@@ -73,7 +73,7 @@ void main(void)
 
 vec4 nrmFour = vec4(normals,1.0);
 
-nrmFour = inv_bind_matrix * nrmFour;
+//nrmFour = inv_bind_matrix * nrmFour;
 
 nrmFour = transform_matrix * nrmFour;
 
@@ -85,7 +85,7 @@ varyingHalfVector = (varyingLightDir+(-varyingVertPos)).xyz;
 
 vec4 posFour = vec4(position,1.0);
 
-posFour = inv_bind_matrix * posFour;
+//posFour = inv_bind_matrix * posFour;
 
 posFour = transform_matrix * posFour;
 
