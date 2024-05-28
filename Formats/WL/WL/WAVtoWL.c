@@ -102,6 +102,8 @@ int open_WAV() {
 
 	Encoder.sample_buffer = (WAV16*)malloc(Encoder.sample_count*sizeof(WAV16));
 
+	Encoder.differential_buffer = (WAV16*)malloc(Encoder.sample_count * sizeof(WAV16));
+
 	Encoder.spu_buffer = (SPU_sample*)malloc(Encoder.spu_sample_count*sizeof(SPU_sample));
 	
 	
@@ -113,7 +115,13 @@ int open_WAV() {
 
 		fread(&Encoder.sample_buffer[i].data, sizeof(WAV16), 1, fileio);
 
-
+		if (i > 0) {
+			Encoder.differential_buffer[i].data = Encoder.sample_buffer[i].data - Encoder.sample_buffer[i - 1].data;
+		}
+		else
+		{
+			Encoder.differential_buffer[i].data = Encoder.sample_buffer[i].data;
+		}
 	}
 
 	fclose(fileio);

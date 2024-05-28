@@ -3,7 +3,12 @@
 #include <stdint.h>
 
 
+#define DIVISOR 5
 
+
+
+#define MAX_INT_4 7
+#define MIN_INT_4 -8
 
 
 #pragma pack(push,1)

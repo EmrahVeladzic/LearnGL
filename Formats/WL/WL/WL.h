@@ -61,7 +61,7 @@ typedef struct wl_encoder {
 
 	SPU_sample* spu_buffer;
 
-
+	WAV16* differential_buffer;
 
 }WL_ENC;
 #pragma pack (pop)
@@ -74,7 +74,7 @@ typedef struct wl_file {
 	uint16_t default_sample_rate;
 	uint32_t block_count;
 	SPU_sample* data;
-
+	
 
 }WL_FILE;
 
