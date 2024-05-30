@@ -717,7 +717,7 @@ void ModelImporter::parseGLTF(const char* filePathRel) {
 
 	}
 
-	GLTF_To_AST(filePathRel, 12, 127, 255,60);
+	GLTF_To_AST(filePathRel, 12,60);
 	OpenAST(filePathRel);
 
 	bin_file.close();
@@ -726,7 +726,7 @@ void ModelImporter::parseGLTF(const char* filePathRel) {
 
 
 
-void ModelImporter::GLTF_To_AST(const char* filePathRel , uint8_t scalingFactorBits, uint8_t maxTexWidth, uint8_t maxTexHeight, uint8_t FPS) {
+void ModelImporter::GLTF_To_AST(const char* filePathRel , uint8_t scalingFactorBits, uint8_t FPS) {
 
 	fix tempFix;
 	uint8_t tempByte;
@@ -826,16 +826,6 @@ void ModelImporter::GLTF_To_AST(const char* filePathRel , uint8_t scalingFactorB
 	uvStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
 
-	tempByte = maxTexWidth;
-
-	uvStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
-
-	tempByte = maxTexHeight;
-
-	uvStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
-
-	
-
 	for (MImeshes msh : ImpMeshes)
 	{
 		
@@ -847,11 +837,11 @@ void ModelImporter::GLTF_To_AST(const char* filePathRel , uint8_t scalingFactorB
 		for (uint16_t i = 0; i < tempShort; i+=2)
 		{
 		
-			tempByte = (uint8_t)(msh.textureCoords[i]* (float)maxTexWidth);
+			tempByte = (uint8_t)(msh.textureCoords[i]* 255.0f);
 
 			uvStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 			
-			tempByte = (uint8_t)(msh.textureCoords[i + 1] * (float)maxTexHeight);
+			tempByte = (uint8_t)(msh.textureCoords[i + 1] * 255.0f);
 			
 			uvStream.write(reinterpret_cast<char*>(&tempByte),sizeof(tempByte));
 		}
@@ -1192,14 +1182,6 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 
 	mshCount = tempByte;
 
-	uvStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
-
-	uint8_t maxWidth = tempByte;
-
-	uvStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
-
-	uint8_t maxHeight = tempByte;
-
 	for (uint8_t i = 0; i < mshCount; i++)
 	{
 		uvStream.read(reinterpret_cast<char*>(&tempShort), sizeof(tempShort));
@@ -1208,13 +1190,13 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 		{
 			uvStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
-			tempFloat = (float(tempByte) / float(maxWidth));
+			tempFloat = (float(tempByte) / 255.0f);
 
 			tempMesh.textureCoords.push_back(tempFloat);
 
 			uvStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
-			tempFloat = (float(tempByte) / float(maxHeight));
+			tempFloat = (float(tempByte) / 255.0f);
 
 			tempMesh.textureCoords.push_back(tempFloat);
 

@@ -116,7 +116,7 @@ public:
 
 	
 	void parseGLTF(const char* filePathRel);
-	void GLTF_To_AST(const char* filePathRel, uint8_t scalingFactorBits, uint8_t maxTexWidth, uint8_t maxTexHeight, uint8_t FPS);
+	void GLTF_To_AST(const char* filePathRel, uint8_t scalingFactorBits, uint8_t FPS);
 	void OpenAST(const char* filePathRel);
 
 	int findBoneByNode(int node);
