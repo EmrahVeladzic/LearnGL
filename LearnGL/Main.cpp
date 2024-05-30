@@ -234,6 +234,8 @@ void animate(GLFWwindow* window, double currentTime, std::vector<ImportedModel>&
 
 			if (model.num_anims > 0) {
 
+				
+
 				Utils::UpdateInterpolationIndex(model.bones[model.Meshes[i].jointIndex].animations[curr], currentGlobalTime);
 
 
@@ -429,7 +431,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 		if (Models.empty() == false) {
 
-			Models[0].currentAnim = 1;
+			if (Models[0].bones[0].animations.size() > 1) {
+				Models[0].currentAnim = 1;
+			}
 
 		}
 	}
@@ -441,7 +445,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 		if (Models.empty() == false) {
 
-			Models[0].currentAnim = 1;
+			if (Models[0].bones[0].animations.size() > 1) {
+				Models[0].currentAnim = 1;
+			}
 
 		}
 	}
@@ -454,7 +460,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 		if (Models.empty() == false) {
 
-			Models[0].currentAnim = 1;
+			if (Models[0].bones[0].animations.size() > 1) {
+				Models[0].currentAnim = 1;
+			}
 
 		}
 	}
@@ -466,8 +474,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 
 		if (Models.empty() == false) {
-			Models[0].currentAnim = 1;
 
+			if (Models[0].bones[0].animations.size() > 1) {
+				Models[0].currentAnim = 1;
+			}
 		}
 	}
 
@@ -552,7 +562,7 @@ int main(void) {
 
 	if (!audio_context) {
 
-		//exit(EXIT_FAILURE);
+		exit(EXIT_FAILURE);
 	}
 	
 
@@ -560,7 +570,7 @@ int main(void) {
 	glfwSwapInterval(mode->refreshRate/TARGET_FPS);
 
 
-	Models.push_back(ImportedModel("raven", "raven", glm::vec3(0.0f, 0.0f, -5.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
+	Models.push_back(ImportedModel("skele", "skele", glm::vec3(0.0f, 0.0f, -5.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
 	//Models.push_back(ImportedModel("chara", "char", glm::vec3(1.0f, 0.0f, -6.0f), glm::quat(1.8f, 0.0f, 1.0f, 0.0f)));	
 	//Models.push_back(ImportedModel("raven", "raven", glm::vec3(-5.0f, 0.0f, -7.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
 	//Models.push_back(ImportedModel("ground", "ground", glm::vec3(2.0f, -2.85f, 0.0f), glm::quat((3.14159f/2.0f), 1.0f, 0.0f, 0.0f)));
@@ -617,10 +627,11 @@ int main(void) {
 
 		end_time =(float) glfwGetTime();
 
+		Models[0].rotation.w += end_time - beg_time;
 		
 	}
 
-
+	
 	
 
 	Models.clear();
