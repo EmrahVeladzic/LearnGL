@@ -10,7 +10,7 @@
 #include "nlohmann/json.hpp"
 #include <glm/gtx/matrix_decompose.hpp>
 #include "Animation.hpp"
-
+#include"BufferWriter.hpp"
 
 #define ROOT_MARKER -1
 
@@ -28,9 +28,8 @@ ImportedModel::ImportedModel(const char* filePath, const char* ImagePath, glm::v
 
 	root = -1;
 
-	importer.parseGLTF(filePath);
-	//importer.OpenAST(filePath);
-
+	//importer.parseGLTF(filePath);
+	importer.OpenAST(filePath);
 
 	num_joints = importer.num_joints;
 	num_mats = importer.num_mats;
@@ -1110,6 +1109,7 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 	vtStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
 	uint8_t mshCount = tempByte;
+	num_meshes = mshCount;
 
 	vtStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
@@ -1131,9 +1131,7 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 
 			tempMesh.triangleVerts.push_back(tempFloat);
 		}
-		ImpMeshes[i].triangleVerts.clear();
-		ImpMeshes[i].triangleVerts = tempMesh.triangleVerts;
-		ImpMeshes[i].jointIndex = tempMesh.jointIndex;
+		ImpMeshes.push_back(tempMesh);
 
 		tempMesh.triangleVerts.clear();
 	}
@@ -1260,13 +1258,15 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 
 	uint8_t boneCount = tempByte;
 
+	num_joints = boneCount;
+
 	fkrStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
 	scalingFactor = tempByte;
 
+	
 
-
-	for (size_t i = 0; i < boneCount; i++)
+	for (uint8_t i = 0; i < boneCount; i++)
 	{
 		fkrStream.read(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
 
@@ -1314,6 +1314,10 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 
 		mshCount = tempByte;
 
+		if (mshCount == 0) {
+			tempBone.extremity = true;
+		}
+
 		for (size_t j = 0; j < mshCount; j++)
 		{
 			fkrStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
@@ -1321,15 +1325,44 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 			tempBone.children.push_back((int)tempByte);
 		}
 
-		bones[i].children.clear();
-		bones[i].children = tempBone.children;
-		bones[i].InitTransform = tempBone.InitTransform;
+		tempBone.TransformMat = Utils::transToMat(tempBone.InitTransform);
+
+		bones.push_back(tempBone);
 		
 
 		tempBone.children.clear();
 	}
 
+	
+	
 	fkrStream.close();
+
+
+	for (uint8_t i = 0; i < (uint8_t)num_joints; i++)
+	{
+		bones[i].parent = ROOT_MARKER;
+
+		for (uint8_t j = 0; j < (uint8_t)num_joints; j++)
+		{
+
+			for (uint8_t k = 0; k < (uint8_t)bones[j].children.size(); k++) {
+
+				if (bones[j].children[k]==i)
+				{
+					bones[i].parent = j;
+				}
+			}
+
+		}
+
+		if (bones[i].parent==ROOT_MARKER) {
+
+			root = i;
+
+		}
+
+	}
+
 
 
 	std::ifstream anmStream;
@@ -1362,7 +1395,7 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 
 		uint8_t animCount = tempByte;
 
-		
+		num_anims = animCount;
 
 		for (uint8_t j = 0; j < animCount; j++) {
 
@@ -1501,25 +1534,11 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 				tempAnim.scales.push_back(glm::vec3(tempVec.x, tempVec.y, tempVec.z));
 
 			}			
-			bones[i].animations[j].translations.clear();
-			bones[i].animations[j].rotations.clear();
-			bones[i].animations[j].scales.clear();
+		
+			bones[i].animations.push_back(tempAnim);
 
-			bones[i].animations[j].transTimes.clear();
-			bones[i].animations[j].rotTimes.clear();
-			bones[i].animations[j].scalTimes.clear();
-			
-			
-			bones[i].animations[j].translations = tempAnim.translations;
-			bones[i].animations[j].rotations = tempAnim.rotations;
-			bones[i].animations[j].scales = tempAnim.scales;
-
-			bones[i].animations[j].transTimes = tempAnim.transTimes;
-			bones[i].animations[j].rotTimes = tempAnim.rotTimes;
-			bones[i].animations[j].scalTimes = tempAnim.scalTimes;
 
 			
-
 		
 			tempAnim.translations.clear();
 			tempAnim.rotations.clear();
@@ -1529,9 +1548,11 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 			tempAnim.rotTimes.clear();
 			tempAnim.scalTimes.clear();
 		}
-
+		
 	}
 
+	
+	
 
 
 	anmStream.close();
@@ -1784,6 +1805,9 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 	rtn[3] = (GLuint)rpf.magic[2] + 1;
 	rtn[4] = (GLuint)rpf.magic[3] + 1;
 
+	
+	RPF_Buffer(rpf);
+	
 
 	delete[] rpf.CLUT;
 
@@ -1834,7 +1858,7 @@ int ModelImporter::get_child_index(int j_son_index) {
 
 void ModelImporter::clearRig() {
 
-	transforms.clear();
+	
 	bones.clear();
 	matrices.clear();
 
@@ -1905,4 +1929,3 @@ int ModelImporter::findBoneByNode(int node) {
 
 	return -1;
 }
-

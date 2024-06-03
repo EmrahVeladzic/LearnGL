@@ -18,12 +18,14 @@
 #include "SoundLoader.hpp"
 #include <glm/gtx/string_cast.hpp>
 
+
 #define numVAOs 1
 #define numVBOs 3
 #define numEBOs 1
 
 #define TARGET_FPS 60
 #define SECOND_F 1000.0f
+
 
 
 
@@ -328,7 +330,7 @@ void display(GLFWwindow* window ,std::vector<ImportedModel>& models) {
 
 			if (model.num_anims > 0)
 			{
-				invBTemp = model.INVmatrices[model.Meshes[i].jointIndex];
+				//invBTemp = model.INVmatrices[model.Meshes[i].jointIndex];
 				transTemp = model.bones[model.Meshes[i].jointIndex].TransformMat;
 
 			}
@@ -544,7 +546,6 @@ int main(void) {
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-
 	
 
 	ALCdevice* audio_device = alcOpenDevice(nullptr);
@@ -570,13 +571,13 @@ int main(void) {
 	glfwSwapInterval(mode->refreshRate/TARGET_FPS);
 
 
-	Models.push_back(ImportedModel("skele", "skele", glm::vec3(0.0f, 0.0f, -5.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
+	Models.push_back(ImportedModel("raven", "raven", glm::vec3(0.0f, 0.0f, -5.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
 	//Models.push_back(ImportedModel("chara", "char", glm::vec3(1.0f, 0.0f, -6.0f), glm::quat(1.8f, 0.0f, 1.0f, 0.0f)));	
 	//Models.push_back(ImportedModel("raven", "raven", glm::vec3(-5.0f, 0.0f, -7.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
 	//Models.push_back(ImportedModel("ground", "ground", glm::vec3(2.0f, -2.85f, 0.0f), glm::quat((3.14159f/2.0f), 1.0f, 0.0f, 0.0f)));
 	
 
-	glfwSetKeyCallback(window,key_callback);
+	//glfwSetKeyCallback(window,key_callback);
 
 
 	glEnable(GL_DEBUG_OUTPUT);

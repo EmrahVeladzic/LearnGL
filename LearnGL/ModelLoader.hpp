@@ -94,7 +94,7 @@ private:
 
 	std::vector<glm::mat4x4> matrices;
 
-	std::vector<transform> transforms;
+	
 
 	std::vector<uint16_t> indices;
 
