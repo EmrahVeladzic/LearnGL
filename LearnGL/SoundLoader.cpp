@@ -14,7 +14,7 @@ ALuint Audio_Handler::load_WL(const char* filepathRel) {
 
 	uint16_t last_value = 0;
 
-	const std::string filePath = "Assets/" + (std::string)filepathRel;
+	const std::string filePath = "Assets/" + (std::string)filepathRel +".wl";
 
 	std::ifstream stream(filePath, std::ios::binary);
 
