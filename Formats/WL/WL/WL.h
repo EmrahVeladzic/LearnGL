@@ -52,7 +52,7 @@ typedef struct spu_adpcm {
 #pragma pack(push,1)
 typedef struct wl_encoder {
 
-	
+
 
 	uint32_t sample_count;
 	uint32_t spu_sample_count;
@@ -61,7 +61,7 @@ typedef struct wl_encoder {
 
 	SPU_sample* spu_buffer;
 
-
+	WAV16* differential_buffer;
 
 }WL_ENC;
 #pragma pack (pop)
@@ -69,7 +69,7 @@ typedef struct wl_encoder {
 WL_ENC Encoder;
 
 typedef struct wl_file {
-	
+
 	uint8_t magic;
 	uint16_t default_sample_rate;
 	uint32_t block_count;

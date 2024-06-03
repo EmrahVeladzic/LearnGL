@@ -11,19 +11,20 @@ int main(int argc, char** argv) {
 
 	Export();
 
-	
 
-	//open_WL();
 
-	//Decode();
+	open_WL();
 
-	//Reconvert();
-	
+	Decode();
+
+	Reconvert();
+
 
 
 	free(Encoder.sample_buffer);
 	free(Encoder.spu_buffer);
 	free(NewWL.data);
+	free(Encoder.differential_buffer);
 
 	return 0;
 }
