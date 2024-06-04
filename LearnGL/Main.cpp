@@ -556,8 +556,6 @@ int main(void) {
 
 	GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "OpenGL3D", monitor, NULL);
 	
-	
-
 
 	glfwMakeContextCurrent(window);
 
@@ -587,10 +585,11 @@ int main(void) {
 
 	
 
-	std::cout << sizeof(Models[0]);
-	
+	init(window, Models);
 
 	sfx = global_audio.load_WL("bossfight");
+
+
 	
 
 	ALuint src;
