@@ -9,8 +9,8 @@ const uint16_t rounding_table[4] = { 2,3,7,8 };
 #define MAX_INT_4 7
 #define MIN_INT_4 -8
 
-#define MIN_TRESHOLD -500
-#define MAX_TRESHOLD 500
+#define MIN_TRESHOLD -30000
+#define MAX_TRESHOLD 30000
 
 
 uint8_t calculate_shift(WAV_BLOCK in) {
@@ -149,6 +149,10 @@ int Decode() {
 
 		if (temp16 > MAX_INT_4) {
 			temp16 = 0 - (temp16 - MAX_INT_4);
+		}
+
+		if (temp16 < MIN_INT_4) {
+			temp16 = 0 - (temp16 - MIN_INT_4);
 		}
 
 

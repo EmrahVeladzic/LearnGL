@@ -11,8 +11,7 @@
 
 ALuint Audio_Handler::load_WL(const char* filepathRel) {
 	ALuint out;
-
-	uint16_t last_value = 0;
+	
 
 	const std::string filePath = "Assets/" + (std::string)filepathRel +".wl";
 
@@ -78,6 +77,9 @@ ALuint Audio_Handler::load_WL(const char* filepathRel) {
 			temp16 = 0 - (temp16 - MAX_INT_4);
 		}
 
+		else if (temp16 < MIN_INT_4) {
+			temp16 = 0 - (temp16 - MIN_INT_4);
+		}
 
 		temp16 <<= sh_val;
 

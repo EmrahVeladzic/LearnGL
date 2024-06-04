@@ -1318,7 +1318,7 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 			tempBone.extremity = true;
 		}
 
-		for (size_t j = 0; j < mshCount; j++)
+		for (uint8_t j = 0; j < mshCount; j++)
 		{
 			fkrStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
@@ -1331,9 +1331,7 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 		
 
 		tempBone.children.clear();
-	}
-
-	
+	}	
 	
 	fkrStream.close();
 
