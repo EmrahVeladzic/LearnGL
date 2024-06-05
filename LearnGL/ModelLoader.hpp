@@ -13,8 +13,6 @@
 
 
 
-
-
 #define numVAOs 1
 #define numVBOs 3
 #define numEBOs 1

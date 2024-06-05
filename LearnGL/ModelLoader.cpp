@@ -1134,6 +1134,8 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 		ImpMeshes.push_back(tempMesh);
 
 		tempMesh.triangleVerts.clear();
+
+		
 	}
 
 	vtStream.close();
@@ -1166,6 +1168,8 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 		ImpMeshes[i].indices = tempMesh.indices;
 
 		tempMesh.indices.clear();
+
+		
 
 	}
 
@@ -1207,6 +1211,8 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 
 		tempMesh.textureCoords.clear();
 
+		
+
 	}
 	uvStream.close();
 
@@ -1244,6 +1250,8 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 		ImpMeshes[i].normals = tempMesh.normals;
 
 		tempMesh.normals.clear();
+
+		
 	}
 
 
@@ -1331,6 +1339,8 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 		
 
 		tempBone.children.clear();
+
+		
 	}	
 	
 	fkrStream.close();
@@ -1545,6 +1555,9 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 			tempAnim.transTimes.clear();
 			tempAnim.rotTimes.clear();
 			tempAnim.scalTimes.clear();
+
+
+			
 		}
 		
 	}
@@ -1555,6 +1568,7 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 
 	anmStream.close();
 
+	
 }
 
 void ImportedModel::compute_pose(int boneI) {
@@ -1624,6 +1638,7 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 		rpfloader.read(reinterpret_cast<char*>(&reader), 1 * sizeof(uint16_t));
 
 
+		
 		temp_pixel.a = (reader >> 0) & 0x01;
 		temp_pixel.r = (reader >> 1) & 0x1F;
 		temp_pixel.g = (reader >> 6) & 0x1F;
@@ -1634,6 +1649,9 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 		rpf.CLUT[i].g = temp_pixel.g * 8;
 		rpf.CLUT[i].b = temp_pixel.b * 8;
 
+
+		
+		
 		
 
 	}
@@ -1806,6 +1824,8 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 	
 	RPF_Buffer(rpf);
 	
+	std::cout << (int)rpf.CLUT[rpf.data[0]].r << " " << (int)rpf.CLUT[rpf.data[0]].g << " " << (int)rpf.CLUT[rpf.data[0]].b << " " << (int)rpf.CLUT[rpf.data[0]].a << " " << std::endl;
+
 
 	delete[] rpf.CLUT;
 

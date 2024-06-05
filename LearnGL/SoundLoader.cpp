@@ -97,11 +97,10 @@ ALuint Audio_Handler::load_WL(const char* filepathRel) {
 
 		rawAudio[i] = (int16_t)out;
 
+		
 
 	}
-
-
-
+	
 
 	alGenBuffers(1, &out);
 	alBufferData(out, AL_FORMAT_MONO16, rawAudio, (pcm_sample_count * sizeof(int16_t)), uninitialised.sample_rate);
