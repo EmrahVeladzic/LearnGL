@@ -1824,8 +1824,7 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 	
 	RPF_Buffer(rpf);
 	
-	std::cout << (int)rpf.CLUT[rpf.data[0]].r << " " << (int)rpf.CLUT[rpf.data[0]].g << " " << (int)rpf.CLUT[rpf.data[0]].b << " " << (int)rpf.CLUT[rpf.data[0]].a << " " << std::endl;
-
+	
 
 	delete[] rpf.CLUT;
 
