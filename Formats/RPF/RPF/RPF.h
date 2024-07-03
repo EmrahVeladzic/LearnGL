@@ -12,7 +12,7 @@
 size_t SCALEX;
 size_t SCALEY;
 
-#define DEPTH 64
+#define DEPTH 16
 
 #define PROTECTED_BUFFER_SIZE 8
 
@@ -24,7 +24,7 @@ uint8_t* mode_in;
 typedef struct bit
 {
 	unsigned int value : 1;
-}BIT;
+}BIT; 
 
 
 

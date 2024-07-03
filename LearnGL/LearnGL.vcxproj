@@ -138,7 +138,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BufferWriter.cpp" />
     <ClCompile Include="Lights.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Materials.cpp" />
@@ -156,7 +155,6 @@
     <ClInclude Include="CustomImageFormat.hpp" />
     <ClInclude Include="CustomSoundFormat.hpp" />
     <ClInclude Include="FixedPointMath.h" />
-    <ClInclude Include="BufferWriter.hpp" />
     <ClInclude Include="Lights.hpp" />
     <ClInclude Include="Materials.hpp" />
     <ClInclude Include="ModelLoader.hpp" />

@@ -10,7 +10,7 @@
 #include "nlohmann/json.hpp"
 #include <glm/gtx/matrix_decompose.hpp>
 #include "Animation.hpp"
-#include"BufferWriter.hpp"
+
 
 #define ROOT_MARKER -1
 
@@ -1188,20 +1188,13 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 	{
 		uvStream.read(reinterpret_cast<char*>(&tempShort), sizeof(tempShort));
 
-		for (uint16_t j = 0; j < tempShort; j+=2)
+		for (uint16_t j = 0; j < tempShort; j++)
 		{
 			uvStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
-			tempFloat = (float(tempByte) / 255.0f);
+			tempFloat = (float(tempByte) / 255.0f);			
 
 			tempMesh.textureCoords.push_back(tempFloat);
-
-			uvStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
-
-			tempFloat = (float(tempByte) / 255.0f);
-
-			tempMesh.textureCoords.push_back(tempFloat);
-
 
 		}
 
@@ -1577,7 +1570,7 @@ void ImportedModel::compute_pose(int boneI) {
 
 	int proc = (int)bones[boneI].children.size();
 
-	if (proc==0)
+	if (proc == 0)
 	{
 		return;
 	}
@@ -1595,7 +1588,7 @@ void ImportedModel::compute_pose(int boneI) {
 glm::mat4x4 ImportedModel::compute_transformJ(int boneI) {
 	int boneP = bones[boneI].parent;
 
-	if (boneI!=root)
+	if (boneI != root)
 	{
 		return bones[boneP].TransformMat * bones[boneI].TransformMat;
 	}
@@ -1624,33 +1617,20 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
 	rpfloader.read(reinterpret_cast<char*>(&rpf.magic), sizeof(rpf.magic));
 
-	rpf.CLUT = new Pixel32[(int)(rpf.magic[1] + 1)];
-
-	Pixel temp_pixel;
+	rpf.CLUT = new uint16_t[(int)(rpf.magic[1] + 1)];	
 
 
 	rpf.data = new uint8_t[((int)rpf.magic[2] + 1) * ((int)rpf.magic[3] + 1)];
 
 	uint16_t reader = 0;
 
+	
+
 	for (int i = 0; i < ((int)rpf.magic[1] + 1); i++)
 	{
 		rpfloader.read(reinterpret_cast<char*>(&reader), 1 * sizeof(uint16_t));
 
-
-		
-		temp_pixel.a = (reader >> 0) & 0x01;
-		temp_pixel.r = (reader >> 1) & 0x1F;
-		temp_pixel.g = (reader >> 6) & 0x1F;
-		temp_pixel.b = (reader >> 11) & 0x1F;
-
-		rpf.CLUT[i].a = temp_pixel.a * 255;
-		rpf.CLUT[i].r = temp_pixel.r * 8;
-		rpf.CLUT[i].g = temp_pixel.g * 8;
-		rpf.CLUT[i].b = temp_pixel.b * 8;
-
-
-		
+		rpf.CLUT[i] = reader;		
 		
 		
 
@@ -1805,8 +1785,8 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
 	glBindTexture(GL_TEXTURE_1D, clt);
 
-	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA16, tempc, 0, GL_RGBA, GL_UNSIGNED_BYTE, rpf.CLUT);
-
+	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA16, tempc, 0, GL_RGBA, GL_UNSIGNED_SHORT_5_5_5_1,rpf.CLUT);
+	
 
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -1821,9 +1801,6 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 	rtn[3] = (GLuint)rpf.magic[2] + 1;
 	rtn[4] = (GLuint)rpf.magic[3] + 1;
 
-	
-	RPF_Buffer(rpf);
-	
 	
 
 	delete[] rpf.CLUT;

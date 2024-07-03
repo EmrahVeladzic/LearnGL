@@ -59,21 +59,6 @@ void Utils::UpdateInterpolationIndex(animJoint& in, float timestamp) {
 		in.scalInterpolation -= INTERPOLATION_APPROX;
 	}
 
-	if (in.transIndex >= (int)(in.translations.size() - 1))
-	{
-		in.transIndex = 0;
-	}
-	if (in.rotIndex >= (int)(in.rotations.size() - 1))
-	{
-		in.rotIndex = 0;
-	}
-	if (in.scalIndex >= (int)(in.scales.size() - 1))
-	{
-		in.scalIndex = 0;
-	}
-
-
-
 
 
 	if (in.transIndex >= (int)(in.translations.size() - 2))
@@ -133,8 +118,6 @@ glm::mat4x4 Utils::transToMat(transform input) {
 	Vz = Vz * input.scale.z;
 
 	glm::vec3 Vp = input.translation;
-
-
 
 
 	return glm::mat4x4(

@@ -1,5 +1,4 @@
 #include <GL/glew.h>
-#include <SOIL2/soil2.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <string>
@@ -28,8 +27,7 @@
 
 
 
-
-float cameraX, cameraY, cameraZ;
+transform camTransform;
 
 GLuint shadowBuffer, shadowTex;
 
@@ -121,10 +119,10 @@ void init(GLFWwindow* window, std::vector<ImportedModel>& models) {
 	pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f);
 
 
-	cameraX = 0.0f;
-	cameraY = 0.5f;
-	cameraZ = 8.0f;
+	camTransform.translation = Models[0].position + glm::vec3(0.0f,0.0f,-15.0f);
+	camTransform.rotation =  glm::rotate(glm::mat4x4(1.0f),0.0f, glm::vec3(0.0, 1.0, 0.0));
 
+	
 	
 	setupVertices(models);
 		
@@ -223,14 +221,7 @@ void animate(GLFWwindow* window, double currentTime, std::vector<ImportedModel>&
 		{
 
 			
-			
-			
-
-			
-			glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
-
-			
-			vMat = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
+			vMat = Utils::transToMat(camTransform);
 
 
 
@@ -249,15 +240,16 @@ void animate(GLFWwindow* window, double currentTime, std::vector<ImportedModel>&
 				rot_inter = model.bones[model.Meshes[i].jointIndex].animations[curr].rotInterpolation;
 				scal_inter = model.bones[model.Meshes[i].jointIndex].animations[curr].scalInterpolation;
 
-				model.bones[model.Meshes[i].jointIndex].TransformMat = glm::mat4x4(1.0f);
-
-
+				
 				
 				int te = model.bones[model.Meshes[i].jointIndex].animations[curr].Tend_index;
 				
 				int re = model.bones[model.Meshes[i].jointIndex].animations[curr].Rend_index;
 				
 				int se = model.bones[model.Meshes[i].jointIndex].animations[curr].Send_index;
+
+				
+
 
 
 				model.bones[model.Meshes[i].jointIndex].TransformMat = Utils::interpolateTransforms(
@@ -269,7 +261,7 @@ void animate(GLFWwindow* window, double currentTime, std::vector<ImportedModel>&
 					model.bones[model.Meshes[i].jointIndex].animations[curr].scales[se],
 					trans_inter, rot_inter, scal_inter
 				);
-
+				
 				
 			}
 
@@ -332,7 +324,6 @@ void display(GLFWwindow* window ,std::vector<ImportedModel>& models) {
 			{
 				//invBTemp = model.INVmatrices[model.Meshes[i].jointIndex];
 				transTemp = model.bones[model.Meshes[i].jointIndex].TransformMat;
-
 			}
 
 			
@@ -354,7 +345,6 @@ void display(GLFWwindow* window ,std::vector<ImportedModel>& models) {
 
 			mvStack.push(mvStack.top());
 			mvStack.top() *= glm::rotate(glm::mat4((1.0f)), model.rotation.w, glm::vec3(model.rotation.x, model.rotation.y, model.rotation.z));
-
 
 
 
@@ -385,6 +375,8 @@ void display(GLFWwindow* window ,std::vector<ImportedModel>& models) {
 
 
 
+
+			glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
 			
 
 
@@ -427,9 +419,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	if (keys[GLFW_KEY_W]==true)
 	{
-		outtrv.z = -0.1f;
+		
 
-		tmq.w = 3.0f;
+		tmq.w = camTransform.rotation.w;
+		outtrv.z = 0.1f;
+
 
 		if (Models.empty() == false) {
 
@@ -441,9 +435,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 	else if (keys[GLFW_KEY_S] == true)
 	{
+		
+
+		tmq.w = camTransform.rotation.w - glm::pi<float>();
 		outtrv.z = 0.1f;
 
-		tmq.w = 0.0f;
 
 		if (Models.empty() == false) {
 
@@ -456,9 +452,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	else if (keys[GLFW_KEY_A] == true)
 	{
-		outtrv.x = -0.1f;
+		
 
-		tmq.w = -1.5f;
+		tmq.w = camTransform.rotation.w-glm::half_pi<float>();
+		outtrv.z = 0.1f;
+
 
 		if (Models.empty() == false) {
 
@@ -470,10 +468,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 	else if (keys[GLFW_KEY_D] == true)
 	{
-		outtrv.x = 0.1f;
+		
 
-		tmq.w = 1.5f;
-
+		tmq.w = camTransform.rotation.w+ glm::half_pi<float>();
+		outtrv.z = 0.1f;
 
 		if (Models.empty() == false) {
 
@@ -481,6 +479,24 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 				Models[0].currentAnim = 1;
 			}
 		}
+	}
+
+	else if (keys[GLFW_KEY_Q]) {
+
+
+		camTransform.translation = Models[0].position + glm::vec3(0.0f, 0.0f, -15.0f);
+		camTransform.rotation = glm::rotate(Utils::transToMat(camTransform), -0.1f, glm::vec3(0.0, 1.0, 0.0));
+
+
+	}
+
+	else if (keys[GLFW_KEY_E]) {
+
+
+		camTransform.translation = Models[0].position + glm::vec3(0.0f, 0.0f, -15.0f);
+		camTransform.rotation = glm::rotate(Utils::transToMat(camTransform), 0.1f, glm::vec3(0.0, 1.0, 0.0));
+
+
 	}
 
 	else
@@ -494,14 +510,12 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			Models[0].currentAnim = 0;
 
 		}
-	}
+	}	
 	
-	cameraX += outtrv.x;
-	cameraY += outtrv.y;
-	cameraZ += outtrv.z;
 
 	if (Models.empty() == false) {
 
+		camTransform.translation += outtrv;
 		Models[0].position += outtrv;
 		Models[0].rotation = tmq;
 
@@ -547,7 +561,6 @@ int main(void) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	
-
 	ALCdevice* audio_device = alcOpenDevice(nullptr);
 	ALCcontext* audio_context = alcCreateContext(audio_device,nullptr);
 	 
@@ -556,7 +569,6 @@ int main(void) {
 
 	GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "OpenGL3D", monitor, NULL);
 	
-
 	glfwMakeContextCurrent(window);
 
 	alcMakeContextCurrent(audio_context);
@@ -564,33 +576,25 @@ int main(void) {
 	if (!audio_context) {
 
 		exit(EXIT_FAILURE);
+
 	}
 	
-
 	if (glewInit() != GLEW_OK) { exit(EXIT_FAILURE); }
 	glfwSwapInterval(mode->refreshRate/TARGET_FPS);
 
-
-	Models.push_back(ImportedModel("raven", "raven", glm::vec3(0.0f, 0.0f, -5.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
+	Models.push_back(ImportedModel("raven", "raven", glm::vec3(0.0f, 0.0f, 0.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
 	//Models.push_back(ImportedModel("chara", "char", glm::vec3(1.0f, 0.0f, -6.0f), glm::quat(1.8f, 0.0f, 1.0f, 0.0f)));	
 	//Models.push_back(ImportedModel("raven", "raven", glm::vec3(-5.0f, 0.0f, -7.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
 	//Models.push_back(ImportedModel("ground", "ground", glm::vec3(2.0f, -2.85f, 0.0f), glm::quat((3.14159f/2.0f), 1.0f, 0.0f, 0.0f)));
 	
-
-	//glfwSetKeyCallback(window,key_callback);
-
+	glfwSetKeyCallback(window,key_callback);
 
 	glEnable(GL_DEBUG_OUTPUT);
 	glDebugMessageCallback(MessageCallback, 0);
 
-	
-
 	init(window, Models);
 
-	sfx = global_audio.load_WL("raven");
-
-
-	
+	sfx = global_audio.load_WL("SK");
 
 	ALuint src;
 
@@ -606,46 +610,25 @@ int main(void) {
 
 	alSourcePlay(src);
 	
-	
-	
-
 	glfwSetWindowSizeCallback(window, window_reshape_callback);
 
-
-	float beg_time = 0.0f;
-	float end_time = 0.0f;
-
 	while (!glfwWindowShouldClose(window)){
-		
-		beg_time =(float) glfwGetTime();
-		end_time += beg_time;
-
-		
-
+			
 		animate(window,glfwGetTime(),Models);
 		display(window,Models);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
-		end_time =(float) glfwGetTime();
-
-		Models[0].rotation.w += end_time - beg_time;
-		
 	}
-
 	
-	
-
 	Models.clear();
 
 	alSourceStop(src);
-
 
 	alDeleteSources(1, &src);
 	alDeleteBuffers(1, &sfx);
 	alcDestroyContext(audio_context);
 	alcCloseDevice(audio_device);
-
 
 	glfwDestroyWindow(window);
 	glfwTerminate();

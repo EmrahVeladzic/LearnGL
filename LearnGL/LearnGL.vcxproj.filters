@@ -33,9 +33,6 @@
     <ClCompile Include="SoundLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BufferWriter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vertShader.glsl" />
@@ -68,9 +65,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FixedPointMath.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BufferWriter.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
