@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include "Animation.hpp"
+#include "Animation.h"
 
 extern GLuint vShader;
 extern GLuint fShader;

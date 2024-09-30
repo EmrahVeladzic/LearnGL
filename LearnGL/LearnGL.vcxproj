@@ -116,7 +116,10 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;OpenAL32.lib;glew32.lib;soil2-debug.lib;opengl32.lib;/NODEFAULTLIB:MSVCRT;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;OpenAL32.lib;glew32.lib;opengl32.lib;/NODEFAULTLIB:MSVCRT;%(AdditionalDependencies)</AdditionalDependencies>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
+      <NoEntryPoint>false</NoEntryPoint>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -138,6 +141,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Character.cpp" />
     <ClCompile Include="Lights.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Materials.cpp" />
@@ -151,7 +156,9 @@
     <None Include="vertShader.glsl" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Animation.hpp" />
+    <ClInclude Include="Animation.h" />
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="Character.hpp" />
     <ClInclude Include="CustomImageFormat.hpp" />
     <ClInclude Include="CustomSoundFormat.hpp" />
     <ClInclude Include="FixedPointMath.h" />
@@ -159,6 +166,7 @@
     <ClInclude Include="Materials.hpp" />
     <ClInclude Include="ModelLoader.hpp" />
     <ClInclude Include="SoundLoader.hpp" />
+    <ClInclude Include="Transform.h" />
     <ClInclude Include="Utils.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

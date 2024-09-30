@@ -12,9 +12,9 @@
 size_t SCALEX;
 size_t SCALEY;
 
-#define DEPTH 16
+#define DEPTH 256
 
-#define PROTECTED_BUFFER_SIZE 8
+#define PROTECTED_BUFFER_SIZE 2
 
 size_t ProtectedBufferAccess;
 
@@ -146,6 +146,8 @@ char* fileName;
 char* fileexnm;
 
 int Export();
+
+int Reconvert();
 
 
 BIT Compare(Pixel a, Pixel b);

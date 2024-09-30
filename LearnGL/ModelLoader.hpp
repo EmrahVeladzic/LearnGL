@@ -8,7 +8,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include "CustomImageFormat.hpp"
 #include "nlohmann/json.hpp"
-#include "Animation.hpp"
+#include "Animation.h"
 #include "FixedPointMath.h"
 
 
@@ -17,7 +17,7 @@
 #define numVBOs 3
 #define numEBOs 1
 
-
+#define useAST true
 
 
 struct Bone {
@@ -113,8 +113,8 @@ public:
 	int get_child_index(int j_son_index);
 
 	
-	void parseGLTF(const char* filePathRel);
-	void GLTF_To_AST(const char* filePathRel, uint8_t scalingFactorBits, uint8_t FPS);
+	void parseGLTF(const char* filePathRel, uint8_t scalingFactorBits, uint8_t FPS, uint8_t tPageX_begin, uint8_t tPageY_begin, uint8_t tPageX_end, uint8_t tPageY_end);
+	void GLTF_To_AST(const char* filePathRel, uint8_t scalingFactorBits, uint8_t FPS, uint8_t tPageX_begin, uint8_t tPageY_begin, uint8_t tPageX_end, uint8_t tPageY_end);
 	void OpenAST(const char* filePathRel);
 
 	int findBoneByNode(int node);
@@ -218,14 +218,14 @@ struct ImportedModel {
 	
 	int root;
 
+	transform transform;
+
 	int currentAnim;
 
 	ModelImporter importer;
-	glm::vec3 position;
+	
 
-	glm::quat rotation;
-
-	ImportedModel(const char * filePath,const char* Image,glm::vec3 pos, glm::quat rot);
+	ImportedModel(const char * filePath,glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f), glm::quat rot = glm::quat(0.0f,0.0f,1.0f,0.0f), glm::vec3 scal = glm::vec3(1.0f, 1.0f, 1.0f));
 	
 
 	GLuint texture;
@@ -241,8 +241,9 @@ struct ImportedModel {
 		importer = ModelImporter();
 		num_joints = 0;
 		num_anims = 0;
-		position = glm::vec3(0.0,0.0,0.0);
-		rotation = glm::quat(0.0,0.0,0.0,0.0);
+		transform.translation = glm::vec3(0.0f,0.0f,0.0f);
+		transform.rotation = glm::quat(0.0f,0.0f,1.0f,0.0f);
+		transform.scale = glm::vec3(1.0f, 1.0f, 1.0f);
 		root = 0;
 		currentAnim = 0;
 		texture = 0;

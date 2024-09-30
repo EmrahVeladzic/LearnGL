@@ -9,18 +9,19 @@
 #include "CustomImageFormat.hpp"
 #include "nlohmann/json.hpp"
 #include <glm/gtx/matrix_decompose.hpp>
-#include "Animation.hpp"
+#include "Animation.h"
 
 
 #define ROOT_MARKER -1
 
 
 
+ImportedModel::ImportedModel(const char* filePath, glm::vec3 pos, glm::quat rot , glm::vec3 scal ) {
 
-ImportedModel::ImportedModel(const char* filePath, const char* ImagePath, glm::vec3 pos, glm::quat rot) {
+	transform.translation = pos;
+	transform.rotation = rot;
+	transform.scale = scal;
 
-	position = pos;
-	rotation = rot;
 
 	clut_multiplier = 1.0f;
 
@@ -28,8 +29,33 @@ ImportedModel::ImportedModel(const char* filePath, const char* ImagePath, glm::v
 
 	root = -1;
 
-	//importer.parseGLTF(filePath);
-	importer.OpenAST(filePath);
+
+	GLuint* temptext = importer.loadRPF(filePath);
+
+	texture = temptext[0];
+	clut = temptext[1];
+
+
+	unsigned int Mode = temptext[2];
+
+	tex_width = temptext[3];
+	tex_height = temptext[4];
+
+	clut_multiplier = 256.0f / (float)Mode;
+
+	delete[] temptext;
+
+	if (useAST) {
+		importer.OpenAST(filePath);
+	}
+	else
+	{
+		importer.parseGLTF(filePath, 12, 60, 0, 0, (uint8_t)(tex_width - 1), (uint8_t)(tex_height - 1));
+	}
+
+
+	
+	
 
 	num_joints = importer.num_joints;
 	num_mats = importer.num_mats;
@@ -72,30 +98,10 @@ ImportedModel::ImportedModel(const char* filePath, const char* ImagePath, glm::v
 		
 	}
 
+
 	importer.clearData();
 	importer.clearRig();
 	
-
-	GLuint* temptext = importer.loadRPF(ImagePath);
-
-	texture = temptext[0];
-	clut = temptext[1];
-
-
-	unsigned int Mode = temptext[2];
-
-	tex_width = temptext[3];
-	tex_height = temptext[4];
-
-
-	clut_multiplier = 256.0f / (float)Mode;
-
-	
-
-	delete[] temptext;
-
-
-	importer.clearData();
 
 }
 
@@ -110,7 +116,7 @@ std::vector<uint16_t> Mesh::getIndices() { return indices; }
 
 
 
-void ModelImporter::parseGLTF(const char* filePathRel) {
+void ModelImporter::parseGLTF(const char* filePathRel,uint8_t scalingFactorBits, uint8_t FPS, uint8_t tPageX_begin, uint8_t tPageY_begin, uint8_t tPageX_end, uint8_t tPageY_end) {
 
 	num_meshes = 0;
 	num_mats = 0;
@@ -428,9 +434,7 @@ void ModelImporter::parseGLTF(const char* filePathRel) {
 			{
 				bin_file.read(reinterpret_cast<char*>(&temp_float), sizeof(float));
 
-				if (j % 2 == 1) {
-					temp_float *= -1.0;
-				}
+			
 
 				stVals.push_back(temp_float);
 
@@ -716,16 +720,17 @@ void ModelImporter::parseGLTF(const char* filePathRel) {
 
 	}
 
-	GLTF_To_AST(filePathRel, 12,60);
-	OpenAST(filePathRel);
 
 	bin_file.close();
+
+
+	GLTF_To_AST(filePathRel,scalingFactorBits,  FPS,  tPageX_begin,  tPageY_begin,  tPageX_end,  tPageY_end);
 }
 
 
 
 
-void ModelImporter::GLTF_To_AST(const char* filePathRel , uint8_t scalingFactorBits, uint8_t FPS) {
+void ModelImporter::GLTF_To_AST(const char* filePathRel , uint8_t scalingFactorBits, uint8_t FPS, uint8_t tPageX_begin, uint8_t tPageY_begin, uint8_t tPageX_end, uint8_t tPageY_end) {
 
 	fix tempFix;
 	uint8_t tempByte;
@@ -820,9 +825,22 @@ void ModelImporter::GLTF_To_AST(const char* filePathRel , uint8_t scalingFactorB
 	std::ofstream uvStream;
 	uvStream.open(uvPath,std::ios::binary);
 
+	uvStream.write(reinterpret_cast<char*>(&tPageX_begin), sizeof(tPageX_begin));
+	uvStream.write(reinterpret_cast<char*>(&tPageY_begin), sizeof(tPageY_begin));
+
+	uvStream.write(reinterpret_cast<char*>(&tPageX_end), sizeof(tPageX_end));
+	uvStream.write(reinterpret_cast<char*>(&tPageY_end), sizeof(tPageY_end));
+
 	tempByte = (uint8_t)ImpMeshes.size();
 
+	
+	
+
 	uvStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+
+
+	uint16_t x_diff = (uint16_t)(tPageX_end - tPageX_begin) + 1;
+	uint16_t y_diff = (uint16_t)(tPageY_end - tPageY_begin) + 1;
 
 
 	for (MImeshes msh : ImpMeshes)
@@ -832,15 +850,16 @@ void ModelImporter::GLTF_To_AST(const char* filePathRel , uint8_t scalingFactorB
 		tempShort = (uint16_t)msh.textureCoords.size();
 		uvStream.write(reinterpret_cast<char*>(&tempShort), sizeof(tempShort));
 		
+		
 
 		for (uint16_t i = 0; i < tempShort; i+=2)
 		{
 		
-			tempByte = (uint8_t)(msh.textureCoords[i]* 255.0f);
+			tempByte = (uint8_t)((uint16_t)round(msh.textureCoords[i] * (float)(x_diff))%x_diff);
 
 			uvStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 			
-			tempByte = (uint8_t)(msh.textureCoords[i + 1] * 255.0f);
+			tempByte = (uint8_t)((uint16_t)round(msh.textureCoords[i + 1] * (float)(y_diff))%y_diff);
 			
 			uvStream.write(reinterpret_cast<char*>(&tempByte),sizeof(tempByte));
 		}
@@ -1180,19 +1199,43 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 
 	uvStream.open(uvPath,std::ios::binary);
 
+	uint8_t x_beg;
+	uint8_t x_end;
+
+	uint8_t y_beg;
+	uint8_t y_end;
+
+	uvStream.read(reinterpret_cast<char*>(&x_beg), sizeof(x_beg));
+	uvStream.read(reinterpret_cast<char*>(&y_beg), sizeof(y_beg));
+	
+	uvStream.read(reinterpret_cast<char*>(&x_end), sizeof(x_end));
+	uvStream.read(reinterpret_cast<char*>(&y_end), sizeof(y_end));
+
+
+
 	uvStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
 	mshCount = tempByte;
+
+	uint16_t x_diff = (uint16_t)(x_end - x_beg) +1;
+	uint16_t y_diff = (uint16_t)(y_end - y_beg) +1;
 
 	for (uint8_t i = 0; i < mshCount; i++)
 	{
 		uvStream.read(reinterpret_cast<char*>(&tempShort), sizeof(tempShort));
 
-		for (uint16_t j = 0; j < tempShort; j++)
+		for (uint16_t j = 0; j < tempShort; j+=2)
 		{
 			uvStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
-			tempFloat = (float(tempByte) / 255.0f);			
+			tempFloat = (float(tempByte) / (float)(x_diff));			
+
+
+			tempMesh.textureCoords.push_back(tempFloat);
+
+			uvStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+
+			tempFloat = (float(tempByte) / (float)(y_diff));
 
 			tempMesh.textureCoords.push_back(tempFloat);
 
@@ -1602,9 +1645,6 @@ glm::mat4x4 ImportedModel::compute_transformJ(int boneI) {
 
 
 
-
-
-
 GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
 	std::string filePath = "Assets/" + (std::string)filePathRel +".rpf";
@@ -1636,6 +1676,7 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
 	}
 
+	
 
 
 	if ((rpf.magic[1] + 1) > 16)

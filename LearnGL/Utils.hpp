@@ -9,7 +9,7 @@
 #include <string>
 #include<SOIL2/SOIL2.h>
 #include<glm/gtx/matrix_decompose.hpp>
-#include"Animation.hpp"
+#include"Animation.h"
 
 
 

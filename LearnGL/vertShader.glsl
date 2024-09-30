@@ -51,11 +51,8 @@ uniform mat4 inv_bind_matrix;
 uniform mat4 transform_matrix;
 
 
-
 uniform float tf;
 
-layout(binding=0) uniform sampler2D samp;
-layout(binding=1) uniform sampler1D cltsamp;
 
 mat4 buildRotateX(float rad); 
 mat4 buildRotateY(float rad); 
@@ -73,7 +70,7 @@ void main(void)
 
 vec4 nrmFour = vec4(normals,1.0);
 
-
+nrmFour = inv_bind_matrix * nrmFour;
 
 nrmFour = transform_matrix * nrmFour;
 
@@ -85,7 +82,7 @@ varyingHalfVector = (varyingLightDir+(-varyingVertPos)).xyz;
 
 vec4 posFour = vec4(position,1.0);
 
-
+posFour = inv_bind_matrix * posFour;
 
 posFour = transform_matrix * posFour;
 

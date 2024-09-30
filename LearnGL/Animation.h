@@ -1,33 +1,13 @@
 #ifndef ANIMATION
 #define ANIMATION
 
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
+#include "Transform.h"
 #include <glm/gtx/matrix_decompose.hpp>
 #include <vector>
 #include <iostream>
 
 
-struct transform {
 
-	glm::vec3 translation;
-
-	glm::vec3 scale;
-
-	glm::quat rotation;
-
-
-	transform()
-	{
-		 translation = glm::vec3(0.0f, 0.0f, 0.0f);
-		
-		 scale = glm::vec3(1.0f, 1.0f, 1.0f);
-		
-		 rotation = glm::quat(0.0f, 0.0f, 1.0f, 0.0f);
-		
-	}
-
-};
 
 
 struct animJoint {

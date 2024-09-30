@@ -15,7 +15,7 @@ const uint16_t rounding_table[4] = { 2,3,7,8 };
 
 uint8_t calculate_shift(WAV_BLOCK in) {
 	uint8_t shift = 0;
-	uint8_t repeat = 1;
+	uint8_t repeat = 1; 
 
 	WAV_BLOCK testBlock;
 

@@ -16,7 +16,7 @@
 #include <OpenAL/alc.h>
 #include "SoundLoader.hpp"
 #include <glm/gtx/string_cast.hpp>
-
+#include "Camera.h"
 
 #define numVAOs 1
 #define numVBOs 3
@@ -25,15 +25,15 @@
 #define TARGET_FPS 60
 #define SECOND_F 1000.0f
 
-
-
-transform camTransform;
+Camera cam;
 
 GLuint shadowBuffer, shadowTex;
 
 Audio_Handler global_audio;
 
-bool keys[256];
+#define NUM_KEYS 300
+
+bool keys[NUM_KEYS];
 
 
 GLuint renderingProgram;
@@ -118,12 +118,11 @@ void init(GLFWwindow* window, std::vector<ImportedModel>& models) {
 	aspect = (float)width / (float)height;
 	pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f);
 
+	if (Models.empty() == false) {
 
-	camTransform.translation = Models[0].position + glm::vec3(0.0f,0.0f,-15.0f);
-	camTransform.rotation =  glm::rotate(glm::mat4x4(1.0f),0.0f, glm::vec3(0.0, 1.0, 0.0));
+		cam.Setup(Models[0].transform);
 
-	
-	
+	}
 	setupVertices(models);
 		
 
@@ -219,10 +218,10 @@ void animate(GLFWwindow* window, double currentTime, std::vector<ImportedModel>&
 
 		for (size_t i = 0; i < model.Meshes.size(); i++)
 		{
-
 			
-			vMat = Utils::transToMat(camTransform);
-
+			
+			vMat = Utils::transToMat(cam.camT);
+			
 
 
 			if (model.num_anims > 0) {
@@ -266,6 +265,8 @@ void animate(GLFWwindow* window, double currentTime, std::vector<ImportedModel>&
 			}
 
 		}
+
+
 
 
 		
@@ -322,7 +323,15 @@ void display(GLFWwindow* window ,std::vector<ImportedModel>& models) {
 
 			if (model.num_anims > 0)
 			{
-				//invBTemp = model.INVmatrices[model.Meshes[i].jointIndex];
+
+				if (useAST) {
+					invBTemp = glm::mat4x4(1.0f);
+				}
+				else
+				{
+					invBTemp = model.INVmatrices[model.Meshes[i].jointIndex];
+				}
+				
 				transTemp = model.bones[model.Meshes[i].jointIndex].TransformMat;
 			}
 
@@ -341,10 +350,10 @@ void display(GLFWwindow* window ,std::vector<ImportedModel>& models) {
 
 
 			mvStack.push(mvStack.top());
-			mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(model.position.x, model.position.y, model.position.z));
+			mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(model.transform.translation.x, model.transform.translation.y, model.transform.translation.z));
 
 			mvStack.push(mvStack.top());
-			mvStack.top() *= glm::rotate(glm::mat4((1.0f)), model.rotation.w, glm::vec3(model.rotation.x, model.rotation.y, model.rotation.z));
+			mvStack.top() *= glm::rotate(glm::mat4((1.0f)), model.transform.rotation.w, glm::vec3(model.transform.rotation.x, model.transform.rotation.y, model.transform.rotation.z));
 
 
 
@@ -400,128 +409,132 @@ void display(GLFWwindow* window ,std::vector<ImportedModel>& models) {
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	glm::vec3 outtrv = glm::vec3{ 0.0f,0.0f,0.0f };
-	glm::quat tmq = glm::quat{0.0f,0.0f,1.0f,0.0f };
-
-
-
-
-	if (action == GLFW_PRESS && key <256 && key>-1)
-	{
-		keys[key] = true;
-
-	}
-	else if (action == GLFW_RELEASE && key < 256 && key>-1)
-	{
-		keys[key] = false;
-
-	}
-
-	if (keys[GLFW_KEY_W]==true)
-	{
-		
-
-		tmq.w = camTransform.rotation.w;
-		outtrv.z = 0.1f;
-
-
-		if (Models.empty() == false) {
-
-			if (Models[0].bones[0].animations.size() > 1) {
-				Models[0].currentAnim = 1;
-			}
-
-		}
-	}
-	else if (keys[GLFW_KEY_S] == true)
-	{
-		
-
-		tmq.w = camTransform.rotation.w - glm::pi<float>();
-		outtrv.z = 0.1f;
-
-
-		if (Models.empty() == false) {
-
-			if (Models[0].bones[0].animations.size() > 1) {
-				Models[0].currentAnim = 1;
-			}
-
-		}
-	}
-
-	else if (keys[GLFW_KEY_A] == true)
-	{
-		
-
-		tmq.w = camTransform.rotation.w-glm::half_pi<float>();
-		outtrv.z = 0.1f;
-
-
-		if (Models.empty() == false) {
-
-			if (Models[0].bones[0].animations.size() > 1) {
-				Models[0].currentAnim = 1;
-			}
-
-		}
-	}
-	else if (keys[GLFW_KEY_D] == true)
-	{
-		
-
-		tmq.w = camTransform.rotation.w+ glm::half_pi<float>();
-		outtrv.z = 0.1f;
-
-		if (Models.empty() == false) {
-
-			if (Models[0].bones[0].animations.size() > 1) {
-				Models[0].currentAnim = 1;
-			}
-		}
-	}
-
-	else if (keys[GLFW_KEY_Q]) {
-
-
-		camTransform.translation = Models[0].position + glm::vec3(0.0f, 0.0f, -15.0f);
-		camTransform.rotation = glm::rotate(Utils::transToMat(camTransform), -0.1f, glm::vec3(0.0, 1.0, 0.0));
-
-
-	}
-
-	else if (keys[GLFW_KEY_E]) {
-
-
-		camTransform.translation = Models[0].position + glm::vec3(0.0f, 0.0f, -15.0f);
-		camTransform.rotation = glm::rotate(Utils::transToMat(camTransform), 0.1f, glm::vec3(0.0, 1.0, 0.0));
-
-
-	}
-
-	else
-	{
-		tmq.w = Models[0].rotation.w;
-
-
-		if (Models.empty() == false) {
-
-
-			Models[0].currentAnim = 0;
-
-		}
-	}	
+	
 	
 
 	if (Models.empty() == false) {
 
-		camTransform.translation += outtrv;
-		Models[0].position += outtrv;
-		Models[0].rotation = tmq;
+	
+		glm::vec3 outtrv = glm::vec3{ 0.0f,0.0f,0.0f };
+	
+		glm::vec3 cameraPosition = cam.camT.translation;
+		glm::vec3 objectPosition = Models[0].transform.translation;
+
+
+		
+
+
+		if (action == GLFW_PRESS && key <NUM_KEYS && key>-1)
+		{
+			keys[key] = true;
+
+		}
+		else if (action == GLFW_RELEASE && key < NUM_KEYS && key>-1)
+		{
+			keys[key] = false;
+
+		}
+
+		if (keys[GLFW_KEY_W]==true)
+		{
+		
+			Models[0].transform.rotation.w = 0;
+		
+			outtrv.z = 0.1f;
+
+
+			
+				if (Models[0].bones[0].animations.size() > 1) {
+					Models[0].currentAnim = 1;
+				}
+
+			
+		}
+		else if (keys[GLFW_KEY_S] == true)
+		{
+		
+
+		
+			outtrv.z = 0.1f;
+
+
+			
+				if (Models[0].bones[0].animations.size() > 1) {
+					Models[0].currentAnim = 1;
+				}
+			
+		}
+
+		else if (keys[GLFW_KEY_A] == true)
+		{
+		
+
+		
+			outtrv.z = 0.1f;
+
+
+			
+				if (Models[0].bones[0].animations.size() > 1) {
+					Models[0].currentAnim = 1;
+				}
+
+			
+		}
+		else if (keys[GLFW_KEY_D] == true)
+		{
+		
+
+		
+			outtrv.z = 0.1f;
+
+			
+				if (Models[0].bones[0].animations.size() > 1) {
+					Models[0].currentAnim = 1;
+				}
+			
+		}
+
+		else if (keys[GLFW_KEY_LEFT]) {
+
+			cam.Yaw(Models[0].transform, 0.1f);
+			
+			
+		}
+
+		else if (keys[GLFW_KEY_RIGHT]) {
+
+
+			cam.Yaw(Models[0].transform, -0.1f);
+			
+
+		}
+
+		else if (keys[GLFW_KEY_UP]) {
+
+			cam.Pitch(Models[0].transform, -0.1f);
+		}
+
+		else if (keys[GLFW_KEY_DOWN]) {
+		
+			cam.Pitch(Models[0].transform, 0.1f);
+		}
+
+
+		else
+		{
+				
+
+				Models[0].currentAnim = 0;
+
+		}	
+	
+
+		
+
 
 	}
 
-
+	
 	
 }
 
@@ -582,11 +595,12 @@ int main(void) {
 	if (glewInit() != GLEW_OK) { exit(EXIT_FAILURE); }
 	glfwSwapInterval(mode->refreshRate/TARGET_FPS);
 
-	Models.push_back(ImportedModel("raven", "raven", glm::vec3(0.0f, 0.0f, 0.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
-	//Models.push_back(ImportedModel("chara", "char", glm::vec3(1.0f, 0.0f, -6.0f), glm::quat(1.8f, 0.0f, 1.0f, 0.0f)));	
-	//Models.push_back(ImportedModel("raven", "raven", glm::vec3(-5.0f, 0.0f, -7.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
-	//Models.push_back(ImportedModel("ground", "ground", glm::vec3(2.0f, -2.85f, 0.0f), glm::quat((3.14159f/2.0f), 1.0f, 0.0f, 0.0f)));
+	Models.push_back(ImportedModel("chara"));
 	
+	//Models.push_back(ImportedModel("skele", glm::vec3(-5.0f, 0.0f, -2.0f),glm::quat(0.5f,0.0f,1.0f,0.0f)));
+
+	//Models.push_back(ImportedModel("raven", glm::vec3(5.0f, 0.0f, 1.0f) , glm::quat(-0.5f, 0.0f, 1.0f, 0.0f)));
+
 	glfwSetKeyCallback(window,key_callback);
 
 	glEnable(GL_DEBUG_OUTPUT);
@@ -594,7 +608,7 @@ int main(void) {
 
 	init(window, Models);
 
-	sfx = global_audio.load_WL("SK");
+	sfx = global_audio.load_WL("raven");
 
 	ALuint src;
 
