@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <glm/glm.hpp>
-#endif // !LIGHTS
+
 
 
 
@@ -93,3 +93,4 @@ public:
 };
 
 
+#endif // !LIGHTS

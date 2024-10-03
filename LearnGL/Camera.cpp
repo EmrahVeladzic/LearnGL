@@ -1,62 +1,79 @@
 #include "Camera.h"
 
-Camera::Camera()
-{
-	camD = -15.0f;
-	camO = glm::pi<float>();
-	camVO = 0.0f;
+Camera::Camera(transform* T, float dist, float spd ) {
 
-}
+	target = T;
+	mvSpeed = spd / TARGET_FPS;
+	distance = dist;
+	pitch = 0.0f;	
+	yaw = glm::pi<float>();
+	camTrans.scale = glm::vec3(1.0f);
+	camTrans.translation = glm::vec3(0.0f, 0.0f, -distance);
+	camTrans.rotation = glm::quat(0.0f, 0.0f, 1.0f, 0.0f);
+	viewMat = Utils::transToMat(camTrans);
+	
 
-void Camera::Setup(transform mT) {
+	if (target != nullptr) {		
 
+		Update();
 
-	camT.translation = mT.translation + glm::vec3(0.0f, camVO, camD);
-	camT.rotation = glm::rotate(glm::mat4x4(1.0f), camO, glm::vec3(0.0, 1.0, 0.0));
-	camT.scale = glm::vec3(1.0f, 1.0f, 1.0f);
-
-}
-
-void Camera::Yaw(transform mT, float value) {
-
-	camO += value;
-	camO = glm::mod(camO, (glm::pi<float>() * 2));
-
-	Update(mT);
-
-}
-
-void Camera::Pitch(transform mT, float value) {
-
-	camVO += value;
-
-	if (camVO > glm::half_pi<float>()) {
-		camVO = glm::half_pi<float>();
 	}
 
-	else if (camVO < -glm::half_pi<float>()) {
-		camVO = -glm::half_pi<float>();
-	}
-
-	Update(mT);
-
+	
+	
 }
 
-void Camera::Update(transform mT) {
+void Camera::Retarget(transform* T) {
+	target = T;
 
-	camT.translation = mT.translation + glm::vec3(0.0f, 0.0f, camD);
+	if (target != nullptr) {
 
-	glm::mat4x4 camMat = glm::mat4x4(1.0f);
+		
+		
+		Update();
+	
+	}
+}
 
-	camMat = glm::translate(camMat, mT.translation);
+void Camera::Y_Axis(float input) {	
+	pitch += (input * mvSpeed);
+	if (pitch > glm::half_pi<float>() * 0.75f)
+	{
+		pitch = glm::half_pi<float>() * 0.75f;
+	}
+	else if (pitch < -glm::half_pi<float>() * 0.75f)
+	{
+		pitch = -glm::half_pi<float>() * 0.75f;
+	}
 
-	camT.rotation = glm::rotate(camMat, camO, glm::vec3(0.0f, 1.0f, 0.0f));
+	Update();
+		
+}
+void Camera::X_Axis(float input) {
+	yaw += (input*mvSpeed);
+	yaw = glm::mod(yaw,(glm::pi<float>()*2));
+	if (yaw<0.0f)
+	{
+		yaw += (2 * glm::pi<float>());
+	}
+		
+	Update();
+	
+}
 
-	camMat = Utils::transToMat(camT);
+void Camera::Update() {			
+	
+		
+	glm::vec3 offset;
+	offset.x = distance * cos(pitch) * sin(yaw); 
+	offset.y = distance * sin(pitch);            
+	offset.z = distance * cos(pitch) * cos(yaw); 
 
-	glm::quat localX = glm::angleAxis(camO, glm::vec3(0.0f, 1.0f, 0.0f));
+	
+	camTrans.translation = target->translation + offset;
 
+	
+	viewMat = glm::lookAt(camTrans.translation, target->translation, glm::vec3(0.0f, 1.0f, 0.0f));
 
-	camT.rotation = glm::rotate(camMat, camVO, glm::vec3(1.0f, 0.0f, 0.0f) * localX);
 
 }

@@ -10,14 +10,10 @@
 #include "nlohmann/json.hpp"
 #include "Animation.h"
 #include "FixedPointMath.h"
+#include "SystemConfig.h"
 
 
 
-#define numVAOs 1
-#define numVBOs 3
-#define numEBOs 1
-
-#define useAST true
 
 
 struct Bone {
@@ -218,14 +214,14 @@ struct ImportedModel {
 	
 	int root;
 
-	transform transform;
+	
 
 	int currentAnim;
 
 	ModelImporter importer;
 	
 
-	ImportedModel(const char * filePath,glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f), glm::quat rot = glm::quat(0.0f,0.0f,1.0f,0.0f), glm::vec3 scal = glm::vec3(1.0f, 1.0f, 1.0f));
+	ImportedModel(const char * filePath);
 	
 
 	GLuint texture;
@@ -241,9 +237,7 @@ struct ImportedModel {
 		importer = ModelImporter();
 		num_joints = 0;
 		num_anims = 0;
-		transform.translation = glm::vec3(0.0f,0.0f,0.0f);
-		transform.rotation = glm::quat(0.0f,0.0f,1.0f,0.0f);
-		transform.scale = glm::vec3(1.0f, 1.0f, 1.0f);
+		
 		root = 0;
 		currentAnim = 0;
 		texture = 0;

@@ -16,11 +16,8 @@
 
 
 
-ImportedModel::ImportedModel(const char* filePath, glm::vec3 pos, glm::quat rot , glm::vec3 scal ) {
+ImportedModel::ImportedModel(const char* filePath) {
 
-	transform.translation = pos;
-	transform.rotation = rot;
-	transform.scale = scal;
 
 
 	clut_multiplier = 1.0f;
