@@ -5,11 +5,14 @@
 #include "Utils.hpp"
 #include "SystemConfig.h"
 
+#define CAMERA_MAX_ANGLE_MULT 0.85f
+
 struct Camera {
 
 	transform camTrans;
 	transform * target;
 
+	float height;
 	float distance;
 	float pitch;
 	float yaw;
@@ -18,7 +21,7 @@ struct Camera {
 	glm::mat4x4 viewMat;
 	
 
-	Camera(transform * T = nullptr ,float dist = 7.5f, float spd = 1.0f);
+	Camera(transform * T = nullptr ,float dist = 15.0f,float off = 1.0f, float spd = 3.0f);
 	
 	void Retarget(transform* T);
 

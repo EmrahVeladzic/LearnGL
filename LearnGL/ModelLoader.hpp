@@ -2,16 +2,14 @@
 #define MODEL_LOADER
 
 #include <vector>
-#include <glm/glm.hpp>
 #include <GL/glew.h>
-#include <SOIL2/SOIL2.h>
-#include <glm/gtc/quaternion.hpp>
 #include "CustomImageFormat.hpp"
 #include "nlohmann/json.hpp"
 #include "Animation.h"
 #include "FixedPointMath.h"
 #include "SystemConfig.h"
-
+#include "GL_Math.h"
+#include "Utils.hpp"
 
 
 
@@ -232,22 +230,10 @@ struct ImportedModel {
 
 	float clut_multiplier;
 
-	ImportedModel()
-	{
-		importer = ModelImporter();
-		num_joints = 0;
-		num_anims = 0;
-		
-		root = 0;
-		currentAnim = 0;
-		texture = 0;
-		tex_height = 0;
-		tex_width = 0;
-		clut = 0;
-		num_mats = 0;
-		clut_multiplier = 1.0f;
-	}
+
 	
+	~ImportedModel();
+
 };
 
 #endif // !MODEL_LOADER

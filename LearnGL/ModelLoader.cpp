@@ -1,20 +1,55 @@
 ﻿#include <fstream>
 #include <sstream>
-#include <glm/glm.hpp>
-#include <SOIL2/SOIL2.h>
 #include <iostream>
 #include "ModelLoader.hpp"
-#include "Utils.hpp"
-#include <glm/gtc/quaternion.hpp>
-#include "CustomImageFormat.hpp"
-#include "nlohmann/json.hpp"
-#include <glm/gtx/matrix_decompose.hpp>
-#include "Animation.h"
+
 
 
 #define ROOT_MARKER -1
 
 
+
+ImportedModel::~ImportedModel() {
+	
+	importer.clearData();
+	importer.clearRig();
+	GLuint tDel[2] = { texture,clut };
+	glDeleteTextures(1,tDel);
+		
+	
+
+
+	for (Mesh & msh : Meshes)
+	{
+		msh.vertices.clear();
+		msh.indices.clear();
+		msh.texCoords.clear();
+		msh.normalVecs.clear();
+
+		glDeleteBuffers(numVAOs, msh.vao);
+		glDeleteBuffers(numVBOs, msh.vbo);
+		glDeleteBuffers(numEBOs, msh.ebo);
+	}
+
+	for (Bone & bone : bones)
+	{
+		for (animJoint& anim : bone.animations) {
+
+			anim.transTimes.clear();
+			anim.rotTimes.clear();
+			anim.scalTimes.clear();
+
+			anim.translations.clear();
+			anim.rotations.clear();
+			anim.scales.clear();
+
+		}
+
+		bone.animations.clear();
+		bone.children.clear();
+	}
+
+}
 
 ImportedModel::ImportedModel(const char* filePath) {
 
@@ -199,7 +234,7 @@ void ModelImporter::parseGLTF(const char* filePathRel,uint8_t scalingFactorBits,
 
 			glm::vec3 transl = glm::vec3(0.0f, 0.0f, 0.0f);
 			glm::vec3 scal = glm::vec3(1.0f, 1.0f, 1.0f);
-			glm::quat rot = glm::quat(0.0f, 0.0f, 1.0f, 0.0f);
+			glm::quat rot = glm::angleAxis(glm::pi<float>(), glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f)));
 
 			int indexJ = j_son["skins"][0]["joints"][i];
 
@@ -274,7 +309,7 @@ void ModelImporter::parseGLTF(const char* filePathRel,uint8_t scalingFactorBits,
 
 			
 
-		    tempbone.TransformMat = Utils::transToMat(tempbone.InitTransform);		 
+		    tempbone.TransformMat = tempbone.InitTransform.Matrix();		 
 			
 			
 
@@ -1366,7 +1401,7 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 			tempBone.children.push_back((int)tempByte);
 		}
 
-		tempBone.TransformMat = Utils::transToMat(tempBone.InitTransform);
+		tempBone.TransformMat = tempBone.InitTransform.Matrix();
 
 		bones.push_back(tempBone);
 		
@@ -1529,7 +1564,7 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 
 				tempVec.w = tempFloat;
 
-				tempAnim.rotations.push_back(glm::quat(tempVec.w,tempVec.x,tempVec.y,tempVec.z));
+				tempAnim.rotations.push_back(glm::normalize(glm::quat(tempVec.w,tempVec.x,tempVec.y,tempVec.z)));
 
 			}
 

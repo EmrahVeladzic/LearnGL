@@ -97,8 +97,8 @@ float object_distance = clamp(tmpPos.w,-1,1000);
 
 gl_Position = tmpPos;
 
-if(false){
-gl_Position.xy = round(gl_Position.xy*(256.0/object_distance))/object_distance;
+if(true){
+gl_Position.xy = round(gl_Position.xy*(512.0/object_distance))/object_distance;
 }
 
 

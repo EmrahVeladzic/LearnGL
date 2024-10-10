@@ -2,7 +2,7 @@
 #define LIGHTS
 
 #include <iostream>
-#include <glm/glm.hpp>
+#include "GL_Math.h"
 
 
 

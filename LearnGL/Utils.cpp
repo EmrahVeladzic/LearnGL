@@ -93,52 +93,20 @@ void Utils::UpdateInterpolationIndex(animJoint& in, float timestamp) {
 }
 
 
-transform Utils::matToTrans(glm::mat4x4 input) {
-	transform output;
-	glm::vec3 skew;
-	glm::vec4 perspective;
-
-	glm::decompose(input, output.scale, output.rotation, output.translation, skew, perspective);
-
-	output.rotation = glm::conjugate(output.rotation);
-
-	return output;
-}
 
 
-glm::mat4x4 Utils::transToMat(transform input) {
 
-
-	glm::vec3 Vx = input.rotation * glm::vec3(1.0f, 0.0f, 0.0f);
-	glm::vec3 Vy = input.rotation * glm::vec3(0.0f, 1.0f, 0.0f);
-	glm::vec3 Vz = input.rotation * glm::vec3(0.0f, 0.0f, 1.0f);
-
-	Vx = Vx * input.scale.x;
-	Vy = Vy * input.scale.y;
-	Vz = Vz * input.scale.z;
-
-	glm::vec3 Vp = input.translation;
-
-
-	return glm::mat4x4(
-
-		Vx.x, Vx.y, Vx.z, 0.0f,
-		Vy.x, Vy.y, Vy.z, 0.0f,
-		Vz.x, Vz.y, Vz.z, 0.0f,
-		Vp.x, Vp.y, Vp.z, 1.0f
-
-	);
-}
 
 glm::mat4x4 Utils::interpolateTransforms(glm::vec3 transA, glm::vec3 transB, glm::quat rotA, glm::quat rotB, glm::vec3 scalA, glm::vec3 scalB, float passedTrans, float passedRot, float passedScal) {
 
 	transform out;
 
 	out.translation = glm::mix(transA,transB,passedTrans);
-	out.rotation = glm::mix(rotA,rotB,passedRot);
-	out.scale = glm::mix(scalA, scalB, passedScal);
+	out.rotation = glm::normalize(glm::slerp(rotA,rotB,passedRot));
 
-	return transToMat(out);
+	out.scale = glm::mix(scalA, scalB, passedScal);	
+
+	return out.Matrix();
 }
 
 

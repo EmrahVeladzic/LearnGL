@@ -90,6 +90,8 @@ int open_WAV() {
 
 	fread(&IMPORTED.data_section_size, sizeof(uint32_t), 1, fileio);
 
+	
+	
 
 	Encoder.sample_count = IMPORTED.data_section_size / sizeof(WAV16);
 
@@ -106,7 +108,10 @@ int open_WAV() {
 
 	Encoder.spu_buffer = (SPU_sample*)malloc(Encoder.spu_sample_count * sizeof(SPU_sample));
 
-
+	if (IMPORTED.num_of_channels > 28)
+	{
+		return 1;
+	}
 
 	for (size_t i = 0; i < Encoder.sample_count; i++)
 	{
@@ -115,8 +120,8 @@ int open_WAV() {
 
 		fread(&Encoder.sample_buffer[i].data, sizeof(WAV16), 1, fileio);
 
-		if (i > 0) {
-			Encoder.differential_buffer[i].data = Encoder.sample_buffer[i].data - Encoder.sample_buffer[i - 1].data;
+		if (i >= (size_t)IMPORTED.num_of_channels) {
+			Encoder.differential_buffer[i].data = Encoder.sample_buffer[i].data- Encoder.sample_buffer[i - (size_t)IMPORTED.num_of_channels].data;
 		}
 		else
 		{
@@ -134,6 +139,8 @@ int Export() {
 
 
 	NewWL.magic = 87;
+	NewWL.num_of_channels = (uint8_t)(IMPORTED.num_of_channels);
+	NewWL.clamp_bits = (MAX_TRESHOLD / 2) -1;
 	NewWL.block_count = Encoder.spu_sample_count;
 	NewWL.default_sample_rate = (uint16_t)IMPORTED.sample_rate;
 	NewWL.data = (SPU_sample*)malloc(NewWL.block_count * sizeof(SPU_sample));
@@ -151,14 +158,16 @@ int Export() {
 
 	fileio = fopen(fileexpath, "wb");
 
-
+	
 
 	fwrite(&NewWL.magic, sizeof(uint8_t), 1, fileio);
+	fwrite(&NewWL.num_of_channels, sizeof(uint8_t), 1, fileio);
+	fwrite(&NewWL.clamp_bits, sizeof(uint8_t), 1, fileio);
 	fwrite(&NewWL.block_count, sizeof(uint32_t), 1, fileio);
 	fwrite(&NewWL.default_sample_rate, sizeof(uint16_t), 1, fileio);
 
-	uint8_t temp;
 
+	uint8_t temp;
 
 	for (size_t i = 0; i < NewWL.block_count; i++)
 	{
@@ -167,7 +176,9 @@ int Export() {
 
 		for (size_t j = 0; j < 14; j++)
 		{
-			temp = ((NewWL.data[i].samples[j * 2].value << 4) | (NewWL.data[i].samples[(j * 2) + 1].value));
+			temp = (((NewWL.data[i].samples[j * 2].value & 0xF) << 4) | (NewWL.data[i].samples[(j * 2) + 1].value & 0xF));
+
+
 
 
 
@@ -241,6 +252,8 @@ int open_WL() {
 
 
 	fread(&NewWL.magic, sizeof(uint8_t), 1, fileio);
+	fread(&NewWL.num_of_channels, sizeof(uint8_t), 1, fileio);
+	fread(&NewWL.clamp_bits, sizeof(uint8_t), 1, fileio);
 	fread(&NewWL.block_count, sizeof(uint32_t), 1, fileio);
 	fread(&NewWL.default_sample_rate, sizeof(uint16_t), 1, fileio);
 
@@ -264,9 +277,9 @@ int open_WL() {
 
 				fread(&temp, sizeof(uint8_t), 1, fileio);
 
-				NewWL.data[i].samples[j * 2].value = (temp >> 4) & 0xF;
-				NewWL.data[i].samples[(j * 2) + 1].value = temp & 0xF;
 
+				NewWL.data[i].samples[j * 2].value = ((temp >> 4) & 0xF);
+				NewWL.data[i].samples[(j * 2) + 1].value = (temp & 0xF);
 
 
 
@@ -289,19 +302,19 @@ int open_WL() {
 int sanity_check() {
 
 
-	printf("\n%c%c%c%c\n", IMPORTED.magic[0], IMPORTED.magic[1], IMPORTED.magic[2], IMPORTED.magic[3]);
-	printf("\n%d\n", IMPORTED.file_size);
-	printf("\n%c%c%c%c\n", IMPORTED.file_type[0], IMPORTED.file_type[1], IMPORTED.file_type[2], IMPORTED.file_type[3]);
-	printf("\n%c%c%c%c\n", IMPORTED.fmt_marker[0], IMPORTED.fmt_marker[1], IMPORTED.fmt_marker[2], IMPORTED.fmt_marker[3]);
-	printf("\n%d\n", IMPORTED.fmt_size);
-	printf("\n%d\n", IMPORTED.format);
-	printf("\n%d\n", IMPORTED.num_of_channels);
-	printf("\n%d\n", IMPORTED.sample_rate);
-	printf("\n%d\n", IMPORTED.byte_rate);
-	printf("\n%d\n", IMPORTED.block_align);
-	printf("\n%d\n", IMPORTED.bits_per_sample);
-	printf("\n%c%c%c%c\n", IMPORTED.data_marker[0], IMPORTED.data_marker[1], IMPORTED.data_marker[2], IMPORTED.data_marker[3]);
-	printf("\n%d\n", IMPORTED.data_section_size);
+	printf("\nResult:\nHeader: %c%c%c%c\n", IMPORTED.magic[0], IMPORTED.magic[1], IMPORTED.magic[2], IMPORTED.magic[3]);
+	printf("File Size: %d\n", IMPORTED.file_size);
+	printf("File Type: %c%c%c%c\n", IMPORTED.file_type[0], IMPORTED.file_type[1], IMPORTED.file_type[2], IMPORTED.file_type[3]);
+	printf("FMT Marker: %c%c%c%c\n", IMPORTED.fmt_marker[0], IMPORTED.fmt_marker[1], IMPORTED.fmt_marker[2], IMPORTED.fmt_marker[3]);
+	printf("FMT Size: %d\n", IMPORTED.fmt_size);
+	printf("Format: %d\n", IMPORTED.format);
+	printf("Channel Count: %d\n", IMPORTED.num_of_channels);
+	printf("Sample Rate: %d\n", IMPORTED.sample_rate);
+	printf("Byte Rate: %d\n", IMPORTED.byte_rate);
+	printf("Block Alignment: %d\n", IMPORTED.block_align);
+	printf("Bits Per Sample: %d\n", IMPORTED.bits_per_sample);
+	printf("Data Marker: %c%c%c%c\n", IMPORTED.data_marker[0], IMPORTED.data_marker[1], IMPORTED.data_marker[2], IMPORTED.data_marker[3]);
+	printf("Data Section Size: %d\n\n", IMPORTED.data_section_size);
 
 	return 0;
 }

@@ -2,7 +2,7 @@
 #define ANIMATION
 
 #include "Transform.h"
-#include <glm/gtx/matrix_decompose.hpp>
+#include "GL_Math.h"
 #include <vector>
 #include <iostream>
 

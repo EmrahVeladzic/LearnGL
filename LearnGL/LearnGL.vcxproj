@@ -140,6 +140,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AI_Handler.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Actor.cpp" />
     <ClCompile Include="Lights.cpp" />
@@ -148,6 +149,7 @@
     <ClCompile Include="ModelLoader.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SoundLoader.cpp" />
+    <ClCompile Include="Transform.cpp" />
     <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -156,12 +158,14 @@
     <None Include="vertShader.glsl" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AI_Handler.hpp" />
     <ClInclude Include="Animation.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Actor.hpp" />
     <ClInclude Include="CustomImageFormat.hpp" />
     <ClInclude Include="CustomSoundFormat.hpp" />
     <ClInclude Include="FixedPointMath.h" />
+    <ClInclude Include="GL_Math.h" />
     <ClInclude Include="Lights.hpp" />
     <ClInclude Include="Materials.hpp" />
     <ClInclude Include="ModelLoader.hpp" />
