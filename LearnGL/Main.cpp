@@ -575,6 +575,7 @@ int main(void) {
 		
 	ActiveScene.AddActor(new Actor("chara", &cam));
 
+
 	ActiveScene.AddActor(new Actor("skele", NULL, transform(glm::vec3(1.0f,0.0f,10.0f)),2.0f));
 
 	
