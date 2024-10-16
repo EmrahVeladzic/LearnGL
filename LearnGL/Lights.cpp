@@ -1,4 +1,3 @@
-#include <glm/glm.hpp>
 #include "Lights.hpp"
 
 
@@ -8,6 +7,7 @@ LightGeneric::LightGeneric(glm::vec4 ambi, glm::vec4 diff , glm:: vec4 spec) {
 	diffuse = diff;
 	specular = spec;
 	enabled = false;
+	light_matrix = glm::mat4x4(1.0f);
 
 	for (int i = 0; i < 4; i++)
 	{

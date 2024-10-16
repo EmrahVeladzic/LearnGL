@@ -403,7 +403,7 @@ int determine_best_swap_with_profile() {
 	for (size_t r = 0; r < (PROTECTED_BUFFER_SIZE+1); r++)
 	{
 
-		if (r == PROTECTED_BUFFER_SIZE) {
+		if (r > 0) {
 			Protect(Compressor.ALPHA15);
 		}
 
@@ -877,11 +877,15 @@ int Commit() {
 
 	if ((NewRPF.magic[1] + 1) > 16) {
 
-		for (size_t i = 0; i < (SCALEX * SCALEY); i++)
+		for (size_t i = SCALEY; i > 0; i--)
 		{
+			
+			for (size_t j = 0; j < SCALEX; j++)
+			{
 
-			NewRPF.data[i] = write_CLUT_to_data((int)i);
+				NewRPF.data[((i-1)*SCALEX)+j] = write_CLUT_to_data((int)(((SCALEY-i) * SCALEX) + j));
 
+			}
 
 		}
 
@@ -889,10 +893,15 @@ int Commit() {
 
 	else
 	{
-		for (size_t i = 0; i < ((SCALEX * SCALEY) / 2); i++)
-		{	
+		for (size_t i = SCALEY; i > 0; i--)
+		{
 
-			NewRPF.data[i] = write_CLUT_to_data4bpp((int)i);
+			for (size_t j = 0; j < SCALEX; j++)
+			{
+
+				NewRPF.data[(((i - 1) * SCALEX) + j)/2] = write_CLUT_to_data4bpp((int)((((SCALEY - i) * SCALEX) + j)/2));
+
+			}
 
 		}
 	}

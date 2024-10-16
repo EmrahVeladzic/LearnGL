@@ -2,22 +2,14 @@
 #define MODEL_LOADER
 
 #include <vector>
-#include <glm/glm.hpp>
 #include <GL/glew.h>
-#include <SOIL2/SOIL2.h>
-#include <glm/gtc/quaternion.hpp>
 #include "CustomImageFormat.hpp"
 #include "nlohmann/json.hpp"
-#include "Animation.hpp"
-
-
-
-
-
-
-#define numVAOs 1
-#define numVBOs 3
-#define numEBOs 1
+#include "Animation.h"
+#include "FixedPointMath.h"
+#include "SystemConfig.h"
+#include "GL_Math.h"
+#include "Utils.hpp"
 
 
 
@@ -94,11 +86,9 @@ private:
 
 	std::vector<glm::mat4x4> matrices;
 
-	std::vector<transform> transforms;
+	
 
 	std::vector<uint16_t> indices;
-
-
 
 
 public:
@@ -117,8 +107,10 @@ public:
 	int get_child_index(int j_son_index);
 
 	
-	void parseGLTF(const char* filePathRel);
-	
+	void parseGLTF(const char* filePathRel, uint8_t scalingFactorBits, uint8_t FPS, uint8_t tPageX_begin, uint8_t tPageY_begin, uint8_t tPageX_end, uint8_t tPageY_end);
+	void GLTF_To_AST(const char* filePathRel, uint8_t scalingFactorBits, uint8_t FPS, uint8_t tPageX_begin, uint8_t tPageY_begin, uint8_t tPageX_end, uint8_t tPageY_end);
+	void OpenAST(const char* filePathRel);
+
 	int findBoneByNode(int node);
 	int findBoneByJointVal(int jointVal);
 	int getNumVertices(int m);
@@ -220,14 +212,14 @@ struct ImportedModel {
 	
 	int root;
 
+	
+
 	int currentAnim;
 
 	ModelImporter importer;
-	glm::vec3 position;
+	
 
-	glm::quat rotation;
-
-	ImportedModel(const char * filePath,const char* Image,glm::vec3 pos, glm::quat rot);
+	ImportedModel(const char * filePath);
 	
 
 	GLuint texture;
@@ -238,23 +230,10 @@ struct ImportedModel {
 
 	float clut_multiplier;
 
-	ImportedModel()
-	{
-		importer = ModelImporter();
-		num_joints = 0;
-		num_anims = 0;
-		position = glm::vec3(0.0,0.0,0.0);
-		rotation = glm::quat(0.0,0.0,0.0,0.0);
-		root = 0;
-		currentAnim = 0;
-		texture = 0;
-		tex_height = 0;
-		tex_width = 0;
-		clut = 0;
-		num_mats = 0;
-		clut_multiplier = 1.0f;
-	}
+
 	
+	~ImportedModel();
+
 };
 
 #endif // !MODEL_LOADER

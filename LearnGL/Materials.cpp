@@ -1,4 +1,4 @@
-#include <glm/glm.hpp>
+#include "GL_Math.h"
 #include "Materials.hpp"
 
 Material::Material(glm::vec4 ambi, glm::vec4 diff, glm::vec4 spec, float shin,float trans, float emmis) {

@@ -1,54 +1,36 @@
 #include <GL/glew.h>
-#include <SOIL2/soil2.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
-#include <string>
-#include <fstream>
-#include <cmath>
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include "Utils.hpp"
-#include <stack>
-#include "ModelLoader.hpp"
-#include "Lights.hpp"
 #include "Materials.hpp"
 #include <OpenAL/al.h>
 #include <OpenAL/alc.h>
 #include "SoundLoader.hpp"
-#include <glm/gtx/string_cast.hpp>
+#include "GL_Math.h"
+#include "Scene.hpp"
 
-#define numVAOs 1
-#define numVBOs 3
-#define numEBOs 1
-
-#define TARGET_FPS 60
-#define SECOND_F 1000.0f
-
-
-
-float cameraX, cameraY, cameraZ;
 
 GLuint shadowBuffer, shadowTex;
 
 Audio_Handler global_audio;
 
-bool keys[256];
+#define NUM_KEYS 300
+
+bool keys[NUM_KEYS];
 
 
 GLuint renderingProgram;
-GLuint vao[numVAOs];
-GLuint vbo[numVBOs];
+
 
 GLuint projLoc, vLoc, tfLoc, mvLoc, invBindLoc, transLoc, offsetLoc, clutMultLoc ,tWidthLoc,tHeightLoc;
 int width, height;
 float aspect, timeFactor;
-glm::mat4 pMat, vMat, mMat, mvMat;
+glm::mat4 pMat, mMat, mvMat;
 
 
 GLuint globalAmbiLoc, ambiLoc, diffLoc, specLoc, posLoc, mAmbiLoc, mDiffLoc, mSpecLoc, mShinLoc ;
 
-std::vector<ImportedModel> Models;
+
 
 
 Material testMat(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
@@ -69,37 +51,38 @@ LightPositional light(glm::vec4(0.125f, 0.125f, 0.125f, 1.0f),
 ALuint sfx;
 
 
-void setupVertices(std::vector<ImportedModel>& models) {
+
+void setupVertices(std::vector<Actor *>& models) {
 	
 
 	
-	for (ImportedModel& model:models)
+	for (Actor * & actor:models)
 	{
-		for (size_t i = 0; i < model.Meshes.size(); i++)
+		for (size_t i = 0; i < actor->Model->Meshes.size(); i++)
 		{
 			
 			
-			glGenVertexArrays(1, model.Meshes[i].vao);
-			glBindVertexArray(model.Meshes[i].vao[0]);
+			glGenVertexArrays(1, actor->Model->Meshes[i].vao);
+			glBindVertexArray(actor->Model->Meshes[i].vao[0]);
 
-			glGenBuffers(numVBOs, model.Meshes[i].vbo);
+			glGenBuffers(numVBOs, actor->Model->Meshes[i].vbo);
 
 		
 
-			glBindBuffer(GL_ARRAY_BUFFER, model.Meshes[i].vbo[0]);
-			glBufferData(GL_ARRAY_BUFFER, model.Meshes[i].vertices.size() * 12, &model.Meshes[i].vertices.data()[0], GL_STATIC_DRAW);
+			glBindBuffer(GL_ARRAY_BUFFER, actor->Model->Meshes[i].vbo[0]);
+			glBufferData(GL_ARRAY_BUFFER, actor->Model->Meshes[i].vertices.size() * 12, &actor->Model->Meshes[i].vertices.data()[0], GL_STATIC_DRAW);
 
-			glBindBuffer(GL_ARRAY_BUFFER, model.Meshes[i].vbo[1]);
-			glBufferData(GL_ARRAY_BUFFER, model.Meshes[i].texCoords.size() * 8, &model.Meshes[i].texCoords.data()[0], GL_STATIC_DRAW);
+			glBindBuffer(GL_ARRAY_BUFFER, actor->Model->Meshes[i].vbo[1]);
+			glBufferData(GL_ARRAY_BUFFER, actor->Model->Meshes[i].texCoords.size() * 8, &actor->Model->Meshes[i].texCoords.data()[0], GL_STATIC_DRAW);
 
-			glBindBuffer(GL_ARRAY_BUFFER, model.Meshes[i].vbo[2]);
-			glBufferData(GL_ARRAY_BUFFER, model.Meshes[i].normalVecs.size() * 12, &model.Meshes[i].normalVecs.data()[0], GL_STATIC_DRAW);
+			glBindBuffer(GL_ARRAY_BUFFER, actor->Model->Meshes[i].vbo[2]);
+			glBufferData(GL_ARRAY_BUFFER, actor->Model->Meshes[i].normalVecs.size() * 12, &actor->Model->Meshes[i].normalVecs.data()[0], GL_STATIC_DRAW);
 
 
-			glGenBuffers(numEBOs, model.Meshes[i].ebo);
+			glGenBuffers(numEBOs, actor->Model->Meshes[i].ebo);
 
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model.Meshes[i].ebo[0]);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, model.Meshes[i].indices.size() * 2, &model.Meshes[i].indices[0], GL_STATIC_DRAW);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, actor->Model->Meshes[i].ebo[0]);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, actor->Model->Meshes[i].indices.size() * 2, &actor->Model->Meshes[i].indices[0], GL_STATIC_DRAW);
 
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		}
@@ -109,7 +92,7 @@ void setupVertices(std::vector<ImportedModel>& models) {
 }
 
 
-void init(GLFWwindow* window, std::vector<ImportedModel>& models) {
+void init(GLFWwindow* window, std::vector<Actor *>& actors) {
 
 	renderingProgram = Utils::createShaderProgram("vertShader.glsl", "fragShader.glsl");
 
@@ -118,13 +101,12 @@ void init(GLFWwindow* window, std::vector<ImportedModel>& models) {
 	aspect = (float)width / (float)height;
 	pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f);
 
+	if (Player!=nullptr) {
 
-	cameraX = 0.0f;
-	cameraY = 0.5f;
-	cameraZ = 8.0f;
-
-	
-	setupVertices(models);
+		cam.Retarget(&Player->Trans);
+		
+	}
+	setupVertices(actors);
 		
 
 	ambient.enabled = true;
@@ -158,10 +140,10 @@ void init(GLFWwindow* window, std::vector<ImportedModel>& models) {
 	
 
 
-	for (ImportedModel& model : models)
+	for (Actor * & actor : actors)
 	{		
 		
-		model.importer.clearData();
+		actor->Model->importer.clearData();
 
 	}
 
@@ -195,12 +177,12 @@ void lightingConfig(glm::mat4x4 & viewMatrix ) {
 
 }
 
-void animate(GLFWwindow* window, double currentTime, std::vector<ImportedModel>& models) {
+void animate(GLFWwindow* window, double currentTime, std::vector<Actor * >& actors) {
 	
 
-	float currentGlobalTime = (float)currentTime;
+	float currentGlobalTime = (float)(currentTime);
 
-	float currentFracTime = fmod(currentGlobalTime, 1.0f);
+	
 
 	int trans_ind;
 	int rot_ind;
@@ -210,66 +192,65 @@ void animate(GLFWwindow* window, double currentTime, std::vector<ImportedModel>&
 	float rot_inter;
 	float scal_inter;
 
-	for (ImportedModel& model : models)
+	for (Actor* & actor : actors)
 	{
-		int curr = model.currentAnim;
+		int curr = actor->Model->currentAnim;
+
+		
 
 
 
-
-		for (size_t i = 0; i < model.Meshes.size(); i++)
+		for (size_t i = 0; i < actor->Model->Meshes.size(); i++)
 		{
-
 			
 			
 			
-
 			
-			glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
-
-			
-			vMat = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
 
 
-
-			if (model.num_anims > 0) {
-
-				Utils::UpdateInterpolationIndex(model.bones[model.Meshes[i].jointIndex].animations[curr], currentGlobalTime);
-
-
-				trans_ind = model.bones[model.Meshes[i].jointIndex].animations[curr].transIndex;
-				rot_ind = model.bones[model.Meshes[i].jointIndex].animations[curr].rotIndex;
-				scal_ind = model.bones[model.Meshes[i].jointIndex].animations[curr].scalIndex;
-
-				trans_inter = model.bones[model.Meshes[i].jointIndex].animations[curr].transInterpolation;
-				rot_inter = model.bones[model.Meshes[i].jointIndex].animations[curr].rotInterpolation;
-				scal_inter = model.bones[model.Meshes[i].jointIndex].animations[curr].scalInterpolation;
-
-				model.bones[model.Meshes[i].jointIndex].TransformMat = glm::mat4x4(1.0f);
-
+			if (actor->Model->num_anims > 0) {
 
 				
-				int te = model.bones[model.Meshes[i].jointIndex].animations[curr].Tend_index;
-				
-				int re = model.bones[model.Meshes[i].jointIndex].animations[curr].Rend_index;
-				
-				int se = model.bones[model.Meshes[i].jointIndex].animations[curr].Send_index;
+
+				Utils::UpdateInterpolationIndex(actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr], currentGlobalTime);
 
 
-				model.bones[model.Meshes[i].jointIndex].TransformMat = Utils::interpolateTransforms(
-					model.bones[model.Meshes[i].jointIndex].animations[curr].translations[trans_ind],
-					model.bones[model.Meshes[i].jointIndex].animations[curr].translations[te],
-					model.bones[model.Meshes[i].jointIndex].animations[curr].rotations[rot_ind],
-					model.bones[model.Meshes[i].jointIndex].animations[curr].rotations[re],
-					model.bones[model.Meshes[i].jointIndex].animations[curr].scales[scal_ind],
-					model.bones[model.Meshes[i].jointIndex].animations[curr].scales[se],
+				trans_ind = actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr].transIndex;
+				rot_ind = actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr].rotIndex;
+				scal_ind = actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr].scalIndex;
+
+				trans_inter = actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr].transInterpolation;
+				rot_inter = actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr].rotInterpolation;
+				scal_inter = actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr].scalInterpolation;
+
+				
+				
+				int te = actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr].Tend_index;
+				
+				int re = actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr].Rend_index;
+				
+				int se = actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr].Send_index;
+
+				
+
+
+
+				actor->Model->bones[actor->Model->Meshes[i].jointIndex].TransformMat = Utils::interpolateTransforms(
+					actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr].translations[trans_ind],
+					actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr].translations[te],
+					actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr].rotations[rot_ind],
+					actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr].rotations[re],
+					actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr].scales[scal_ind],
+					actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr].scales[se],
 					trans_inter, rot_inter, scal_inter
 				);
-
+				
 				
 			}
 
 		}
+
+
 
 
 		
@@ -281,92 +262,102 @@ void animate(GLFWwindow* window, double currentTime, std::vector<ImportedModel>&
 
 
 
-void display(GLFWwindow* window ,std::vector<ImportedModel>& models) {
+void display(GLFWwindow* window ,std::vector<Actor * >& actors) {
 	std::stack<glm::mat4> mvStack;
 
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glClear(GL_COLOR_BUFFER_BIT);
 	
-	glClearColor(0.15f,0.15f,0.15f,1.0f);
+	glClearColor(0.25f, 0.25f, 0.25f,1.0f);
 
 	glUseProgram(renderingProgram);
 
 	
 	
 
-	for (ImportedModel& model : models)
+	for (Actor * & actor : actors)
 	{
 		
 		glm::mat4x4 invBTemp = glm::mat4x4(1.0f);
 		glm::mat4x4 transTemp = glm::mat4x4(1.0f);
 
 		
-		glUniform1f(clutMultLoc, model.clut_multiplier);
+		glUniform1f(clutMultLoc, actor->Model->clut_multiplier);
 
-		lightingConfig(vMat);
+		lightingConfig(cam.viewMat);
 
-		glUniform1ui(tWidthLoc,model.tex_width);
-		glUniform1ui(tHeightLoc, model.tex_height);
+		glUniform1ui(tWidthLoc, actor->Model->tex_width);
+		glUniform1ui(tHeightLoc, actor->Model->tex_height);
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, model.texture);		
+		glBindTexture(GL_TEXTURE_2D, actor->Model->texture);
 
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_1D, model.clut);
+		glBindTexture(GL_TEXTURE_1D, actor->Model->clut);
 
+		
 
-		if (model.num_joints>0)
+		if (actor->Model->num_joints>0)
 		{
-			model.compute_pose(model.root);
+			actor->Model->compute_pose(actor->Model->root);
 		}
 
-		for (size_t i = 0; i < model.Meshes.size(); i++)
+		for (size_t i = 0; i < actor->Model->Meshes.size(); i++)
 		{
 
-			if (model.num_anims > 0)
+			if (actor->Model->num_anims > 0)
 			{
-				invBTemp = model.INVmatrices[model.Meshes[i].jointIndex];
-				transTemp = model.bones[model.Meshes[i].jointIndex].TransformMat;
 
+				if (useAST) {
+					invBTemp = glm::mat4x4(1.0f);
+				}
+				else
+				{
+					invBTemp = actor->Model->INVmatrices[actor->Model->Meshes[i].jointIndex];
+				}
+				
+				transTemp = actor->Model->bones[actor->Model->Meshes[i].jointIndex].TransformMat;
 			}
+					
+
+
+			glBindBuffer(GL_ARRAY_BUFFER, actor->Model->Meshes[i].vbo[0]);
+			glBufferData(GL_ARRAY_BUFFER, actor->Model->Meshes[i].vertices.size() * 12, &actor->Model->Meshes[i].vertices.data()[0], GL_STATIC_DRAW);
+
+
+
+
+			mvStack.push(cam.viewMat);
+
+			glm::mat4 translationMat = glm::translate(glm::mat4(1.0f),actor->Trans.translation);
 
 			
+			mvStack.push(mvStack.top() * translationMat);
 
 
+			glm::mat4 rotationMat = glm::mat4_cast(actor->Trans.rotation);
 
-			glBindBuffer(GL_ARRAY_BUFFER, model.Meshes[i].vbo[0]);
-			glBufferData(GL_ARRAY_BUFFER, model.Meshes[i].vertices.size() * 12, &model.Meshes[i].vertices.data()[0], GL_STATIC_DRAW);
-
-
-
-
-			mvStack.push(vMat);
+			
+			mvStack.push(mvStack.top() * rotationMat);
 
 
+			glm::mat4 scaleMat = glm::scale(glm::mat4(1.0f), actor->Trans.scale);
+			mvStack.push(mvStack.top() * scaleMat);
 
-			mvStack.push(mvStack.top());
-			mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(model.position.x, model.position.y, model.position.z));
-
-			mvStack.push(mvStack.top());
-			mvStack.top() *= glm::rotate(glm::mat4((1.0f)), model.rotation.w, glm::vec3(model.rotation.x, model.rotation.y, model.rotation.z));
-
-
-
-
-			glBindBuffer(GL_ARRAY_BUFFER, model.Meshes[i].vbo[0]);
+			glBindBuffer(GL_ARRAY_BUFFER, actor->Model->Meshes[i].vbo[0]);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 			glEnableVertexAttribArray(0);
 
 
-			glBindBuffer(GL_ARRAY_BUFFER, model.Meshes[i].vbo[1]);
+			glBindBuffer(GL_ARRAY_BUFFER, actor->Model->Meshes[i].vbo[1]);
 			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
 			glEnableVertexAttribArray(1);
 
-			glBindBuffer(GL_ARRAY_BUFFER, model.Meshes[i].vbo[2]);
+			glBindBuffer(GL_ARRAY_BUFFER, actor->Model->Meshes[i].vbo[2]);
 			glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
 			glEnableVertexAttribArray(2);
 
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model.Meshes[i].ebo[0]);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, actor->Model->Meshes[i].ebo[0]);
 
 
 
@@ -380,11 +371,13 @@ void display(GLFWwindow* window ,std::vector<ImportedModel>& models) {
 
 
 
-		
+
+			glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
+			
 
 
 			
-			glDrawElements(GL_TRIANGLES, model.Meshes[i].getNumIndices(), GL_UNSIGNED_SHORT, 0);
+			glDrawElements(GL_TRIANGLES, actor->Model->Meshes[i].getNumIndices(), GL_UNSIGNED_SHORT, 0);
 
 		}
 
@@ -403,98 +396,32 @@ void display(GLFWwindow* window ,std::vector<ImportedModel>& models) {
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	glm::vec3 outtrv = glm::vec3{ 0.0f,0.0f,0.0f };
-	glm::quat tmq = glm::quat{0.0f,0.0f,1.0f,0.0f };
-
-
-
-
-	if (action == GLFW_PRESS && key <256 && key>-1)
-	{
-		keys[key] = true;
-
-	}
-	else if (action == GLFW_RELEASE && key < 256 && key>-1)
-	{
-		keys[key] = false;
-
-	}
-
-	if (keys[GLFW_KEY_W]==true)
-	{
-		outtrv.z = -0.1f;
-
-		tmq.w = 3.0f;
-
-		if (Models.empty() == false) {
-
-			Models[0].currentAnim = 1;
-
-		}
-	}
-	else if (keys[GLFW_KEY_S] == true)
-	{
-		outtrv.z = 0.1f;
-
-		tmq.w = 0.0f;
-
-		if (Models.empty() == false) {
-
-			Models[0].currentAnim = 1;
-
-		}
-	}
-
-	else if (keys[GLFW_KEY_A] == true)
-	{
-		outtrv.x = -0.1f;
-
-		tmq.w = -1.5f;
-
-		if (Models.empty() == false) {
-
-			Models[0].currentAnim = 1;
-
-		}
-	}
-	else if (keys[GLFW_KEY_D] == true)
-	{
-		outtrv.x = 0.1f;
-
-		tmq.w = 1.5f;
-
-
-		if (Models.empty() == false) {
-			Models[0].currentAnim = 1;
-
-		}
-	}
-
-	else
-	{
-		tmq.w = Models[0].rotation.w;
-
-
-		if (Models.empty() == false) {
-
-
-			Models[0].currentAnim = 0;
-
-		}
-	}
 	
-	cameraX += outtrv.x;
-	cameraY += outtrv.y;
-	cameraZ += outtrv.z;
+	
 
-	if (Models.empty() == false) {
+	if (Player!=nullptr) {
 
-		Models[0].position += outtrv;
-		Models[0].rotation = tmq;
+		
+			
+
+
+		if (action == GLFW_PRESS && key <NUM_KEYS && key>-1)
+		{
+			keys[key] = true;
+
+		}
+		else if (action == GLFW_RELEASE && key < NUM_KEYS && key>-1)
+		{
+			keys[key] = false;
+
+		}
+
+		
+
 
 	}
 
-
+	
 	
 }
 
@@ -509,6 +436,84 @@ void window_reshape_callback(GLFWwindow* window, int newWidth, int newHeight) {
 
 
 }
+
+
+void KeyActions() {
+
+	if (Player != nullptr) {
+
+		if (keys[GLFW_KEY_W] == true)
+		{
+			
+			AI::Move(Player,glm::two_pi<float>());
+
+		}
+		else if (keys[GLFW_KEY_S] == true)
+		{
+			AI::Move(Player,glm::pi<float>());
+			
+
+
+		}
+
+		else if (keys[GLFW_KEY_A] == true)
+		{
+					
+
+			AI::Move(Player,glm::half_pi<float>());
+
+
+		}
+		else if (keys[GLFW_KEY_D] == true)
+		{
+			AI::Move(Player,glm::pi<float>()+glm::half_pi<float>());
+
+		}
+
+
+
+
+		else
+		{
+
+
+			Player->Model->currentAnim = 0;
+
+		}
+
+
+		if (keys[GLFW_KEY_LEFT]) {
+
+			cam.X_Axis(1.0f);
+
+
+		}
+
+		if (keys[GLFW_KEY_RIGHT]) {
+
+
+			cam.X_Axis(-1.0f);
+
+
+		}
+
+		if (keys[GLFW_KEY_UP]) {
+
+			cam.Y_Axis(-1.0f);
+		}
+
+		if (keys[GLFW_KEY_DOWN]) {
+
+			cam.Y_Axis(1.0f);
+		}
+		
+
+	}
+
+}
+
+
+
 
 void GLAPIENTRY
 MessageCallback(GLenum source,
@@ -533,19 +538,23 @@ int main(void) {
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-
 	
-
 	ALCdevice* audio_device = alcOpenDevice(nullptr);
 	ALCcontext* audio_context = alcCreateContext(audio_device,nullptr);
 	 
 	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 
-	GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "OpenGL3D", monitor, NULL);
+	glm::ivec2 resolution = glm::vec2(mode->width, mode->height);
+
+	if (!FULLSCREEN) {
+		monitor = NULL;
+		resolution.x = 1600;
+		resolution.y = 1200;
+	}
 	
-
-
+	GLFWwindow* window = glfwCreateWindow(resolution.x, resolution.y, "OpenGL3D", monitor, NULL);
+	
 	glfwMakeContextCurrent(window);
 
 	alcMakeContextCurrent(audio_context);
@@ -553,32 +562,31 @@ int main(void) {
 	if (!audio_context) {
 
 		exit(EXIT_FAILURE);
+
 	}
 	
 
+
 	if (glewInit() != GLEW_OK) { exit(EXIT_FAILURE); }
-	glfwSwapInterval(mode->refreshRate/TARGET_FPS);
 
+	
+	glfwSwapInterval(1);
 
-	Models.push_back(ImportedModel("chara.gltf", "char.rpf", glm::vec3(0.0f, 0.0f, -5.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
-	Models.push_back(ImportedModel("skele.gltf", "skele.rpf", glm::vec3(1.0f, 0.0f, -6.0f), glm::quat(1.8f, 0.0f, 1.0f, 0.0f)));	
-	Models.push_back(ImportedModel("raven.gltf", "raven.rpf", glm::vec3(-5.0f, 0.0f, -7.0f), glm::quat(0.0f, 0.0f, 1.0f, 0.0f)));
-	Models.push_back(ImportedModel("ground.gltf", "ground.rpf", glm::vec3(2.0f, -2.85f, 0.0f), glm::quat((3.14159f/2.0f), 1.0f, 0.0f, 0.0f)));
+		
+	ActiveScene.AddActor(new Actor("chara", &cam));
+
+	ActiveScene.AddActor(new Actor("skele", NULL, transform(glm::vec3(1.0f,0.0f,10.0f)),2.0f));
+
 	
 
 	glfwSetKeyCallback(window,key_callback);
 
-
 	glEnable(GL_DEBUG_OUTPUT);
 	glDebugMessageCallback(MessageCallback, 0);
 
-	init(window,Models);
+	init(window, ActiveScene.SceneActors);
 
-	
-
-
-	sfx = global_audio.load_WL("raven.wl");
-	
+	sfx = global_audio.load_WL("rifftape");
 
 	ALuint src;
 
@@ -590,47 +598,53 @@ int main(void) {
 
 	alSourcei(src, AL_LOOPING, AL_TRUE);
 
-	alSourcef(src, AL_GAIN, 0.25f);
+	alSourcef(src, AL_GAIN, 1.0f);
 
 	alSourcePlay(src);
 	
-	
-	
-
 	glfwSetWindowSizeCallback(window, window_reshape_callback);
 
 
-	float beg_time = 0.0f;
-	float end_time = 0.0f;
+	
+	std::thread AIThread(&Scene::AIUpdate,&ActiveScene);
+	
+	AIThread.detach();
 
-	while (!glfwWindowShouldClose(window)){
+	while (!glfwWindowShouldClose(window)){		
 		
-		beg_time =(float) glfwGetTime();
-		end_time += beg_time;
+		std::chrono::time_point<std::chrono::high_resolution_clock> frameStart = std::chrono::high_resolution_clock::now();
 
-		animate(window,glfwGetTime(),Models);
-		display(window,Models);
+
+		animate(window,glfwGetTime(), ActiveScene.SceneActors);
+		display(window, ActiveScene.SceneActors);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
-
-		end_time =(float) glfwGetTime();
+		KeyActions();
 
 		
+		ActiveScene.SceneActors[1]->AI_Node.target = Player->Trans;
+	
+		std::chrono::time_point<std::chrono::high_resolution_clock> frameEnd = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> frameDuration = frameEnd - frameStart;
+
+		double elapsed = frameDuration.count();
+		if (elapsed < (1.0f/(float)TARGET_FPS)) {
+			std::this_thread::sleep_for(std::chrono::duration<double>(1.0f / ((float)TARGET_FPS) - elapsed));
+		}
+
 	}
 
-
+	ActiveScene.performAIUpdates = false;
 	
-
-	Models.clear();
-
 	alSourceStop(src);
-
-
+	
+	
 	alDeleteSources(1, &src);
 	alDeleteBuffers(1, &sfx);
 	alcDestroyContext(audio_context);
 	alcCloseDevice(audio_device);
 
+	
 
 	glfwDestroyWindow(window);
 	glfwTerminate();

@@ -51,11 +51,8 @@ uniform mat4 inv_bind_matrix;
 uniform mat4 transform_matrix;
 
 
-
 uniform float tf;
 
-layout(binding=0) uniform sampler2D samp;
-layout(binding=1) uniform sampler1D cltsamp;
 
 mat4 buildRotateX(float rad); 
 mat4 buildRotateY(float rad); 
@@ -70,9 +67,16 @@ float roundToPrecision(float value, float precis) {
 
 void main(void)
 {
+
+vec4 nrmFour = vec4(normals,1.0);
+
+nrmFour = inv_bind_matrix * nrmFour;
+
+nrmFour = transform_matrix * nrmFour;
+
 varyingVertPos=round(mv_matrix*vec4(position,1.0f)).xyz;
 varyingLightDir=pos_light.position-varyingVertPos;
-varyingNormal= normalize(mat3(transpose(inverse(mv_matrix))) * vec4(normals,1.0f).xyz);
+varyingNormal= normalize(mat3(transpose(inverse(mv_matrix))) * nrmFour.xyz);
 
 varyingHalfVector = (varyingLightDir+(-varyingVertPos)).xyz;
 
@@ -94,7 +98,7 @@ float object_distance = clamp(tmpPos.w,-1,1000);
 gl_Position = tmpPos;
 
 if(true){
-gl_Position.xy = round(gl_Position.xy*(256.0/object_distance))/object_distance;
+gl_Position.xy = round(gl_Position.xy*(512.0/object_distance))/object_distance;
 }
 
 

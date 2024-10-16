@@ -2,8 +2,8 @@
 #define LIGHTS
 
 #include <iostream>
-#include <glm/glm.hpp>
-#endif // !LIGHTS
+#include "GL_Math.h"
+
 
 
 
@@ -93,3 +93,4 @@ public:
 };
 
 
+#endif // !LIGHTS

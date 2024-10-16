@@ -1,7 +1,7 @@
 #ifndef MATERIALS
 #define MATERIALS
 
-#include <glm/glm.hpp>
+#include "GL_Math.h"
 
 #endif // !MATERIALS
 

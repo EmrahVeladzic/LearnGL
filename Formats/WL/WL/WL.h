@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define MAX_TRESHOLD 8
+
 
 int open_WL();
 
@@ -52,7 +54,7 @@ typedef struct spu_adpcm {
 #pragma pack(push,1)
 typedef struct wl_encoder {
 
-	
+
 
 	uint32_t sample_count;
 	uint32_t spu_sample_count;
@@ -61,7 +63,7 @@ typedef struct wl_encoder {
 
 	SPU_sample* spu_buffer;
 
-
+	WAV16* differential_buffer;
 
 }WL_ENC;
 #pragma pack (pop)
@@ -69,8 +71,10 @@ typedef struct wl_encoder {
 WL_ENC Encoder;
 
 typedef struct wl_file {
-	
+
 	uint8_t magic;
+	uint8_t num_of_channels;
+	uint8_t clamp_bits;
 	uint16_t default_sample_rate;
 	uint32_t block_count;
 	SPU_sample* data;
@@ -80,7 +84,7 @@ typedef struct wl_file {
 
 typedef struct wav_28 {
 
-	int16_t data[28];
+	uint16_t data[28];
 
 }WAV_BLOCK;
 

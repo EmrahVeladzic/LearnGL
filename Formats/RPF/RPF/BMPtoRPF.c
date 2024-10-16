@@ -224,7 +224,7 @@ int Export() {
 	{
 
 
-		wrt15 = (NewRPF.CLUT[i].a << 0) | (NewRPF.CLUT[i].b << 11) | (NewRPF.CLUT[i].g << 6) | (NewRPF.CLUT[i].r << 1);
+		wrt15 = (NewRPF.CLUT[i].a << 0) | (NewRPF.CLUT[i].r << 11) | (NewRPF.CLUT[i].g << 6) | (NewRPF.CLUT[i].b << 1);
 
 		fwrite(&wrt15, sizeof(uint16_t), 1, tempoutf);
 
@@ -262,3 +262,8 @@ int Export() {
 	return 0;
 }
 
+int Reconvert() {
+
+
+	return 0;
+}

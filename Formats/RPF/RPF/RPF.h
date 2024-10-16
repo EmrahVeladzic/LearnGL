@@ -14,7 +14,7 @@ size_t SCALEY;
 
 #define DEPTH 256
 
-#define PROTECTED_BUFFER_SIZE 8
+#define PROTECTED_BUFFER_SIZE 2
 
 size_t ProtectedBufferAccess;
 
@@ -24,7 +24,7 @@ uint8_t* mode_in;
 typedef struct bit
 {
 	unsigned int value : 1;
-}BIT;
+}BIT; 
 
 
 
@@ -146,6 +146,8 @@ char* fileName;
 char* fileexnm;
 
 int Export();
+
+int Reconvert();
 
 
 BIT Compare(Pixel a, Pixel b);
