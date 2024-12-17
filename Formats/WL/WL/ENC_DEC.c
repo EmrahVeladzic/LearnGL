@@ -52,8 +52,9 @@ uint8_t calculate_shift(WAV_BLOCK in) {
 
 int Encode() {
 
-	int16_t max_value = 1 << MAX_TRESHOLD;
+	int16_t max_value = (int16_t)(1 << MAX_TRESHOLD);
 	
+
 
 	for (size_t i = 0; i < Encoder.spu_sample_count; i++)
 	{
@@ -92,7 +93,6 @@ int Encode() {
 
 		for (size_t j = 0; j < 28; j++)
 		{			
-
 			
 			Encoder.spu_buffer[i].samples[j].value = (uint8_t)((ActiveBlock.data[j] >> sh_val) & 0x0F);
 			

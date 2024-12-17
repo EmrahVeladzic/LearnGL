@@ -56,20 +56,17 @@ typedef struct px16 {
 }Pixel15;
 
 
-Pixel15* ProtectedBuffer;
-
-
 
 typedef struct rpf {
 
 
 
 	uint8_t magic[4];// - magic byte value - Will == P"#%% - "#" being the 8bit value which corresponds to CLUT size
-	// -% corresponds to SCALE
+	// -% corresponds to SCALEX and SCALEY
 
-	Pixel15* CLUT;//Color lookup table - [0] will be 31,0,31- and will be used as transparency
+	Pixel15* CLUT;//Colour lookup table - [0] will be 31,0,31- and will be used as transparency
 
-	uint8_t* data;//max 256 values of color
+	uint8_t* data;//Index data referencing the CLUT
 
 	
 
@@ -91,7 +88,7 @@ typedef struct se {
 }Swap_Entry;
 //In the later part of the code, each pixel value will be compared and replaced with the donor. 
 //When replacing, if Recipient is itself a donor in some entries, the current Donor will override the donor in tose entries
-
+Pixel15* ProtectedBuffer;
 
 typedef struct com {
 

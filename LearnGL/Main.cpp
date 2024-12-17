@@ -576,9 +576,9 @@ int main(void) {
 	ActiveScene.AddActor(new Actor("chara", &cam));
 
 
-	ActiveScene.AddActor(new Actor("skele", NULL, transform(glm::vec3(1.0f,0.0f,10.0f)),2.0f));
+	//ActiveScene.AddActor(new Actor("skele", NULL, transform(glm::vec3(1.0f,0.0f,10.0f)),2.0f));
 
-	
+	//ActiveScene.AddActor(new Actor("raven", NULL, transform(glm::vec3(4.0f, 0.0f, 16.0f)), 0.0f));
 
 	glfwSetKeyCallback(window,key_callback);
 
@@ -623,7 +623,8 @@ int main(void) {
 		KeyActions();
 
 		
-		ActiveScene.SceneActors[1]->AI_Node.target = Player->Trans;
+		//ActiveScene.SceneActors[1]->AI_Node.target = Player->Trans;
+	
 	
 		std::chrono::time_point<std::chrono::high_resolution_clock> frameEnd = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> frameDuration = frameEnd - frameStart;

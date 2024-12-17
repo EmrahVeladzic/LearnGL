@@ -106,7 +106,7 @@ int open_WAV() {
 
 	Encoder.differential_buffer = (WAV16*)malloc(Encoder.sample_count * sizeof(WAV16));
 
-	Encoder.spu_buffer = (SPU_sample*)malloc(Encoder.spu_sample_count * sizeof(SPU_sample));
+	Encoder.spu_buffer = (SPU_block*)malloc(Encoder.spu_sample_count * sizeof(SPU_block));
 
 	if (IMPORTED.num_of_channels > 28)
 	{
@@ -140,10 +140,10 @@ int Export() {
 
 	NewWL.magic = 87;
 	NewWL.num_of_channels = (uint8_t)(IMPORTED.num_of_channels);
-	NewWL.clamp_bits = (MAX_TRESHOLD / 2) -1;
+	NewWL.clamp_bits = MAX_TRESHOLD/2;
 	NewWL.block_count = Encoder.spu_sample_count;
 	NewWL.default_sample_rate = (uint16_t)IMPORTED.sample_rate;
-	NewWL.data = (SPU_sample*)malloc(NewWL.block_count * sizeof(SPU_sample));
+	NewWL.data = (SPU_block*)malloc(NewWL.block_count * sizeof(SPU_block));
 
 	for (size_t i = 0; i < NewWL.block_count; i++)
 	{
@@ -245,7 +245,7 @@ int Reconvert() {
 
 int open_WL() {
 
-	NewWL.data = (SPU_sample*)malloc(Encoder.spu_sample_count * sizeof(SPU_sample));
+	NewWL.data = (SPU_block*)malloc(Encoder.spu_sample_count * sizeof(SPU_block));
 
 	fileio = fopen(fileexpath, "rb");
 

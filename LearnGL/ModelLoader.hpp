@@ -47,7 +47,7 @@ struct Bone {
 		
 };
 
-struct MImeshes {
+struct MImesh {
 
 	std::string name;
 
@@ -58,7 +58,7 @@ struct MImeshes {
 
 	int jointIndex;
 
-	MImeshes()
+	MImesh()
 	{
 		jointIndex = 0;
 		name = "NONE";
@@ -78,7 +78,7 @@ private:
 	std::vector<float> stVals;
 	std::vector<float> normVals;
 
-	std::vector<MImeshes> ImpMeshes;
+	std::vector<MImesh> ImpMeshes;
 
 	
 	
@@ -105,6 +105,8 @@ public:
 	nlohmann::json j_son;
 
 	int get_child_index(int j_son_index);
+
+	void parseGLB(const char* filePathRel, uint8_t scalingFactorBits, uint8_t FPS, uint8_t tPageX_begin, uint8_t tPageY_begin, uint8_t tPageX_end, uint8_t tPageY_end);
 
 	
 	void parseGLTF(const char* filePathRel, uint8_t scalingFactorBits, uint8_t FPS, uint8_t tPageX_begin, uint8_t tPageY_begin, uint8_t tPageX_end, uint8_t tPageY_end);
