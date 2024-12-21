@@ -82,7 +82,7 @@ ImportedModel::ImportedModel(const char* filePath) {
 	}
 	else
 	{
-		//importer.parseGLTF(filePath, 12, 60, 0, 0, (uint8_t)(tex_width - 1), (uint8_t)(tex_height - 1));
+		
 		importer.parseGLB(filePath, 12, 60, 0, 0, (uint8_t)(tex_width - 1), (uint8_t)(tex_height - 1));
 	}
 
@@ -186,9 +186,8 @@ void ModelImporter::parseGLB(const char* filePathRel, uint8_t scalingFactorBits,
 
 	num_meshes = int(j_son["meshes"].size());
 
-	json_length += 20;
 
-	json_length += (2 * sizeof(float));
+	json_length += 28;
 
 
 	if (j_son["skins"][0]["inverseBindMatrices"].is_number_integer()) {
