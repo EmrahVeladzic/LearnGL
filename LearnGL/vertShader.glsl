@@ -90,7 +90,7 @@ posFour = transform_matrix * posFour;
 
 vec4 tmpPos = proj_matrix * mv_matrix * posFour;
 
-float object_distance = clamp(tmpPos.w,-1,1000);
+
 
 
 
@@ -98,7 +98,13 @@ float object_distance = clamp(tmpPos.w,-1,1000);
 gl_Position = tmpPos;
 
 if(true){
-gl_Position.xy = round(gl_Position.xy*(512.0/object_distance))/object_distance;
+
+float fixed_s = 4096;
+
+ivec4 fixed_p = ivec4(gl_Position*fixed_s);
+
+gl_Position = vec4(fixed_p)/fixed_s;
+
 }
 
 

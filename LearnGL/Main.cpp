@@ -243,9 +243,13 @@ void animate(GLFWwindow* window, double currentTime, std::vector<Actor * >& acto
 					actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr].scales[scal_ind],
 					actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr].scales[se],
 					trans_inter, rot_inter, scal_inter
+
+
+					
 				);
-				
-				
+
+
+			
 			}
 
 		}
@@ -299,7 +303,7 @@ void display(GLFWwindow* window ,std::vector<Actor * >& actors) {
 
 		if (actor->Model->num_joints>0)
 		{
-			actor->Model->compute_pose(actor->Model->root);
+			actor->Model->compute_pose(actor->Model->root,glm::mat4x4(1.0f));
 		}
 
 		for (size_t i = 0; i < actor->Model->Meshes.size(); i++)
@@ -579,6 +583,7 @@ int main(void) {
 	ActiveScene.AddActor(new Actor("skele", NULL, transform(glm::vec3(1.0f,0.0f,10.0f)),2.0f));
 
 	ActiveScene.AddActor(new Actor("raven", NULL, transform(glm::vec3(4.0f, 0.0f, 16.0f)), 0.0f));
+
 
 	glfwSetKeyCallback(window,key_callback);
 

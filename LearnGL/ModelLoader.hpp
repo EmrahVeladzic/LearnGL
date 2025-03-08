@@ -199,9 +199,7 @@ struct Mesh {
 
 struct ImportedModel {
 
-	void compute_pose(int boneI);
-
-	glm::mat4x4 compute_transformJ(int boneI);
+	void compute_pose(int boneI, glm::mat4x4 parent_T);
 
 	std::vector<Mesh> Meshes;
 

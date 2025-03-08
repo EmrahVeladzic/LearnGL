@@ -21,7 +21,7 @@ struct Camera {
 	glm::mat4x4 viewMat;
 	
 
-	Camera(transform * T = nullptr ,float dist = 15.0f,float off = 1.0f, float spd = 3.0f);
+	Camera(transform * T = nullptr ,float dist = 5.0f,float off = 1.0f, float spd = 3.0f);
 	
 	void Retarget(transform* T);
 
