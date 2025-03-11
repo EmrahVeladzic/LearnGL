@@ -577,12 +577,12 @@ int main(void) {
 	glfwSwapInterval(1);
 
 		
-	ActiveScene.AddActor(new Actor("chara", &cam));
+	ActiveScene.AddActor(new Actor("CHARA", &cam));
 
 
-	ActiveScene.AddActor(new Actor("skele", NULL, transform(glm::vec3(1.0f,0.0f,10.0f)),2.0f));
+	ActiveScene.AddActor(new Actor("SKELE", NULL, transform(glm::vec3(1.0f,0.0f,10.0f)),2.0f));
 
-	ActiveScene.AddActor(new Actor("raven", NULL, transform(glm::vec3(4.0f, 0.0f, 16.0f)), 0.0f));
+	ActiveScene.AddActor(new Actor("RAVEN", NULL, transform(glm::vec3(4.0f, 0.0f, 16.0f)), 0.0f));
 
 
 	glfwSetKeyCallback(window,key_callback);
@@ -592,7 +592,7 @@ int main(void) {
 
 	init(window, ActiveScene.SceneActors);
 
-	sfx = global_audio.load_WL("rifftape");
+	sfx = global_audio.load_WL("RAVEN");
 
 	ALuint src;
 

@@ -1432,9 +1432,6 @@ void ModelImporter::GLTF_To_AST(const char* filePathRel , uint8_t scalingFactorB
 	astStream.write(reinterpret_cast<char*>(&tPageX_end), sizeof(tPageX_end));
 	astStream.write(reinterpret_cast<char*>(&tPageY_end), sizeof(tPageY_end));
 
-	astStream.write(reinterpret_cast<char*>(&FPS), sizeof(FPS));
-
-
 	tempByte = (uint8_t)ImpMeshes.size();
 
 	astStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
@@ -1535,6 +1532,8 @@ void ModelImporter::GLTF_To_AST(const char* filePathRel , uint8_t scalingFactorB
 
 	}
 
+
+
 	tempByte = (uint8_t)bones.size();
 	astStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
@@ -1554,8 +1553,9 @@ void ModelImporter::GLTF_To_AST(const char* filePathRel , uint8_t scalingFactorB
 			tempByte = (uint8_t)bones[0].animations.size();
 		}
 	}
-
 	astStream.write(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+
+	astStream.write(reinterpret_cast<char*>(&FPS), sizeof(FPS));
 
 
 	if (bones.size() > 0) {
@@ -1722,7 +1722,7 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 	animJoint tempAnim;
 	glm::vec4 tempVec;
 
-	const std::string Path = "Assets/" + (std::string)filePathRel + ".ast";
+	const std::string Path = "Assets/" + (std::string)filePathRel + ".AST";
 	
 
 	std::ifstream astStream;
@@ -1750,10 +1750,6 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 	astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
 	uint8_t y_end = tempByte;
-
-	astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
-
-	uint8_t targetFPS = tempByte;
 
 	astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
@@ -1863,6 +1859,9 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 
 	num_anims = animCount;
 	
+	astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+
+	uint8_t targetFPS = tempByte;
 
 	for (uint8_t i = 0; i < boneCount; i++)
 	{
@@ -2119,7 +2118,7 @@ void ImportedModel::compute_pose(int boneI, glm::mat4x4 Parent_T) {
 
 GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
-	std::string filePath = "Assets/" + (std::string)filePathRel +".rpf";
+	std::string filePath = "Assets/" + (std::string)filePathRel +".RPF";
 
 	std::ifstream rpfloader(filePath, std::ios::binary);
 
