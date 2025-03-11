@@ -4,7 +4,6 @@
 #include <vector>
 #include <GL/glew.h>
 #include "CustomImageFormat.hpp"
-#include "nlohmann/json.hpp"
 #include "Animation.h"
 #include "FixedPointMath.h"
 #include "SystemConfig.h"
@@ -102,15 +101,8 @@ public:
 
 	int getBoneIndex(int m);
 
-	nlohmann::json j_son;
 
 	int get_child_index(int j_son_index);
-
-	void parseGLB(const char* filePathRel, uint8_t scalingFactorBits, uint8_t FPS, uint8_t tPageX_begin, uint8_t tPageY_begin, uint8_t tPageX_end, uint8_t tPageY_end);
-
-	
-	void parseGLTF(const char* filePathRel, uint8_t scalingFactorBits, uint8_t FPS, uint8_t tPageX_begin, uint8_t tPageY_begin, uint8_t tPageX_end, uint8_t tPageY_end);
-	void GLTF_To_AST(const char* filePathRel, uint8_t scalingFactorBits, uint8_t FPS, uint8_t tPageX_begin, uint8_t tPageY_begin, uint8_t tPageX_end, uint8_t tPageY_end);
 	void OpenAST(const char* filePathRel);
 
 	int findBoneByNode(int node);

@@ -22,20 +22,20 @@ bool keys[NUM_KEYS];
 GLuint renderingProgram;
 
 
-GLuint projLoc, vLoc, tfLoc, mvLoc, invBindLoc, transLoc, offsetLoc, clutMultLoc ,tWidthLoc,tHeightLoc;
+GLuint projLoc, vLoc, tfLoc, mvLoc, invBindLoc, transLoc, offsetLoc, clutMultLoc, tWidthLoc, tHeightLoc;
 int width, height;
 float aspect, timeFactor;
 glm::mat4 pMat, mMat, mvMat;
 
 
-GLuint globalAmbiLoc, ambiLoc, diffLoc, specLoc, posLoc, mAmbiLoc, mDiffLoc, mSpecLoc, mShinLoc ;
+GLuint globalAmbiLoc, ambiLoc, diffLoc, specLoc, posLoc, mAmbiLoc, mDiffLoc, mSpecLoc, mShinLoc;
 
 
 
 
 Material testMat(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
 	glm::vec4(0.5f, 0.5f, 0.5f, 1.0f),
-	glm::vec4(0.25f, 0.25f, 0.25f, 1.0f), 
+	glm::vec4(0.25f, 0.25f, 0.25f, 1.0f),
 	0.1f, 0.0f, 0.0f);
 
 LightGeneric ambient(glm::vec4(0.1f, 0.1f, 0.1f, 1.0f),
@@ -44,30 +44,30 @@ LightGeneric ambient(glm::vec4(0.1f, 0.1f, 0.1f, 1.0f),
 
 LightPositional light(glm::vec4(0.125f, 0.125f, 0.125f, 1.0f),
 	glm::vec4(0.5f, 0.5f, 0.5f, 1.0f),
-	glm::vec4(0.25f, 0.25f, 0.25f, 1.0f), 
-	glm::vec3(5.0f, 5.0f,-5.0f), 
+	glm::vec4(0.25f, 0.25f, 0.25f, 1.0f),
+	glm::vec3(5.0f, 5.0f, -5.0f),
 	0.5f, 0.1f, 0.1f);
 
 ALuint sfx;
 
 
 
-void setupVertices(std::vector<Actor *>& models) {
-	
+void setupVertices(std::vector<Actor*>& models) {
 
-	
-	for (Actor * & actor:models)
+
+
+	for (Actor*& actor : models)
 	{
 		for (size_t i = 0; i < actor->Model->Meshes.size(); i++)
 		{
-			
-			
+
+
 			glGenVertexArrays(1, actor->Model->Meshes[i].vao);
 			glBindVertexArray(actor->Model->Meshes[i].vao[0]);
 
 			glGenBuffers(numVBOs, actor->Model->Meshes[i].vbo);
 
-		
+
 
 			glBindBuffer(GL_ARRAY_BUFFER, actor->Model->Meshes[i].vbo[0]);
 			glBufferData(GL_ARRAY_BUFFER, actor->Model->Meshes[i].vertices.size() * 12, &actor->Model->Meshes[i].vertices.data()[0], GL_STATIC_DRAW);
@@ -92,7 +92,7 @@ void setupVertices(std::vector<Actor *>& models) {
 }
 
 
-void init(GLFWwindow* window, std::vector<Actor *>& actors) {
+void init(GLFWwindow* window, std::vector<Actor*>& actors) {
 
 	renderingProgram = Utils::createShaderProgram("vertShader.glsl", "fragShader.glsl");
 
@@ -101,21 +101,21 @@ void init(GLFWwindow* window, std::vector<Actor *>& actors) {
 	aspect = (float)width / (float)height;
 	pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f);
 
-	if (Player!=nullptr) {
+	if (Player != nullptr) {
 
 		cam.Retarget(&Player->Trans);
-		
+
 	}
 	setupVertices(actors);
-		
+
 
 	ambient.enabled = true;
 	light.enabled = true;
 
-	
+
 
 	glEnable(GL_DEPTH_TEST);
-	
+
 	projLoc = glGetUniformLocation(renderingProgram, "proj_matrix");
 	globalAmbiLoc = glGetUniformLocation(renderingProgram, "glo_light.ambient");
 
@@ -137,25 +137,25 @@ void init(GLFWwindow* window, std::vector<Actor *>& actors) {
 	tWidthLoc = glGetUniformLocation(renderingProgram, "tex_width");
 	tHeightLoc = glGetUniformLocation(renderingProgram, "tex_height");
 
-	
 
 
-	for (Actor * & actor : actors)
-	{		
-		
+
+	for (Actor*& actor : actors)
+	{
+
 		actor->Model->importer.clearData();
 
 	}
 
 
-	
+
 }
 
-void lightingConfig(glm::mat4x4 & viewMatrix ) {
+void lightingConfig(glm::mat4x4& viewMatrix) {
 
 
 
-	
+
 
 
 	glProgramUniform4fv(renderingProgram, globalAmbiLoc, 1, ambient.get_ambient_float());
@@ -165,7 +165,7 @@ void lightingConfig(glm::mat4x4 & viewMatrix ) {
 	glProgramUniform4fv(renderingProgram, diffLoc, 1, light.get_diffuse_float());
 	glProgramUniform4fv(renderingProgram, specLoc, 1, light.get_specular_float());
 
-		
+
 
 	glProgramUniform4fv(renderingProgram, mAmbiLoc, 1, testMat.get_ambient_float());
 	glProgramUniform4fv(renderingProgram, mDiffLoc, 1, testMat.get_diffuse_float());
@@ -177,12 +177,12 @@ void lightingConfig(glm::mat4x4 & viewMatrix ) {
 
 }
 
-void animate(GLFWwindow* window, double currentTime, std::vector<Actor * >& actors) {
-	
+void animate(GLFWwindow* window, double currentTime, std::vector<Actor* >& actors) {
+
 
 	float currentGlobalTime = (float)(currentTime);
 
-	
+
 
 	int trans_ind;
 	int rot_ind;
@@ -192,25 +192,25 @@ void animate(GLFWwindow* window, double currentTime, std::vector<Actor * >& acto
 	float rot_inter;
 	float scal_inter;
 
-	for (Actor* & actor : actors)
+	for (Actor*& actor : actors)
 	{
 		int curr = actor->Model->currentAnim;
 
-		
+
 
 
 
 		for (size_t i = 0; i < actor->Model->Meshes.size(); i++)
 		{
-			
-			
-			
-			
+
+
+
+
 
 
 			if (actor->Model->num_anims > 0) {
 
-				
+
 
 				Utils::UpdateInterpolationIndex(actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr], currentGlobalTime);
 
@@ -223,15 +223,15 @@ void animate(GLFWwindow* window, double currentTime, std::vector<Actor * >& acto
 				rot_inter = actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr].rotInterpolation;
 				scal_inter = actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr].scalInterpolation;
 
-				
-				
+
+
 				int te = actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr].Tend_index;
-				
+
 				int re = actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr].Rend_index;
-				
+
 				int se = actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr].Send_index;
 
-				
+
 
 
 
@@ -245,11 +245,11 @@ void animate(GLFWwindow* window, double currentTime, std::vector<Actor * >& acto
 					trans_inter, rot_inter, scal_inter
 
 
-					
+
 				);
 
 
-			
+
 			}
 
 		}
@@ -257,7 +257,7 @@ void animate(GLFWwindow* window, double currentTime, std::vector<Actor * >& acto
 
 
 
-		
+
 	}
 
 
@@ -266,26 +266,26 @@ void animate(GLFWwindow* window, double currentTime, std::vector<Actor * >& acto
 
 
 
-void display(GLFWwindow* window ,std::vector<Actor * >& actors) {
+void display(GLFWwindow* window, std::vector<Actor* >& actors) {
 	std::stack<glm::mat4> mvStack;
 
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glClear(GL_COLOR_BUFFER_BIT);
-	
-	glClearColor(0.25f, 0.25f, 0.25f,1.0f);
+
+	glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 
 	glUseProgram(renderingProgram);
 
-	
-	
 
-	for (Actor * & actor : actors)
+
+
+	for (Actor*& actor : actors)
 	{
-		
+
 		glm::mat4x4 invBTemp = glm::mat4x4(1.0f);
 		glm::mat4x4 transTemp = glm::mat4x4(1.0f);
 
-		
+
 		glUniform1f(clutMultLoc, actor->Model->clut_multiplier);
 
 		lightingConfig(cam.viewMat);
@@ -299,11 +299,11 @@ void display(GLFWwindow* window ,std::vector<Actor * >& actors) {
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_1D, actor->Model->clut);
 
-		
 
-		if (actor->Model->num_joints>0)
+
+		if (actor->Model->num_joints > 0)
 		{
-			actor->Model->compute_pose(actor->Model->root,glm::mat4x4(1.0f));
+			actor->Model->compute_pose(actor->Model->root, glm::mat4x4(1.0f));
 		}
 
 		for (size_t i = 0; i < actor->Model->Meshes.size(); i++)
@@ -312,17 +312,14 @@ void display(GLFWwindow* window ,std::vector<Actor * >& actors) {
 			if (actor->Model->num_anims > 0)
 			{
 
-				if (useAST) {
-					invBTemp = glm::mat4x4(1.0f);
-				}
-				else
-				{
-					invBTemp = actor->Model->INVmatrices[actor->Model->Meshes[i].jointIndex];
-				}
-				
+
+				invBTemp = glm::mat4x4(1.0f);
+
+
+
 				transTemp = actor->Model->bones[actor->Model->Meshes[i].jointIndex].TransformMat;
 			}
-					
+
 
 
 			glBindBuffer(GL_ARRAY_BUFFER, actor->Model->Meshes[i].vbo[0]);
@@ -333,15 +330,15 @@ void display(GLFWwindow* window ,std::vector<Actor * >& actors) {
 
 			mvStack.push(cam.viewMat);
 
-			glm::mat4 translationMat = glm::translate(glm::mat4(1.0f),actor->Trans.translation);
+			glm::mat4 translationMat = glm::translate(glm::mat4(1.0f), actor->Trans.translation);
 
-			
+
 			mvStack.push(mvStack.top() * translationMat);
 
 
 			glm::mat4 rotationMat = glm::mat4_cast(actor->Trans.rotation);
 
-			
+
 			mvStack.push(mvStack.top() * rotationMat);
 
 
@@ -377,20 +374,20 @@ void display(GLFWwindow* window ,std::vector<Actor * >& actors) {
 
 
 			glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
-			
 
 
-			
+
+
 			glDrawElements(GL_TRIANGLES, actor->Model->Meshes[i].getNumIndices(), GL_UNSIGNED_SHORT, 0);
 
 		}
 
-	
-		
-	
+
+
+
 	}
 
-	
+
 
 	while (!mvStack.empty())
 	{
@@ -400,13 +397,13 @@ void display(GLFWwindow* window ,std::vector<Actor * >& actors) {
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	
-	
 
-	if (Player!=nullptr) {
 
-		
-			
+
+	if (Player != nullptr) {
+
+
+
 
 
 		if (action == GLFW_PRESS && key <NUM_KEYS && key>-1)
@@ -420,23 +417,23 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 		}
 
-		
+
 
 
 	}
 
-	
-	
+
+
 }
 
 void window_reshape_callback(GLFWwindow* window, int newWidth, int newHeight) {
-	if (newWidth>0 && newHeight>0)
+	if (newWidth > 0 && newHeight > 0)
 	{
 		aspect = (float)newWidth / (float)newHeight;
 		glViewport(0, 0, newWidth, newHeight);
 		pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f);
 	}
-	
+
 
 
 }
@@ -448,29 +445,29 @@ void KeyActions() {
 
 		if (keys[GLFW_KEY_W] == true)
 		{
-			
-			AI::Move(Player,glm::two_pi<float>());
+
+			AI::Move(Player, glm::two_pi<float>());
 
 		}
 		else if (keys[GLFW_KEY_S] == true)
 		{
-			AI::Move(Player,glm::pi<float>());
-			
+			AI::Move(Player, glm::pi<float>());
+
 
 
 		}
 
 		else if (keys[GLFW_KEY_A] == true)
 		{
-					
 
-			AI::Move(Player,glm::half_pi<float>());
+
+			AI::Move(Player, glm::half_pi<float>());
 
 
 		}
 		else if (keys[GLFW_KEY_D] == true)
 		{
-			AI::Move(Player,glm::pi<float>()+glm::half_pi<float>());
+			AI::Move(Player, glm::pi<float>() + glm::half_pi<float>());
 
 		}
 
@@ -510,7 +507,7 @@ void KeyActions() {
 
 			cam.Y_Axis(1.0f);
 		}
-		
+
 
 	}
 
@@ -542,10 +539,10 @@ int main(void) {
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-	
+
 	ALCdevice* audio_device = alcOpenDevice(nullptr);
-	ALCcontext* audio_context = alcCreateContext(audio_device,nullptr);
-	 
+	ALCcontext* audio_context = alcCreateContext(audio_device, nullptr);
+
 	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 
@@ -556,9 +553,9 @@ int main(void) {
 		resolution.x = 1600;
 		resolution.y = 1200;
 	}
-	
+
 	GLFWwindow* window = glfwCreateWindow(resolution.x, resolution.y, "OpenGL3D", monitor, NULL);
-	
+
 	glfwMakeContextCurrent(window);
 
 	alcMakeContextCurrent(audio_context);
@@ -568,90 +565,90 @@ int main(void) {
 		exit(EXIT_FAILURE);
 
 	}
-	
+
 
 
 	if (glewInit() != GLEW_OK) { exit(EXIT_FAILURE); }
 
-	
+
 	glfwSwapInterval(1);
 
-		
+
 	ActiveScene.AddActor(new Actor("CHARA", &cam));
 
 
-	ActiveScene.AddActor(new Actor("SKELE", NULL, transform(glm::vec3(1.0f,0.0f,10.0f)),2.0f));
+	ActiveScene.AddActor(new Actor("SKELE", NULL, transform(glm::vec3(1.0f, 0.0f, 10.0f)), 2.0f));
 
 	ActiveScene.AddActor(new Actor("RAVEN", NULL, transform(glm::vec3(4.0f, 0.0f, 16.0f)), 0.0f));
 
 
-	glfwSetKeyCallback(window,key_callback);
+	glfwSetKeyCallback(window, key_callback);
 
 	glEnable(GL_DEBUG_OUTPUT);
 	glDebugMessageCallback(MessageCallback, 0);
 
 	init(window, ActiveScene.SceneActors);
 
-	sfx = global_audio.load_WL("RAVEN");
+	sfx = global_audio.load_WL("LEAVES");
 
 	ALuint src;
 
-	alGenSources(1 ,&src);
+	alGenSources(1, &src);
 
 	alSourcei(src, AL_BUFFER, sfx);
 
-	alSourcei(src,AL_SOURCE_RELATIVE, AL_TRUE);
+	alSourcei(src, AL_SOURCE_RELATIVE, AL_TRUE);
 
 	alSourcei(src, AL_LOOPING, AL_TRUE);
 
 	alSourcef(src, AL_GAIN, 1.0f);
 
 	alSourcePlay(src);
-	
+
 	glfwSetWindowSizeCallback(window, window_reshape_callback);
 
 
-	
-	std::thread AIThread(&Scene::AIUpdate,&ActiveScene);
-	
+
+	std::thread AIThread(&Scene::AIUpdate, &ActiveScene);
+
 	AIThread.detach();
 
-	while (!glfwWindowShouldClose(window)){		
-		
+	while (!glfwWindowShouldClose(window)) {
+
 		std::chrono::time_point<std::chrono::high_resolution_clock> frameStart = std::chrono::high_resolution_clock::now();
 
 
-		animate(window,glfwGetTime(), ActiveScene.SceneActors);
+		animate(window, glfwGetTime(), ActiveScene.SceneActors);
 		display(window, ActiveScene.SceneActors);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		KeyActions();
 
-		
+
 		ActiveScene.SceneActors[1]->AI_Node.target = Player->Trans;
-	
-	
+
+
 		std::chrono::time_point<std::chrono::high_resolution_clock> frameEnd = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> frameDuration = frameEnd - frameStart;
 
 		double elapsed = frameDuration.count();
-		if (elapsed < (1.0f/(float)TARGET_FPS)) {
+		if (elapsed < (1.0f / (float)TARGET_FPS)) {
 			std::this_thread::sleep_for(std::chrono::duration<double>(1.0f / ((float)TARGET_FPS) - elapsed));
 		}
 
 	}
 
 	ActiveScene.performAIUpdates = false;
-	
+
 	alSourceStop(src);
-	
-	
+
+
 	alDeleteSources(1, &src);
 	alDeleteBuffers(1, &sfx);
 	alcDestroyContext(audio_context);
 	alcCloseDevice(audio_device);
 
-	
+
 
 	glfwDestroyWindow(window);
 	glfwTerminate();

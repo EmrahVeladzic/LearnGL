@@ -64,7 +64,6 @@
   <ItemGroup>
     <None Include="vertShader.glsl" />
     <None Include="fragShader.glsl" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Utils.hpp">

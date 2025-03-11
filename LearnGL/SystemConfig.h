@@ -9,8 +9,6 @@
 
 #define interpolateWL true
 
-#define useAST true	
-
 #define FULLSCREEN false
 
 #endif // !CONFIG

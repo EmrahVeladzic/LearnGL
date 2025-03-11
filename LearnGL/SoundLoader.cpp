@@ -22,15 +22,14 @@ ALuint Audio_Handler::load_WL(const char* filepathRel) {
 	stream.read(reinterpret_cast<char*>(&uninitialised.block_count), sizeof(uint32_t));
 	stream.read(reinterpret_cast<char*>(&uninitialised.sample_rate), sizeof(uint16_t));
 
-	const uint32_t pcm_sample_count = SAMPLES_PER_BLOCK * uninitialised.block_count;
+	const uint32_t pcm_sample_count = SAMPLES_PER_BLOCK * uninitialised.block_count * uninitialised.num_of_channels;
 
-	uninitialised.data = new Block[uninitialised.block_count];
+	uninitialised.data = new Block[uninitialised.block_count*(uint32_t)uninitialised.num_of_channels];
 
 	rawAudio = new int16_t[pcm_sample_count]();
-
 	
 
-	for (size_t i = 0; i < uninitialised.block_count; i++)
+	for (size_t i = 0; i < (uninitialised.block_count * (uint32_t)uninitialised.num_of_channels); i++)
 	{
 		stream.read(reinterpret_cast<char*>(&uninitialised.data[i].shift_filter), sizeof(uint8_t));
 		stream.read(reinterpret_cast<char*>(&uninitialised.data[i].flags), sizeof(uint8_t));
@@ -47,52 +46,54 @@ ALuint Audio_Handler::load_WL(const char* filepathRel) {
 
 	int16_t temp16 = 0;
 	uint8_t sh_val = 0;
-	uint16_t tempu16 = 0;
+	int32_t temp32 = 0;
 
-
-
-	for (size_t i = 0; i < uninitialised.block_count * SAMPLES_PER_BLOCK; i++)
+	for (size_t i = 0; i < pcm_sample_count-1; i+=2)
 	{
-			
 
-		sh_val = ((uninitialised.data[i / SAMPLES_PER_BLOCK].shift_filter) >> 4) & 0xF;
+		sh_val = uninitialised.data[i / 28].shift_filter >> 4;
 
+		temp = uninitialised.data[i / 28].Samples[i % 28].value;
 
+		temp32 = (int32_t)((temp >> 4)&0xF);
 
-			tempu16 = (uint16_t)(uninitialised.data[i / SAMPLES_PER_BLOCK].Samples[i % SAMPLES_PER_BLOCK].value & 0xF);
-			if (tempu16 & 0x8) {
-				tempu16 |= 0xFFF0;
-			}
+		if (temp32 > 7) {
+			temp32 -= 16;
+		}		
 
+		temp32 *= (1 <<sh_val);
 
-			tempu16 *= (1 << (sh_val + uninitialised.clamp_bits));
+		temp16 =(int16_t)(temp32 &0xFFFF);
 
+		rawAudio[i] = temp16;
 
+		temp32 = (int32_t)((temp) & 0xF);
 
-			rawAudio[i] = (int16_t)tempu16;
+		if (temp32 > 7) {
+			temp32 -= 16;
+		}
 
+		temp32 *= (1 <<sh_val);
 
+		temp16 = (int16_t)(temp32 & 0xFFFF);
 
-
-			if (interpolateWL && i >= (size_t)uninitialised.num_of_channels * 3)
-			{
-
-
-				temp16 = (rawAudio[i] - rawAudio[i - (size_t)(uninitialised.num_of_channels * 3)]) / 4;
-
-				rawAudio[i - (size_t)(uninitialised.num_of_channels * 1)] += temp16;
-
-				temp16 += (temp16 /= 2);
-
-				rawAudio[i - (size_t)(uninitialised.num_of_channels * 2)] += temp16;
-
-
-
-			}
-
-
+		rawAudio[i+1] = temp16;
 
 		
+	}
+
+	if (interpolateWL) {
+
+		for (size_t i = ((uninitialised.num_of_channels)*3); i < pcm_sample_count; i ++)
+		{
+			temp16 = (rawAudio[i] - rawAudio[i - (3*uninitialised.num_of_channels)])/4;
+
+			rawAudio[i - (uninitialised.num_of_channels * 2)] += temp16;
+
+			rawAudio[i - (uninitialised.num_of_channels)] += temp16*3;
+
+
+		}
 
 	}
 
