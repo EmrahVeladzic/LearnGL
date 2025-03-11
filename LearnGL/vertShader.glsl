@@ -95,17 +95,19 @@ vec4 tmpPos = proj_matrix * mv_matrix * posFour;
 
 
 
-gl_Position = tmpPos;
+
 
 if(true){
 
-float fixed_s = 4096;
+tmpPos.x=roundToPrecision(tmpPos.x,16);
+tmpPos.y=roundToPrecision(tmpPos.y,16);
 
-ivec4 fixed_p = ivec4(gl_Position*fixed_s);
 
-gl_Position = vec4(fixed_p)/fixed_s;
 
 }
+
+gl_Position = tmpPos;
+
 
 
 tc=texCoord;

@@ -589,7 +589,7 @@ int main(void) {
 
 	init(window, ActiveScene.SceneActors);
 
-	sfx = global_audio.load_WL("LEAVES");
+	sfx = global_audio.load_WL("RAVEN");
 
 	ALuint src;
 
