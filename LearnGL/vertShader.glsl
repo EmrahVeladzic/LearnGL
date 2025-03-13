@@ -50,6 +50,8 @@ uniform mat4 proj_matrix;
 uniform mat4 inv_bind_matrix;
 uniform mat4 transform_matrix;
 
+uniform bool psx_shader;
+
 
 uniform float tf;
 
@@ -97,7 +99,7 @@ vec4 tmpPos = proj_matrix * mv_matrix * posFour;
 
 
 
-if(true){
+if(psx_shader){
 
 tmpPos.x=roundToPrecision(tmpPos.x,16);
 tmpPos.y=roundToPrecision(tmpPos.y,16);

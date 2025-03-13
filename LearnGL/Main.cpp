@@ -22,7 +22,7 @@ bool keys[NUM_KEYS];
 GLuint renderingProgram;
 
 
-GLuint projLoc, vLoc, tfLoc, mvLoc, invBindLoc, transLoc, offsetLoc, clutMultLoc, tWidthLoc, tHeightLoc;
+GLuint projLoc, vLoc, tfLoc, mvLoc, invBindLoc, transLoc, offsetLoc, clutMultLoc, tWidthLoc, tHeightLoc, psxShaderLoc;
 int width, height;
 float aspect, timeFactor;
 glm::mat4 pMat, mMat, mvMat;
@@ -137,8 +137,9 @@ void init(GLFWwindow* window, std::vector<Actor*>& actors) {
 	tWidthLoc = glGetUniformLocation(renderingProgram, "tex_width");
 	tHeightLoc = glGetUniformLocation(renderingProgram, "tex_height");
 
+	psxShaderLoc = glGetUniformLocation(renderingProgram, "psx_shader");
 
-
+	glProgramUniform1i(renderingProgram, psxShaderLoc, PSX_SHADER);
 
 	for (Actor*& actor : actors)
 	{
@@ -589,7 +590,7 @@ int main(void) {
 
 	init(window, ActiveScene.SceneActors);
 
-	sfx = global_audio.load_WL("RAVEN");
+	sfx = global_audio.load_WL("LEAVES");
 
 	ALuint src;
 
@@ -607,7 +608,7 @@ int main(void) {
 
 	glfwSetWindowSizeCallback(window, window_reshape_callback);
 
-
+	
 
 	std::thread AIThread(&Scene::AIUpdate, &ActiveScene);
 

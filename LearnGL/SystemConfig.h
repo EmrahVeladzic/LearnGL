@@ -11,4 +11,6 @@
 
 #define FULLSCREEN false
 
+#define PSX_SHADER true
+
 #endif // !CONFIG
