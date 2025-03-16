@@ -16,7 +16,7 @@ ImportedModel::~ImportedModel() {
 	GLuint tDel[2] = { texture,clut };
 	glDeleteTextures(1,tDel);
 		
-	
+	delete this->material;
 
 
 	for (Mesh & msh : Meshes)
@@ -81,7 +81,10 @@ ImportedModel::ImportedModel(const char* filePath) {
 	importer.OpenAST(filePath);
 	
 
-
+	this->material = new Material(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+		glm::vec4(0.5f, 0.5f, 0.5f, 1.0f),
+		glm::vec4(0.25f, 0.25f, 0.25f, 1.0f),
+		0.1f, 0.0f, 0.0f);
 	
 	
 

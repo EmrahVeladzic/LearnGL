@@ -147,6 +147,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Materials.cpp" />
     <ClCompile Include="ModelLoader.cpp" />
+    <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SoundLoader.cpp" />
     <ClCompile Include="Transform.cpp" />
@@ -168,6 +169,7 @@
     <ClInclude Include="Lights.hpp" />
     <ClInclude Include="Materials.hpp" />
     <ClInclude Include="ModelLoader.hpp" />
+    <ClInclude Include="Renderer.hpp" />
     <ClInclude Include="Scene.hpp" />
     <ClInclude Include="SoundLoader.hpp" />
     <ClInclude Include="SystemConfig.h" />

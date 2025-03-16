@@ -9,7 +9,7 @@
 #include "SystemConfig.h"
 #include "GL_Math.h"
 #include "Utils.hpp"
-
+#include "Materials.hpp"
 
 
 
@@ -206,6 +206,7 @@ struct ImportedModel {
 
 	ModelImporter importer;
 	
+	Material* material;
 
 	ImportedModel(const char * filePath);
 	

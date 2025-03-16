@@ -8,9 +8,10 @@
 
 
 
-ALuint Audio_Handler::load_WL(const char* filepathRel) {
-	ALuint out;
+ALuint * Audio_Handler::load_WL(const char* filepathRel) {
+	ALuint * out;
 	uint8_t temp = 0;
+	bool loop;
 
 	const std::string filePath = "Assets/" + (std::string)filepathRel +".WL";
 
@@ -43,6 +44,17 @@ ALuint Audio_Handler::load_WL(const char* filepathRel) {
 
 		}
 	}
+
+	if (uninitialised.block_count > 0) {
+		if (uninitialised.data[0].flags == 6) {
+			loop = true;
+		}
+		else
+		{
+			loop = false;
+		}
+	}
+
 
 	int16_t temp16 = 0;
 	uint8_t sh_val = 0;
@@ -97,11 +109,15 @@ ALuint Audio_Handler::load_WL(const char* filepathRel) {
 
 	}
 
+	out = new ALuint[2];
 
-	alGenBuffers(1, &out);
-	alBufferData(out, (uninitialised.num_of_channels==1)?AL_FORMAT_MONO16:AL_FORMAT_STEREO16, rawAudio, (pcm_sample_count * sizeof(int16_t)), uninitialised.sample_rate);
+
+	alGenBuffers(1, &out[0]);
+	alBufferData(out[0], (uninitialised.num_of_channels == 1) ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16, rawAudio, (pcm_sample_count * sizeof(int16_t)), uninitialised.sample_rate);
 	delete[] rawAudio;
 	delete[] uninitialised.data;
+
+	out[1] = (loop == true) ? 1 : 0;
 
 	return out;
 }
