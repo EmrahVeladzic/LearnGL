@@ -9,8 +9,8 @@
 
 #define interpolateWL true
 
-#define useAST true
+#define FULLSCREEN false
 
-#define FULLSCREEN true
+#define PSX_SHADER true
 
 #endif // !CONFIG

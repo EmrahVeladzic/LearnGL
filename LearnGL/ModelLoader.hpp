@@ -4,13 +4,12 @@
 #include <vector>
 #include <GL/glew.h>
 #include "CustomImageFormat.hpp"
-#include "nlohmann/json.hpp"
 #include "Animation.h"
 #include "FixedPointMath.h"
 #include "SystemConfig.h"
 #include "GL_Math.h"
 #include "Utils.hpp"
-
+#include "Materials.hpp"
 
 
 
@@ -21,8 +20,6 @@ struct Bone {
 	int fromJointTab;
 
 	bool extremity;
-
-	std::string name;
 
 	int parent;
 
@@ -38,7 +35,7 @@ struct Bone {
 		fromNode = 0;
 		fromJointTab = 0;
 		extremity = false;
-		name = "NONE";
+		
 		parent = 0;
 		TransformMat = glm::mat4x4(1.0f);
 	}
@@ -47,9 +44,9 @@ struct Bone {
 		
 };
 
-struct MImeshes {
+struct MImesh {
 
-	std::string name;
+	
 
 	std::vector<float> triangleVerts;
 	std::vector<float> textureCoords;
@@ -58,10 +55,10 @@ struct MImeshes {
 
 	int jointIndex;
 
-	MImeshes()
+	MImesh()
 	{
 		jointIndex = 0;
-		name = "NONE";
+		
 	}
 
 };
@@ -78,7 +75,7 @@ private:
 	std::vector<float> stVals;
 	std::vector<float> normVals;
 
-	std::vector<MImeshes> ImpMeshes;
+	std::vector<MImesh> ImpMeshes;
 
 	
 	
@@ -102,13 +99,8 @@ public:
 
 	int getBoneIndex(int m);
 
-	nlohmann::json j_son;
 
 	int get_child_index(int j_son_index);
-
-	
-	void parseGLTF(const char* filePathRel, uint8_t scalingFactorBits, uint8_t FPS, uint8_t tPageX_begin, uint8_t tPageY_begin, uint8_t tPageX_end, uint8_t tPageY_end);
-	void GLTF_To_AST(const char* filePathRel, uint8_t scalingFactorBits, uint8_t FPS, uint8_t tPageX_begin, uint8_t tPageY_begin, uint8_t tPageX_end, uint8_t tPageY_end);
 	void OpenAST(const char* filePathRel);
 
 	int findBoneByNode(int node);
@@ -197,9 +189,7 @@ struct Mesh {
 
 struct ImportedModel {
 
-	void compute_pose(int boneI);
-
-	glm::mat4x4 compute_transformJ(int boneI);
+	void compute_pose(int boneI, glm::mat4x4 parent_T);
 
 	std::vector<Mesh> Meshes;
 
@@ -210,14 +200,13 @@ struct ImportedModel {
 	std::vector< glm::mat4x4> INVmatrices;
 	std::vector<Bone> bones;
 	
-	int root;
-
-	
+	int root;	
 
 	int currentAnim;
 
 	ModelImporter importer;
 	
+	Material* material;
 
 	ImportedModel(const char * filePath);
 	

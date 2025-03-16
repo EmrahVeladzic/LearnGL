@@ -25,6 +25,12 @@
     <Filter Include="Source Files\Scene">
       <UniqueIdentifier>{2def2377-9765-40ad-8965-53de8d64bf88}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Rendering">
+      <UniqueIdentifier>{c1c5e429-c62b-4ff8-82bc-d4ef4a50ca21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Rendering">
+      <UniqueIdentifier>{99f0d7da-f59a-4e0f-b177-424f962d85dd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -60,11 +66,13 @@
     <ClCompile Include="Transform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vertShader.glsl" />
     <None Include="fragShader.glsl" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Utils.hpp">
@@ -114,6 +122,9 @@
     </ClInclude>
     <ClInclude Include="AI_Handler.hpp">
       <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.hpp">
+      <Filter>Header Files\Rendering</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

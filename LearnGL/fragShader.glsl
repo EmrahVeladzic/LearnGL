@@ -27,6 +27,7 @@ const float[8][8] bayerMatrix ={
 uniform uint tex_width;
 uniform uint tex_height;
 
+uniform bool psx_shader;
 
 float dither (vec2 position){
 int dith_x = int(mod(int(position.x*tex_width),8));
@@ -97,11 +98,6 @@ vec3 specular=pos_light.specular.xyz*material.specular.xyz*pow(max(cosPhi,0.0f),
 
 vec4 light = vec4((ambient+diffuse+specular),1.0f);
 
-
-
-
-if(true){
-
 float clr_ind = texture(samp,affine_tc).r * clut_multiplier;
 
 
@@ -109,13 +105,15 @@ float clr_ind = texture(samp,affine_tc).r * clut_multiplier;
 vec4 simple_color=texture(cltsamp,clr_ind);
 
 
-
-
-	if(simple_color.a==0.0){
+if(simple_color.a==0.0){
 
 		discard;
 
-	}
+}
+
+if(psx_shader){
+
+
 	
 		float lum = (simple_color.r+simple_color.g+simple_color.b)/3.0;
 
@@ -151,27 +149,11 @@ vec4 simple_color=texture(cltsamp,clr_ind);
 
 		
 
-	color=simple_color*light;
-
-}
-
-else{
-float clr_ind = texture(samp,tc).r * clut_multiplier;
-
-vec4 simple_color=texture(cltsamp,clr_ind);
-
-
-
-
-	if(simple_color.a==0.0){
-
-		discard;
-
-	}
 	
 
-	color=simple_color*light;
-
 }
+
+color=simple_color*light;
+
 	
 }

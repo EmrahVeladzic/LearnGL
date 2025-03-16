@@ -50,6 +50,8 @@ uniform mat4 proj_matrix;
 uniform mat4 inv_bind_matrix;
 uniform mat4 transform_matrix;
 
+uniform bool psx_shader;
+
 
 uniform float tf;
 
@@ -90,16 +92,24 @@ posFour = transform_matrix * posFour;
 
 vec4 tmpPos = proj_matrix * mv_matrix * posFour;
 
-float object_distance = clamp(tmpPos.w,-1,1000);
 
 
 
+
+
+
+
+if(psx_shader){
+
+tmpPos.x=roundToPrecision(tmpPos.x,16);
+tmpPos.y=roundToPrecision(tmpPos.y,16);
+
+
+
+}
 
 gl_Position = tmpPos;
 
-if(true){
-gl_Position.xy = round(gl_Position.xy*(512.0/object_distance))/object_distance;
-}
 
 
 tc=texCoord;
