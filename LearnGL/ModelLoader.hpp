@@ -21,8 +21,6 @@ struct Bone {
 
 	bool extremity;
 
-	std::string name;
-
 	int parent;
 
 	glm::mat4x4 TransformMat;
@@ -37,7 +35,7 @@ struct Bone {
 		fromNode = 0;
 		fromJointTab = 0;
 		extremity = false;
-		name = "NONE";
+		
 		parent = 0;
 		TransformMat = glm::mat4x4(1.0f);
 	}
@@ -48,7 +46,7 @@ struct Bone {
 
 struct MImesh {
 
-	std::string name;
+	
 
 	std::vector<float> triangleVerts;
 	std::vector<float> textureCoords;
@@ -60,7 +58,7 @@ struct MImesh {
 	MImesh()
 	{
 		jointIndex = 0;
-		name = "NONE";
+		
 	}
 
 };
@@ -202,9 +200,7 @@ struct ImportedModel {
 	std::vector< glm::mat4x4> INVmatrices;
 	std::vector<Bone> bones;
 	
-	int root;
-
-	
+	int root;	
 
 	int currentAnim;
 
