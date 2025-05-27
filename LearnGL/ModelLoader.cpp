@@ -192,8 +192,8 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 	astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
 
-	uint16_t x_diff = (uint16_t)(x_end - x_beg) + 1;
-	uint16_t y_diff = (uint16_t)(y_end - y_beg) + 1;
+	uint8_t x_diff = (x_end - x_beg);
+	uint8_t y_diff = (y_end - y_beg);
 
 	uint8_t mshCount = tempByte;
 	num_meshes = mshCount;	
@@ -241,14 +241,14 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 			astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
 
-			tempFloat = ((float(tempByte) * ((float)x_diff / (float)(x_diff - 1))) / (float)(x_diff));
+			tempFloat = (float(tempByte) / (float)(x_diff));
 
 
 			tempMesh.textureCoords.push_back(tempFloat);
 
 			astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
-			tempFloat = ((float(tempByte) * ((float)y_diff / (float)(y_diff - 1))) / (float)(y_diff));
+			tempFloat = (float(tempByte)/ (float)(y_diff));
 
 			tempMesh.textureCoords.push_back(tempFloat);
 
