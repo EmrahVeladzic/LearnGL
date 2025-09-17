@@ -45,6 +45,8 @@ ALuint * Audio_Handler::load_WL(const char* filepathRel) {
 		}
 	}
 
+
+
 	if (uninitialised.block_count > 0) {
 		if (uninitialised.data[0].flags == 6) {
 			loop = true;
@@ -63,7 +65,7 @@ ALuint * Audio_Handler::load_WL(const char* filepathRel) {
 	for (size_t i = 0; i < pcm_sample_count-1; i+=2)
 	{
 
-		sh_val = uninitialised.data[i / 28].shift_filter >> 4;
+		sh_val = uninitialised.data[i / 28].shift_filter & 0xF;
 
 		temp = uninitialised.data[i / 28].Samples[i % 28].value;
 
@@ -73,7 +75,7 @@ ALuint * Audio_Handler::load_WL(const char* filepathRel) {
 			temp32 -= 16;
 		}		
 
-		temp32 *= (1 <<sh_val);
+		temp32 *= (1 << (12-sh_val));
 
 		temp16 =(int16_t)(temp32 &0xFFFF);
 
@@ -85,7 +87,7 @@ ALuint * Audio_Handler::load_WL(const char* filepathRel) {
 			temp32 -= 16;
 		}
 
-		temp32 *= (1 <<sh_val);
+		temp32 *= (1 <<(12-sh_val));
 
 		temp16 = (int16_t)(temp32 & 0xFFFF);
 
@@ -94,7 +96,29 @@ ALuint * Audio_Handler::load_WL(const char* filepathRel) {
 		
 	}
 
-	if (interpolateWL) {
+	int16_t* sorted_audio = new int16_t[pcm_sample_count];
+
+	size_t index = 0;
+
+	for (size_t i = 0; i < uninitialised.num_of_channels; i++)
+	{
+
+		for (size_t j = i; j < pcm_sample_count; j+=(size_t)uninitialised.num_of_channels)
+		{
+
+			sorted_audio[j] = rawAudio[index];
+			index++;
+
+		}
+
+
+	}
+
+	delete[] rawAudio;
+
+	rawAudio = sorted_audio;
+
+	if (useSPUFilter) {
 
 		for (size_t i = ((uninitialised.num_of_channels)*3); i < pcm_sample_count; i ++)
 		{

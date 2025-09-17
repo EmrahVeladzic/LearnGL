@@ -201,7 +201,7 @@ int main(void) {
 
 	renderer_init(window, ActiveScene.SceneActors);
 
-	sfx = global_audio.load_WL("RAVEN");
+	sfx = global_audio.load_WL("LEAVES");
 
 	ALuint src;
 
@@ -215,7 +215,7 @@ int main(void) {
 
 	alSourcef(src, AL_GAIN, 1.0f);
 
-	alSourcePlay(src);
+	//alSourcePlay(src);
 
 	glfwSetWindowSizeCallback(window, window_reshape_callback);
 
@@ -245,7 +245,7 @@ int main(void) {
 
 		double elapsed = frameDuration.count();
 		if (elapsed < (1.0f / (float)TARGET_FPS)) {
-			std::this_thread::sleep_for(std::chrono::duration<double>(1.0f / ((float)TARGET_FPS) - elapsed));
+			std::this_thread::sleep_for(std::chrono::duration<double>((1.0f / ((float)TARGET_FPS)) - elapsed));
 		}
 
 	}
