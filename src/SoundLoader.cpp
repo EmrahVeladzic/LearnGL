@@ -118,20 +118,7 @@ ALuint * Audio_Handler::load_WL(const char* filepathRel) {
 
 	rawAudio = sorted_audio;
 
-	if (useSPUFilter) {
-
-		for (size_t i = ((uninitialised.num_of_channels)*3); i < pcm_sample_count; i ++)
-		{
-			temp16 = (rawAudio[i] - rawAudio[i - (3*uninitialised.num_of_channels)])/4;
-
-			rawAudio[i - (uninitialised.num_of_channels * 2)] += temp16;
-
-			rawAudio[i - (uninitialised.num_of_channels)] += temp16*3;
-
-
-		}
-
-	}
+	
 
 	out = new ALuint[2];
 

@@ -145,12 +145,7 @@ void lightingConfig(glm::mat4x4& viewMatrix, Material* mat) {
 
 }
 
-void animate(GLFWwindow* window, double currentTime, std::vector<Actor* >& actors) {
-
-
-	float currentGlobalTime = (float)(currentTime);
-
-
+void animate(GLFWwindow* window, double deltaTime, std::vector<Actor* >& actors) {
 
 	int trans_ind;
 	int rot_ind;
@@ -166,13 +161,8 @@ void animate(GLFWwindow* window, double currentTime, std::vector<Actor* >& actor
 
 
 
-
-
 		for (size_t i = 0; i < actor->Model->Meshes.size(); i++)
 		{
-
-
-
 
 
 
@@ -180,7 +170,7 @@ void animate(GLFWwindow* window, double currentTime, std::vector<Actor* >& actor
 
 
 
-				Utils::UpdateInterpolationIndex(actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr], currentGlobalTime);
+				Utils::UpdateInterpolationIndex(actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr], (float)deltaTime);
 
 
 				trans_ind = actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr].transIndex;
@@ -198,10 +188,6 @@ void animate(GLFWwindow* window, double currentTime, std::vector<Actor* >& actor
 				int re = actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr].Rend_index;
 
 				int se = actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr].Send_index;
-
-
-
-
 
 				actor->Model->bones[actor->Model->Meshes[i].jointIndex].TransformMat = Utils::interpolateTransforms(
 					actor->Model->bones[actor->Model->Meshes[i].jointIndex].animations[curr].translations[trans_ind],

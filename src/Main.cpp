@@ -97,7 +97,7 @@ void KeyActions() {
 
 		if (keys[GLFW_KEY_LEFT]) {
 
-			cam.X_Axis(1.0f);
+			cam.X_Axis(0.5f);
 
 
 		}
@@ -105,19 +105,19 @@ void KeyActions() {
 		if (keys[GLFW_KEY_RIGHT]) {
 
 
-			cam.X_Axis(-1.0f);
+			cam.X_Axis(-0.5f);
 
 
 		}
 
 		if (keys[GLFW_KEY_UP]) {
 
-			cam.Y_Axis(-1.0f);
+			cam.Y_Axis(-0.5f);
 		}
 
 		if (keys[GLFW_KEY_DOWN]) {
 
-			cam.Y_Axis(1.0f);
+			cam.Y_Axis(0.5f);
 		}
 
 
@@ -189,7 +189,7 @@ int main(void) {
 	ActiveScene.AddActor(new Actor("CHARA", &cam));
 
 
-	ActiveScene.AddActor(new Actor("SKELE", NULL, transform(glm::vec3(1.0f, 0.0f, 10.0f)), 2.0f));
+	ActiveScene.AddActor(new Actor("SKELE", NULL, transform(glm::vec3(1.0f, 0.0f, 10.0f)), 200.0f));
 
 	ActiveScene.AddActor(new Actor("RAVEN", NULL, transform(glm::vec3(4.0f, 0.0f, 16.0f)), 0.0f));
 
@@ -215,7 +215,7 @@ int main(void) {
 
 	alSourcef(src, AL_GAIN, 1.0f);
 
-	//alSourcePlay(src);
+	alSourcePlay(src);
 
 	glfwSetWindowSizeCallback(window, window_reshape_callback);
 
@@ -225,29 +225,23 @@ int main(void) {
 
 	AIThread.detach();
 
+	double last_time = glfwGetTime();
+
+
 	while (!glfwWindowShouldClose(window)) {
 
-		std::chrono::time_point<std::chrono::high_resolution_clock> frameStart = std::chrono::high_resolution_clock::now();
+		double current_time = glfwGetTime();		
 
 
-		animate(window, glfwGetTime(), ActiveScene.SceneActors);
+		animate(window, current_time - last_time, ActiveScene.SceneActors);
 		display(window, ActiveScene.SceneActors);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		KeyActions();
-
-
 		ActiveScene.SceneActors[1]->AI_Node.target = Player->Trans;
 
-
-		std::chrono::time_point<std::chrono::high_resolution_clock> frameEnd = std::chrono::high_resolution_clock::now();
-		std::chrono::duration<double> frameDuration = frameEnd - frameStart;
-
-		double elapsed = frameDuration.count();
-		if (elapsed < (1.0f / (float)TARGET_FPS)) {
-			std::this_thread::sleep_for(std::chrono::duration<double>((1.0f / ((float)TARGET_FPS)) - elapsed));
-		}
-
+		last_time = current_time;	
+		
 	}
 
 	ActiveScene.performAIUpdates = false;

@@ -29,7 +29,7 @@ namespace Utils {
  
   GLuint createShaderProgram(const char* vp, const char* fp);
  
-  float getInterpolationValue(float current, float begin, float end);
+  float getInterpolationValue(float current,float delta, float begin, float end);
  
  
  // transform matToTrans(glm::mat4x4 input);

@@ -35,9 +35,9 @@ void Utils::UpdateInterpolationIndex(animJoint& in, float timestamp) {
 	float beginScal = in.scalTimes[in.scalIndex];
 	float endScal = in.scalTimes[in.scalIndex + 1];
 
-	in.transInterpolation = getInterpolationValue(timestamp, beginTrans,endTrans);
-	in.rotInterpolation = getInterpolationValue(timestamp, beginRot, endRot);
-	in.scalInterpolation = getInterpolationValue(timestamp, beginScal, endScal);
+	in.transInterpolation = getInterpolationValue(in.transInterpolation,timestamp, beginTrans,endTrans);
+	in.rotInterpolation = getInterpolationValue(in.rotInterpolation,timestamp, beginRot, endRot);
+	in.scalInterpolation = getInterpolationValue(in.scalInterpolation,timestamp, beginScal, endScal);
 
 	
 
@@ -50,7 +50,7 @@ void Utils::UpdateInterpolationIndex(animJoint& in, float timestamp) {
 	if (in.rotInterpolation >= INTERPOLATION_APPROX)
 	{
 		in.rotIndex++;
-		in.transInterpolation -= INTERPOLATION_APPROX;
+		in.rotInterpolation -= INTERPOLATION_APPROX;
 
 	}
 	if (in.scalInterpolation >= INTERPOLATION_APPROX)
@@ -92,9 +92,29 @@ void Utils::UpdateInterpolationIndex(animJoint& in, float timestamp) {
 	
 }
 
+float Utils::getInterpolationValue(float current, float delta, float begin, float end) {
+
+	if (begin > end) {
+		end += begin;
+	}
 
 
+	float out = delta / (end - begin);
 
+	out += current;
+
+
+	if (out > 1.0f)
+	{
+		out = 1.0f;
+	}
+	if (out < 0.0f)
+	{
+		out = 0.0f;
+	}
+
+	return out;
+}
 
 
 glm::mat4x4 Utils::interpolateTransforms(glm::vec3 transA, glm::vec3 transB, glm::quat rotA, glm::quat rotB, glm::vec3 scalA, glm::vec3 scalB, float passedTrans, float passedRot, float passedScal) {
@@ -108,28 +128,6 @@ glm::mat4x4 Utils::interpolateTransforms(glm::vec3 transA, glm::vec3 transB, glm
 
 	return out.Matrix();
 }
-
-
-float Utils::getInterpolationValue(float current, float begin, float end) {
-	
-	if (begin > end) {
-		end += begin;
-	}
-
-	float out = (current - begin) / (end - begin);
-
-	if (out>1.0f)
-	{
-		out = 1.0f;
-	}
-	if (out<0.0f)
-	{
-		out = 0.0f;
-	}
-
-	return out;
-}
-
 
 
 void Utils::printShaderLog(GLuint shader) {

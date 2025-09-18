@@ -6,7 +6,8 @@ Objective::Objective(empty t , glm::quat R , float tDist, uint8_t route, uint8_t
 
 	target = t;
 	targetDistance = tDist;	
-	
+	RouteID = route;
+	RouteNodeID = routeNode;
 
 }
 

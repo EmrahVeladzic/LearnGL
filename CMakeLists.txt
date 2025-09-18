@@ -18,6 +18,10 @@ set(SHADERS
     ${CMAKE_SOURCE_DIR}/src/vertShader.glsl
 )
 
+if(MSVC)
+       set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")  # /MD
+endif()
+
 add_executable(LearnGL ${SOURCES})
 
 set_property(TARGET LearnGL PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$(OutDir)")

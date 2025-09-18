@@ -32,7 +32,7 @@ struct Actor {
 	
 	Objective AI_Node;
 
-	Actor(const char* fileName, Camera* cam = nullptr, transform TRS = transform(), float mv=4.0f, uint8_t team = 0, Objective defaultObjective = Objective());
+	Actor(const char* fileName, Camera* cam = nullptr, transform TRS = transform(), float mv=200.0f, uint8_t team = 0, Objective defaultObjective = Objective());
 	
 	~Actor();
 

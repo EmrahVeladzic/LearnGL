@@ -595,7 +595,7 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
 	}
 
-	else if ((rpf.magic[1] + 1) <= 16 && (rpf.magic[1]+1)>4) {
+	else{
 		uint8_t msb = 0;
 		uint8_t lsb = 0;
 
@@ -617,86 +617,7 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 		}
 
 		
-	}
-
-	else if ((rpf.magic[1] + 1) <= 4 && (rpf.magic[1] + 1) > 2)
-	{
-
-		uint8_t msb = 0;
-		uint8_t hsb = 0;
-		uint8_t rsb = 0;
-		uint8_t lsb = 0;
-
-		uint8_t temp_data = 0;
-
-		for (int i = 0; i < (int)((((int)rpf.magic[2] + 1) * ((int)rpf.magic[3] + 1)) / 4); i++)
-		{
-			rpfloader.read(reinterpret_cast<char*>(&temp_data), sizeof(char));
-
-			msb = (uint8_t)(temp_data >> 6) & 0x03;
-			hsb = (uint8_t)(temp_data >> 4) & 0x03;
-			rsb = (uint8_t)(temp_data >> 2) & 0x03;
-			lsb = (uint8_t)(temp_data) & 0x03;
-
-
-			rpf.data[(4 * i)] = msb;
-			rpf.data[(4 * i) + 1] = hsb;
-			rpf.data[(4 * i) + 2] = rsb;
-			rpf.data[(4 * i) + 3] = lsb;
-
-		}
-
-
-	
-
-	}
-
-	else
-	{
-		uint8_t msb = 0;
-		uint8_t asb = 0;
-		uint8_t bsb = 0;
-		uint8_t csb = 0;
-		uint8_t dsb = 0;
-		uint8_t esb = 0;
-		uint8_t fsb = 0;
-		uint8_t lsb = 0;
-
-
-		uint8_t temp_data = 0;
-
-		for (int i = 0; i < (int)((((int)rpf.magic[2] + 1) * ((int)rpf.magic[3] + 1)) / 8); i++)
-		{
-			rpfloader.read(reinterpret_cast<char*>(&temp_data), sizeof(char));
-
-
-			msb = (uint8_t)(temp_data >> 7) & 0x01;
-			asb = (uint8_t)(temp_data >> 6) & 0x01;
-			bsb = (uint8_t)(temp_data >> 5) & 0x01;
-			csb = (uint8_t)(temp_data >> 4) & 0x01;
-			dsb = (uint8_t)(temp_data >> 3) & 0x01;
-			esb = (uint8_t)(temp_data >> 2) & 0x01;
-			fsb = (uint8_t)(temp_data >> 1) & 0x01;
-			lsb = (uint8_t)(temp_data) & 0x01;
-
-
-			rpf.data[(8 * i)] = msb ;
-			rpf.data[(8 * i) + 1] = asb;
-			rpf.data[(8 * i) + 2] = bsb;
-			rpf.data[(8 * i) + 3] = csb;
-			rpf.data[(8 * i) + 4] = dsb;
-			rpf.data[(8 * i) + 5] = esb;
-			rpf.data[(8 * i) + 6] = fsb;
-			rpf.data[(8 * i) + 7] = lsb;
-
-		}
-
-	
-
-		
-	}
-
-
+	}	
 
 
 

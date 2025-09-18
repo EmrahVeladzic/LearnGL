@@ -21,7 +21,7 @@ extern LightPositional light;
 void setupVertices(std::vector<Actor*>& models);
 void renderer_init(GLFWwindow* window, std::vector<Actor*>& actors);
 void lightingConfig(glm::mat4x4& viewMatrix, Material* mat);
-void animate(GLFWwindow* window, double currentTime, std::vector<Actor* >& actors);
+void animate(GLFWwindow* window, double deltaTime, std::vector<Actor* >& actors);
 void display(GLFWwindow* window, std::vector<Actor* >& actors);
 void window_reshape_callback(GLFWwindow* window, int newWidth, int newHeight);
 

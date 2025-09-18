@@ -10,9 +10,9 @@ size_t AI::Move(Actor * executor) {
 	{
 		glm::mat4x4 look = glm::lookAt(executor->AI_Node.target.translation, executor->Trans.translation, glm::vec3(0.0f, 1.0f, 0.0f));
 
-		executor->Trans.rotation = glm::slerp(executor->Trans.rotation, transform(look).rotation, executor->mvSpeed);
+		executor->Trans.rotation = glm::slerp(executor->Trans.rotation, transform(look).rotation, executor->mvSpeed * (1.0f / (float)TARGET_FPS));
 
-		executor->Trans.translation += nDiff * executor->mvSpeed;
+		executor->Trans.translation += nDiff * executor->mvSpeed * (1.0f / (float)TARGET_FPS);
 
 
 		if (!executor->Model->bones.empty() && executor->Model->bones[0].animations.size() > 1) {
@@ -47,9 +47,9 @@ size_t AI::Move(Actor * executor,empty target , bool inherit) {
 	{
 		glm::mat4x4 look = glm::lookAt(target.translation, executor->Trans.translation, glm::vec3(0.0f, 1.0f, 0.0f));
 
-		executor->Trans.rotation = glm::slerp(executor->Trans.rotation, transform(look).rotation,executor->mvSpeed);
+		executor->Trans.rotation = glm::slerp(executor->Trans.rotation, transform(look).rotation,executor->mvSpeed * (1.0f / (float)TARGET_FPS));
 
-		executor->Trans.translation += nDiff * executor->mvSpeed;
+		executor->Trans.translation += nDiff * executor->mvSpeed * (1.0f / (float)TARGET_FPS);
 		
 
 		if (!executor->Model->bones.empty() && executor->Model->bones[0].animations.size() > 1) {
@@ -62,7 +62,7 @@ size_t AI::Move(Actor * executor,empty target , bool inherit) {
 	
 	else if (glm::abs(angle)>0.0f && inherit)
 	{
-		executor->Trans.rotation = glm::slerp(executor->Trans.rotation, target.rotation, executor->mvSpeed);
+		executor->Trans.rotation = glm::slerp(executor->Trans.rotation, target.rotation, executor->mvSpeed * (1.0f / (float)TARGET_FPS));
 		
 
 		if (!executor->Model->bones.empty() && executor->Model->bones[0].animations.size() > 1) {
@@ -97,9 +97,9 @@ size_t AI::Move(Actor * executor, float Angle, float Y) {
 
 	executor->AI_Node.target.rotation = glm::angleAxis(Angle + Y + glm::pi<float>(), glm::vec3(0.0f, 1.0f, 0.0f));
 
-	executor->Trans.rotation = glm::slerp(executor->Trans.rotation, executor->AI_Node.target.rotation, executor->mvSpeed);
+	executor->Trans.rotation = glm::slerp(executor->Trans.rotation, executor->AI_Node.target.rotation, executor->mvSpeed * (1.0f / (float)TARGET_FPS));
 
-	executor->Trans.translation += executor->Trans.rotation * glm::vec3(0.0f, 0.0f, executor->mvSpeed);
+	executor->Trans.translation += executor->Trans.rotation * glm::vec3(0.0f, 0.0f, executor->mvSpeed*(1.0f/(float)TARGET_FPS));
 
 	if (executor->Cam != nullptr) {
 		executor->Cam->Update();
