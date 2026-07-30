@@ -191,7 +191,7 @@ int main(void) {
 
 	ActiveScene.AddActor(new Actor("SKELE", NULL, transform(glm::vec3(1.0f, 0.0f, 10.0f)), 200.0f));
 
-	ActiveScene.AddActor(new Actor("RAVEN", NULL, transform(glm::vec3(4.0f, 0.0f, 16.0f)), 0.0f));
+	//ActiveScene.AddActor(new Actor("RAVEN", NULL, transform(glm::vec3(4.0f, 0.0f, 16.0f)), 0.0f));
 
 
 	glfwSetKeyCallback(window, key_callback);
@@ -201,7 +201,7 @@ int main(void) {
 
 	renderer_init(window, ActiveScene.SceneActors);
 
-	sfx = global_audio.load_WL("LEAVES");
+	sfx = global_audio.load_WL("RAVEN");
 
 	ALuint src;
 
