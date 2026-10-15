@@ -5,11 +5,11 @@
 #pragma pack(push,4)
 struct RPF
 {
-	uint8_t magic[4];// Byte 0 = "R" , Byte 1 = CLUT size, Byte 2 = width, Byte 3 = height
+	uint8_t magic[4];
 
-	uint16_t* CLUT;//Color lookup table
+	uint16_t* CLUT;
 
-	uint8_t* data;//Pixel references to the CLUT
+	uint8_t* data;
 };
 #pragma pack(pop)
 

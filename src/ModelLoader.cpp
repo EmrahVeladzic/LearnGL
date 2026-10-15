@@ -10,16 +10,16 @@
 
 
 ImportedModel::~ImportedModel() {
-	
+
 	importer.clearData();
 	importer.clearRig();
 	GLuint tDel[2] = { texture,clut };
-	glDeleteTextures(1,tDel);
-		
+	glDeleteTextures(1, tDel);
+
 	delete this->material;
 
 
-	for (Mesh & msh : Meshes)
+	for (Mesh& msh : Meshes)
 	{
 		msh.vertices.clear();
 		msh.indices.clear();
@@ -31,7 +31,7 @@ ImportedModel::~ImportedModel() {
 		glDeleteBuffers(numEBOs, msh.ebo);
 	}
 
-	for (Bone & bone : bones)
+	for (Bone& bone : bones)
 	{
 		for (animJoint& anim : bone.animations) {
 
@@ -79,14 +79,14 @@ ImportedModel::ImportedModel(const char* filePath) {
 
 
 	importer.OpenAST(filePath);
-	
+
 
 	this->material = new Material(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
 		glm::vec4(0.5f, 0.5f, 0.5f, 1.0f),
 		glm::vec4(0.25f, 0.25f, 0.25f, 1.0f),
 		0.1f, 0.0f, 0.0f);
-	
-	
+
+
 
 	num_joints = importer.num_joints;
 	num_mats = importer.num_mats;
@@ -121,18 +121,18 @@ ImportedModel::ImportedModel(const char* filePath) {
 			mtmp.normalVecs.push_back(glm::vec3(norms[i * 3], norms[i * 3 + 1], norms[i * 3 + 2]));
 
 		}
-		mtmp.jointIndex=importer.getBoneIndex(i);
+		mtmp.jointIndex = importer.getBoneIndex(i);
 		mtmp.indices = importer.getIndices(i);
 
 		Meshes.push_back(mtmp);
 
-		
+
 	}
 
 
 	importer.clearData();
 	importer.clearRig();
-	
+
 
 }
 
@@ -161,11 +161,11 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 	glm::vec4 tempVec;
 
 	const std::string Path = "Assets/" + (std::string)filePathRel + ".AST";
-	
+
 
 	std::ifstream astStream;
 
-	astStream.open(Path,std::ios::binary);
+	astStream.open(Path, std::ios::binary);
 	astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 	astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
@@ -175,7 +175,7 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 
 	astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
-	uint8_t x_beg=tempByte;
+	uint8_t x_beg = tempByte;
 
 	astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
@@ -196,21 +196,21 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 	uint8_t y_diff = (y_end - y_beg);
 
 	uint8_t mshCount = tempByte;
-	num_meshes = mshCount;	
+	num_meshes = mshCount;
 
 	for (uint8_t i = 0; i < mshCount; i++)
 	{
-		
+
 
 		astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 		tempMesh.jointIndex = (int)tempByte;
 		astStream.read(reinterpret_cast<char*>(&tempShort), sizeof(tempShort));
-		
+
 		for (uint16_t j = 0; j < tempShort; j++)
 		{
 			astStream.read(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
 
-			tempFloat = FIX_TO_F(tempFix,scalingFactor);
+			tempFloat = FIX_TO_F(tempFix, scalingFactor);
 
 			tempMesh.triangleVerts.push_back(tempFloat);
 		}
@@ -248,7 +248,7 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 
 			astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
-			tempFloat = (float(tempByte)/ (float)(y_diff));
+			tempFloat = (float(tempByte) / (float)(y_diff));
 
 			tempMesh.textureCoords.push_back(tempFloat);
 
@@ -296,7 +296,7 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 	uint8_t animCount = tempByte;
 
 	num_anims = animCount;
-	
+
 	astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
 	uint8_t targetFPS = tempByte;
@@ -361,14 +361,14 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 		}
 
 		tempBone.TransformMat = tempBone.InitTransform.Matrix();
-		
+
 
 		bones.push_back(tempBone);
-		
+
 
 		tempBone.children.clear();
 
-		
+
 
 		for (uint8_t j = 0; j < animCount; j++) {
 
@@ -524,11 +524,11 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 
 
 		}
-	}	
-	
+	}
+
 
 	astStream.close();
-	
+
 }
 
 void ImportedModel::compute_pose(int boneI, glm::mat4x4 Parent_T) {
@@ -546,7 +546,7 @@ void ImportedModel::compute_pose(int boneI, glm::mat4x4 Parent_T) {
 	{
 		for (int i = 0; i < proc; i++)
 		{
-			compute_pose(bones[boneI].children[i],bones[boneI].TransformMat);
+			compute_pose(bones[boneI].children[i], bones[boneI].TransformMat);
 		}
 	}
 
@@ -581,11 +581,13 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
 	int count = (int)(size_clut & 0x0000FFFF);
 
-	int divisor = (count > 16) ? 2 : 4;
+	int divisor = ((texpage >> 7) & 1) ? 2 : 4;
 
 	int width = (int)(size_tex & 0x0000FFFF) * divisor;
 
 	int height = (int)(size_tex >> 16);
+
+	int real_width = (rpf.magic[1] || rpf.magic[2]) ? (int)rpf.magic[1] + 1 : width;
 
 	rpf.CLUT = new uint16_t[count];
 
@@ -609,7 +611,7 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
 
 
-	if (count > 16)
+	if (divisor == 2)
 	{
 		rpfloader.read(reinterpret_cast<char*>(rpf.data), sizeof(char) * width * height);
 
@@ -650,7 +652,7 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
 	int tempc = count;
 
-	int tempw = width;
+	int tempw = real_width;
 
 	int temph = height;
 
@@ -664,7 +666,13 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
 	glBindTexture(GL_TEXTURE_2D, text);
 
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, width);
+
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, tempw, temph, 0, GL_RED, GL_UNSIGNED_BYTE, rpf.data);
+
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -677,7 +685,7 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
 	glBindTexture(GL_TEXTURE_1D, clt);
 
-	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA16, tempc, 0, GL_BGRA,GL_UNSIGNED_SHORT_1_5_5_5_REV, rpf.CLUT);
+	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA16, tempc, 0, GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, rpf.CLUT);
 
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -689,7 +697,7 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 	rtn[0] = text;
 	rtn[1] = clt;
 	rtn[2] = Mode;
-	rtn[3] = (GLuint)width;
+	rtn[3] = (GLuint)real_width;
 	rtn[4] = (GLuint)height;
 
 
@@ -713,7 +721,7 @@ void ModelImporter::clearData() {
 	vertVals.clear();
 	stVals.clear();
 	normVals.clear();
-	
+
 
 
 	indices.clear();
@@ -726,9 +734,9 @@ int ModelImporter::get_child_index(int j_son_index) {
 	for (int i = 0; i < num_joints; i++)
 	{
 
-		if (bones[i].fromNode==j_son_index) {
+		if (bones[i].fromNode == j_son_index) {
 
-			
+
 			return i;
 
 		}
@@ -741,7 +749,7 @@ int ModelImporter::get_child_index(int j_son_index) {
 
 void ModelImporter::clearRig() {
 
-	
+
 	bones.clear();
 	matrices.clear();
 
