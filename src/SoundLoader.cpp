@@ -10,10 +10,10 @@ int32_t Audio_Handler::filter(int32_t current, int32_t old, int32_t older, uint8
 
 	switch (select)
 	{
-		case SPU_FILTER::SINGLE: { return current + (((60 * old) + 32) >> 6); }
-		case SPU_FILTER::DOUBLE_1: { return current + (((115 * old) - (52 * older) + 32) >> 6); }
-		case SPU_FILTER::DOUBLE_2: { return current + (((98 * old) - (55 * older) + 32) >> 6); }
-		case SPU_FILTER::DOUBLE_3: { return current + (((122 * old) - (60 * older) + 32) >> 6); }
+		case SPU_FILTER::SINGLE: { return current + (((60 * old) + 32) / 64); }
+		case SPU_FILTER::DOUBLE_1: { return current + (((115 * old) - (52 * older) + 32) / 64); }
+		case SPU_FILTER::DOUBLE_2: { return current + (((98 * old) - (55 * older) + 32) / 64); }
+		case SPU_FILTER::DOUBLE_3: { return current + (((122 * old) - (60 * older) + 32) / 64); }
 		default:
 		return current;
 	}
@@ -82,7 +82,7 @@ ALuint * Audio_Handler::load_WL(const char* filepathRel) {
 
 		Block& b = uninitialised.data[i / SAMPLES_PER_BLOCK];
 
-		uint8_t sh_val = b.shift_filter & 0xF;		
+		sh_val = b.shift_filter & 0xF;		
 
 		uint8_t fl_val = (b.shift_filter >> 4) & 0xF;		
 

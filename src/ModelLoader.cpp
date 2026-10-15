@@ -553,10 +553,9 @@ void ImportedModel::compute_pose(int boneI, glm::mat4x4 Parent_T) {
 }
 
 
-
 GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
-	std::string filePath = "Assets/" + (std::string)filePathRel +".RPF";
+	std::string filePath = "Assets/" + (std::string)filePathRel + ".RPF";
 
 	std::ifstream rpfloader(filePath, std::ios::binary);
 
@@ -564,60 +563,82 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
 	GLuint Mode = 0;
 
+	uint32_t dest_tex = 0;
+	uint32_t size_tex = 0;
+	uint32_t dest_clut = 0;
+	uint32_t size_clut = 0;
+	uint16_t texpage = 0;
+	uint16_t clut_word = 0;
+
 	rpfloader.read(reinterpret_cast<char*>(&rpf.magic), sizeof(rpf.magic));
 
-	rpf.CLUT = new uint16_t[(int)(rpf.magic[1] + 1)];	
+	rpfloader.read(reinterpret_cast<char*>(&dest_tex), sizeof(uint32_t));
+	rpfloader.read(reinterpret_cast<char*>(&size_tex), sizeof(uint32_t));
+	rpfloader.read(reinterpret_cast<char*>(&dest_clut), sizeof(uint32_t));
+	rpfloader.read(reinterpret_cast<char*>(&size_clut), sizeof(uint32_t));
+	rpfloader.read(reinterpret_cast<char*>(&texpage), sizeof(uint16_t));
+	rpfloader.read(reinterpret_cast<char*>(&clut_word), sizeof(uint16_t));
+
+	int count = (int)(size_clut & 0x0000FFFF);
+
+	int divisor = (count > 16) ? 2 : 4;
+
+	int width = (int)(size_tex & 0x0000FFFF) * divisor;
+
+	int height = (int)(size_tex >> 16);
+
+	rpf.CLUT = new uint16_t[count];
 
 
-	rpf.data = new uint8_t[((int)rpf.magic[2] + 1) * ((int)rpf.magic[3] + 1)];
+	rpf.data = new uint8_t[width * height];
 
 	uint16_t reader = 0;
 
-	
 
-	for (int i = 0; i < ((int)rpf.magic[1] + 1); i++)
+
+	for (int i = 0; i < count; i++)
 	{
 		rpfloader.read(reinterpret_cast<char*>(&reader), 1 * sizeof(uint16_t));
 
-		rpf.CLUT[i] = reader;		
-		
-		
+		rpf.CLUT[i] = reader;
+
+
 
 	}
 
-	
 
 
-	if ((rpf.magic[1] + 1) > 16)
+
+	if (count > 16)
 	{
-		rpfloader.read(reinterpret_cast<char*>(rpf.data), sizeof(char) * ((int)rpf.magic[2] + 1) * ((int)rpf.magic[3] + 1));
+		rpfloader.read(reinterpret_cast<char*>(rpf.data), sizeof(char) * width * height);
 
 
 	}
 
-	else{
+	else {
 		uint8_t msb = 0;
 		uint8_t lsb = 0;
 
-		
+
 
 		uint8_t temp_data = 0;
 
-		for (int i = 0; i < (int)((((int)rpf.magic[2] + 1) * ((int)rpf.magic[3] + 1)) / 2); i++)
+		for (int i = 0; i < (int)((width * height) / 2); i++)
 		{
 			rpfloader.read(reinterpret_cast<char*>(&temp_data), sizeof(char));
 
 			msb = (uint8_t)(temp_data >> 4) & 0x0F;
 			lsb = (uint8_t)(temp_data) & 0x0F;
-			
 
-			rpf.data[(2 * i)] = msb;
-			rpf.data[(2 * i) + 1] = lsb;
+
+			rpf.data[(2 * i)] = lsb;
+			rpf.data[(2 * i) + 1] = msb;
 
 		}
 
-		
-	}	
+
+	}
 
 
 
@@ -627,13 +648,13 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
 	GLuint text;
 
-	int tempc = (int)rpf.magic[1] + 1;
+	int tempc = count;
 
-	int tempw = (int)rpf.magic[2] + 1;
+	int tempw = width;
 
-	int temph = (int)rpf.magic[3] + 1;
+	int temph = height;
 
-	Mode = (GLuint)rpf.magic[1]+1;
+	Mode = (GLuint)count;
 
 
 	int temp = tempw * temph;
@@ -656,8 +677,7 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
 	glBindTexture(GL_TEXTURE_1D, clt);
 
-	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA16, tempc, 0, GL_RGBA, GL_UNSIGNED_SHORT_5_5_5_1,rpf.CLUT);
-	
+	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA16, tempc, 0, GL_BGRA,GL_UNSIGNED_SHORT_1_5_5_5_REV, rpf.CLUT);
 
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -669,25 +689,23 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 	rtn[0] = text;
 	rtn[1] = clt;
 	rtn[2] = Mode;
-	rtn[3] = (GLuint)rpf.magic[2] + 1;
-	rtn[4] = (GLuint)rpf.magic[3] + 1;
+	rtn[3] = (GLuint)width;
+	rtn[4] = (GLuint)height;
 
-	
+
 
 	delete[] rpf.CLUT;
 
 	delete[] rpf.data;
 
-	
 
-	
+
 
 	return rtn;
 
 
 
 }
-
 
 
 void ModelImporter::clearData() {

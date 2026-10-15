@@ -32,7 +32,7 @@ public:
 
 	ALuint * load_WL(const char* filepathRel);
 	inline int32_t filter(int32_t current, int32_t old, int32_t older, uint8_t filter_select);
-
+	
 };
 
 #endif // !WL_LOADER
