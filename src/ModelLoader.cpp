@@ -571,6 +571,9 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 	uint16_t clut_word = 0;
 
 	rpfloader.read(reinterpret_cast<char*>(&rpf.magic), sizeof(rpf.magic));
+	rpfloader.read(reinterpret_cast<char*>(&rpf.width), sizeof(rpf.width));
+	rpfloader.read(reinterpret_cast<char*>(&rpf.height), sizeof(rpf.height));
+	rpfloader.read(reinterpret_cast<char*>(&rpf.plt_size), sizeof(rpf.plt_size));
 
 	rpfloader.read(reinterpret_cast<char*>(&dest_tex), sizeof(uint32_t));
 	rpfloader.read(reinterpret_cast<char*>(&size_tex), sizeof(uint32_t));
@@ -579,7 +582,9 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 	rpfloader.read(reinterpret_cast<char*>(&texpage), sizeof(uint16_t));
 	rpfloader.read(reinterpret_cast<char*>(&clut_word), sizeof(uint16_t));
 
-	int count = (int)(size_clut & 0x0000FFFF);
+	int count = (int)(rpf.plt_size) + 1;
+
+	
 
 	int divisor = ((texpage >> 7) & 1) ? 2 : 4;
 
@@ -587,7 +592,8 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
 	int height = (int)(size_tex >> 16);
 
-	int real_width = (rpf.magic[1] || rpf.magic[2]) ? (int)rpf.magic[1] + 1 : width;
+
+	int padded_count = (count + 0xF) & (~0xF);
 
 	rpf.CLUT = new uint16_t[count];
 
@@ -598,12 +604,16 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
 
 
-	for (int i = 0; i < count; i++)
+	for (int i = 0; i < padded_count; i++)
 	{
+
+		
 		rpfloader.read(reinterpret_cast<char*>(&reader), 1 * sizeof(uint16_t));
 
-		rpf.CLUT[i] = reader;
 
+		if (i < count) {
+			rpf.CLUT[i] = reader;
+		}
 
 
 	}
@@ -652,7 +662,7 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
 	int tempc = count;
 
-	int tempw = real_width;
+	int tempw = width;
 
 	int temph = height;
 
@@ -697,7 +707,7 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 	rtn[0] = text;
 	rtn[1] = clt;
 	rtn[2] = Mode;
-	rtn[3] = (GLuint)real_width;
+	rtn[3] = (GLuint)width;
 	rtn[4] = (GLuint)height;
 
 

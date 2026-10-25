@@ -5,7 +5,12 @@
 #pragma pack(push,4)
 struct RPF
 {
-	uint8_t magic[4];
+	uint8_t magic;
+
+	uint8_t width;
+	uint8_t height;
+
+	uint8_t plt_size;
 
 	uint16_t* CLUT;
 
