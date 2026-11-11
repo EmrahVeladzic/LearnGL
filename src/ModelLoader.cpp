@@ -151,6 +151,7 @@ std::vector<uint16_t> Mesh::getIndices() { return indices; }
 
 void ModelImporter::OpenAST(const char* filePathRel) {
 
+	sfix tempSFix;
 	fix tempFix;
 	uint8_t tempByte;
 	uint16_t tempShort;
@@ -166,6 +167,7 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 	std::ifstream astStream;
 
 	astStream.open(Path, std::ios::binary);
+
 	astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 	astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
@@ -183,17 +185,15 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 
 	astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
-	uint8_t x_end = tempByte;
+	uint8_t width = tempByte;
 
 	astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
-	uint8_t y_end = tempByte;
+	uint8_t height = tempByte;
 
 	astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
 
-	uint8_t x_diff = (x_end - x_beg);
-	uint8_t y_diff = (y_end - y_beg);
 
 	uint8_t mshCount = tempByte;
 	num_meshes = mshCount;
@@ -204,22 +204,102 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 
 		astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 		tempMesh.jointIndex = (int)tempByte;
+		astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 		astStream.read(reinterpret_cast<char*>(&tempShort), sizeof(tempShort));
 
-		for (uint16_t j = 0; j < tempShort; j++)
+		uint16_t vtx_count = tempShort;
+
+		for (uint16_t j = 0; j < vtx_count; j++)
 		{
-			astStream.read(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+			for (size_t k = 0; k < 3; k++)
+			{
+				astStream.read(reinterpret_cast<char*>(&tempSFix), sizeof(tempSFix));
 
-			tempFloat = FIX_TO_F(tempFix, scalingFactor);
+				tempFloat = FIX_TO_F(tempSFix, scalingFactor);
 
-			tempMesh.triangleVerts.push_back(tempFloat);
+				tempMesh.triangleVerts.push_back(tempFloat);
+			}
+
+			astStream.read(reinterpret_cast<char*>(&tempShort), sizeof(tempShort));
+
+			if (tempByte) {
+
+				uint8_t x = tempShort & 0xFF;
+
+				uint8_t y = (tempShort >> 8) & 0xFF;
+
+				x -= x_beg;
+				y -= y_beg;
+
+
+
+				tempFloat = (float)x / (float)(width + 1);
+
+
+				tempMesh.textureCoords.push_back(tempFloat);
+
+				tempFloat = (float)y / (float)(height + 1);
+
+				tempMesh.textureCoords.push_back(tempFloat);
+
+			}
+
+			else {
+
+				tempMesh.textureCoords.push_back(0.0f);
+				tempMesh.textureCoords.push_back(0.0f);
+
+			}
+
 		}
+
+
 		ImpMeshes.push_back(tempMesh);
 
 		tempMesh.triangleVerts.clear();
 
+		ImpMeshes[i].textureCoords.clear();
+		ImpMeshes[i].textureCoords = tempMesh.textureCoords;
+
+		tempMesh.textureCoords.clear();
+
+
+
+		astStream.read(reinterpret_cast<char*>(&tempShort), sizeof(tempShort));
+
+		uint16_t nrm_count = tempShort;
+
+		astStream.read(reinterpret_cast<char*>(&tempShort), sizeof(tempShort));
+
+		for (uint16_t j = 0; j < nrm_count; j++)
+		{
+
+			for (size_t k = 0; k < 3; k++)
+			{
+				astStream.read(reinterpret_cast<char*>(&tempSFix), sizeof(tempSFix));
+
+				tempFloat = FIX_TO_F(tempSFix, 12);
+
+				tempMesh.normals.push_back(tempFloat);
+			}
+
+			astStream.read(reinterpret_cast<char*>(&tempSFix), sizeof(tempSFix));
+
+
+		}
+
+
+		ImpMeshes[i].normals.clear();
+		ImpMeshes[i].normals = tempMesh.normals;
+
+		tempMesh.normals.clear();
+
+
+
 		astStream.read(reinterpret_cast<char*>(&tempShort), sizeof(tempShort));
 		uint16_t indCount = tempShort;
+
+		astStream.read(reinterpret_cast<char*>(&tempShort), sizeof(tempShort));
 
 		for (uint16_t j = 0; j < indCount; j++)
 		{
@@ -234,50 +314,11 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 
 		tempMesh.indices.clear();
 
-		astStream.read(reinterpret_cast<char*>(&tempShort), sizeof(tempShort));
 
-		for (uint16_t j = 0; j < tempShort; j += 2)
-		{
-			astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
-
-
-			tempFloat = (float(tempByte) / (float)(x_diff));
-
-
-			tempMesh.textureCoords.push_back(tempFloat);
-
-			astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
-
-			tempFloat = (float(tempByte) / (float)(y_diff));
-
-			tempMesh.textureCoords.push_back(tempFloat);
-
+		if (indCount & 0x1) {
+			astStream.read(reinterpret_cast<char*>(&tempShort), sizeof(tempShort));
 		}
 
-
-		ImpMeshes[i].textureCoords.clear();
-		ImpMeshes[i].textureCoords = tempMesh.textureCoords;
-
-		tempMesh.textureCoords.clear();
-
-		astStream.read(reinterpret_cast<char*>(&tempShort), sizeof(tempShort));
-
-		for (uint16_t j = 0; j < tempShort; j++)
-		{
-
-			astStream.read(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
-
-			tempFloat = FIX_TO_F(tempFix, scalingFactor);
-
-			tempMesh.normals.push_back(tempFloat);
-
-		}
-
-
-		ImpMeshes[i].normals.clear();
-		ImpMeshes[i].normals = tempMesh.normals;
-
-		tempMesh.normals.clear();
 	}
 
 	astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
@@ -303,6 +344,8 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 
 	for (uint8_t i = 0; i < boneCount; i++)
 	{
+		tempBone.extremity = false;
+
 		astStream.read(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
 
 		tempBone.InitTransform.translation.x = FIX_TO_F(tempFix, scalingFactor);
@@ -316,34 +359,34 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 		tempBone.InitTransform.translation.z = FIX_TO_F(tempFix, scalingFactor);
 
 
-		astStream.read(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+		astStream.read(reinterpret_cast<char*>(&tempSFix), sizeof(tempSFix));
 
-		tempBone.InitTransform.rotation.x = FIX_TO_F(tempFix, scalingFactor);
+		tempBone.InitTransform.rotation.x = FIX_TO_F(tempSFix, 12);
 
-		astStream.read(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+		astStream.read(reinterpret_cast<char*>(&tempSFix), sizeof(tempSFix));
 
-		tempBone.InitTransform.rotation.y = FIX_TO_F(tempFix, scalingFactor);
+		tempBone.InitTransform.rotation.y = FIX_TO_F(tempSFix, 12);
 
-		astStream.read(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+		astStream.read(reinterpret_cast<char*>(&tempSFix), sizeof(tempSFix));
 
-		tempBone.InitTransform.rotation.z = FIX_TO_F(tempFix, scalingFactor);
+		tempBone.InitTransform.rotation.z = FIX_TO_F(tempSFix, 12);
 
-		astStream.read(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+		astStream.read(reinterpret_cast<char*>(&tempSFix), sizeof(tempSFix));
 
-		tempBone.InitTransform.rotation.w = FIX_TO_F(tempFix, scalingFactor);
+		tempBone.InitTransform.rotation.w = FIX_TO_F(tempSFix, 12);
 
 
-		astStream.read(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+		astStream.read(reinterpret_cast<char*>(&tempSFix), sizeof(tempSFix));
 
-		tempBone.InitTransform.scale.x = FIX_TO_F(tempFix, scalingFactor);
+		tempBone.InitTransform.scale.x = FIX_TO_F(tempSFix, 12);
 
-		astStream.read(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+		astStream.read(reinterpret_cast<char*>(&tempSFix), sizeof(tempSFix));
 
-		tempBone.InitTransform.scale.y = FIX_TO_F(tempFix, scalingFactor);
+		tempBone.InitTransform.scale.y = FIX_TO_F(tempSFix, 12);
 
-		astStream.read(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+		astStream.read(reinterpret_cast<char*>(&tempSFix), sizeof(tempSFix));
 
-		tempBone.InitTransform.scale.z = FIX_TO_F(tempFix, scalingFactor);
+		tempBone.InitTransform.scale.z = FIX_TO_F(tempSFix, 12);
 
 		astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
@@ -437,27 +480,27 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 
 				tempAnim.rotTimes.push_back(tempFloat);
 
-				astStream.read(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+				astStream.read(reinterpret_cast<char*>(&tempSFix), sizeof(tempSFix));
 
-				tempFloat = FIX_TO_F(tempFix, scalingFactor);
+				tempFloat = FIX_TO_F(tempSFix, 12);
 
 				tempVec.x = tempFloat;
 
-				astStream.read(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+				astStream.read(reinterpret_cast<char*>(&tempSFix), sizeof(tempSFix));
 
-				tempFloat = FIX_TO_F(tempFix, scalingFactor);
+				tempFloat = FIX_TO_F(tempSFix, 12);
 
 				tempVec.y = tempFloat;
 
-				astStream.read(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+				astStream.read(reinterpret_cast<char*>(&tempSFix), sizeof(tempSFix));
 
-				tempFloat = FIX_TO_F(tempFix, scalingFactor);
+				tempFloat = FIX_TO_F(tempSFix, 12);
 
 				tempVec.z = tempFloat;
 
-				astStream.read(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+				astStream.read(reinterpret_cast<char*>(&tempSFix), sizeof(tempSFix));
 
-				tempFloat = FIX_TO_F(tempFix, scalingFactor);
+				tempFloat = FIX_TO_F(tempSFix, 12);
 
 				tempVec.w = tempFloat;
 
@@ -486,21 +529,21 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 
 				tempAnim.scalTimes.push_back(tempFloat);
 
-				astStream.read(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+				astStream.read(reinterpret_cast<char*>(&tempSFix), sizeof(tempSFix));
 
-				tempFloat = FIX_TO_F(tempFix, scalingFactor);
+				tempFloat = FIX_TO_F(tempSFix, 12);
 
 				tempVec.x = tempFloat;
 
-				astStream.read(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+				astStream.read(reinterpret_cast<char*>(&tempSFix), sizeof(tempSFix));
 
-				tempFloat = FIX_TO_F(tempFix, scalingFactor);
+				tempFloat = FIX_TO_F(tempSFix, 12);
 
 				tempVec.y = tempFloat;
 
-				astStream.read(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
+				astStream.read(reinterpret_cast<char*>(&tempSFix), sizeof(tempSFix));
 
-				tempFloat = FIX_TO_F(tempFix, scalingFactor);
+				tempFloat = FIX_TO_F(tempSFix, 12);
 
 				tempVec.z = tempFloat;
 
@@ -584,7 +627,7 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 
 	int count = (int)(rpf.plt_size) + 1;
 
-	
+
 
 	int divisor = ((texpage >> 7) & 1) ? 2 : 4;
 
@@ -607,7 +650,7 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 	for (int i = 0; i < padded_count; i++)
 	{
 
-		
+
 		rpfloader.read(reinterpret_cast<char*>(&reader), 1 * sizeof(uint16_t));
 
 

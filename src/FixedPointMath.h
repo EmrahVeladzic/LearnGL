@@ -2,6 +2,7 @@
 #define FIXED_POINT_MATH
 #include<stdint.h>
 typedef int32_t fix;
+typedef int16_t sfix;
 #define CONVERT_A_TO_B(ina,isa,isb)((ina*(1<<isb))/(1<<isa))
 #define F_TO_FIX(in,is)((fix)(in*(float)(1<<is)))
 #define FIX_TO_F(in,is)(((float)in/(float)(1<<is)))
