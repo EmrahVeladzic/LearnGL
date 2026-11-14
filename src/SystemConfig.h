@@ -5,7 +5,7 @@
 #define numVBOs 3
 #define numEBOs 1
 
-#define TARGET_FPS 60
+#define TARGET_FPS 50
 
 #define FULLSCREEN false
 

@@ -403,6 +403,11 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 			tempBone.children.push_back((int)tempByte);
 		}
 
+		for (size_t p = (1 - mshCount) & 0x3; p > 0; p--)
+		{
+			astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+		}
+
 		tempBone.TransformMat = tempBone.InitTransform.Matrix();
 
 
@@ -417,24 +422,25 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 
 			astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
-			uint8_t TRSCount = tempByte;
+			astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
-			for (uint8_t k = 0; k < TRSCount; k++)
+			uint8_t t_count = tempByte;
+
+			astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+
+			uint8_t r_count = tempByte;
+
+			astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+
+			uint8_t s_count = tempByte;
+
+
+			
+
+			for (uint8_t k = 0; k < t_count; k++)
 			{
-				astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
-				tempFloat = (float(tempByte)) / (float(targetFPS));
-
-				if (k > 0) {
-
-					while (tempFloat < tempAnim.transTimes[k - 1])
-					{
-						tempFloat += 1.0f;
-					}
-
-				}
-
-				tempAnim.transTimes.push_back(tempFloat);
+				
 
 				astStream.read(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
 
@@ -459,26 +465,10 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 			}
 
 
-			astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
-
-			TRSCount = tempByte;
-
-			for (uint8_t k = 0; k < TRSCount; k++)
+			for (uint8_t k = 0; k < r_count; k++)
 			{
-				astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
-
-				tempFloat = (float(tempByte)) / (float(targetFPS));
-
-				if (k > 0) {
-
-					while (tempFloat < tempAnim.rotTimes[k - 1])
-					{
-						tempFloat += 1.0f;
-					}
-
-				}
-
-				tempAnim.rotTimes.push_back(tempFloat);
+							
+				
 
 				astStream.read(reinterpret_cast<char*>(&tempSFix), sizeof(tempSFix));
 
@@ -508,26 +498,11 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 
 			}
 
-			astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
-			TRSCount = tempByte;
-
-			for (uint8_t k = 0; k < TRSCount; k++)
+			for (uint8_t k = 0; k < s_count; k++)
 			{
-				astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
-				tempFloat = (float(tempByte)) / (float(targetFPS));
-
-				if (k > 0) {
-
-					while (tempFloat < tempAnim.scalTimes[k - 1])
-					{
-						tempFloat += 1.0f;
-					}
-
-				}
-
-				tempAnim.scalTimes.push_back(tempFloat);
+				
 
 				astStream.read(reinterpret_cast<char*>(&tempSFix), sizeof(tempSFix));
 
@@ -549,6 +524,77 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 
 				tempAnim.scales.push_back(glm::vec3(tempVec.x, tempVec.y, tempVec.z));
 
+			}
+
+			for (uint8_t k = 0; k < t_count; k++)
+			{
+				astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+
+				tempFloat = (float(tempByte)) / (float(targetFPS));
+
+				if (k > 0) {
+
+					while (tempFloat < tempAnim.transTimes[k - 1])
+					{
+						tempFloat += 1.0f;
+					}
+
+				}
+
+				tempAnim.transTimes.push_back(tempFloat);
+			}
+
+
+			for (uint8_t k = 0; k < r_count; k++)
+			{
+
+				
+				astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+
+				tempFloat = (float(tempByte)) / (float(targetFPS));
+
+				if (k > 0) {
+
+					while (tempFloat < tempAnim.rotTimes[k - 1])
+					{
+						tempFloat += 1.0f;
+					}
+
+				}
+
+				tempAnim.rotTimes.push_back(tempFloat);
+
+				
+
+
+			}
+
+			for (uint8_t k = 0; k < s_count; k++)
+			{
+
+				
+				astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+
+				tempFloat = (float(tempByte)) / (float(targetFPS));
+
+				if (k > 0) {
+
+					while (tempFloat < tempAnim.scalTimes[k - 1])
+					{
+						tempFloat += 1.0f;
+					}
+
+				}
+
+				tempAnim.scalTimes.push_back(tempFloat);
+
+
+				
+			}
+
+			for (size_t p = (4 - ((t_count + r_count + 7 * s_count) & 0x3)) & 0x3; p > 0; p--)
+			{
+				astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 			}
 
 			bones[i].animations.push_back(tempAnim);
