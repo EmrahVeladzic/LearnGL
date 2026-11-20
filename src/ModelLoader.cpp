@@ -110,6 +110,8 @@ ImportedModel::ImportedModel(const char* filePath) {
 		mtmp.numVertices = (int)importer.getNumVertices(i);
 		mtmp.numIndices = (int)importer.getNumIndices(i);
 
+		mtmp.material = importer.getMaterial(i);
+
 		std::vector<float>verts = importer.getVertices(i);
 		std::vector<float>tex = importer.getTextureCoords(i);
 		std::vector<float>norms = importer.getNormals(i);
@@ -171,6 +173,9 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 	astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 	astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
+
+	uint8_t ast_flags = tempByte;
+
 	astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
 	uint8_t scalingFactor = tempByte;
@@ -205,6 +210,7 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 		astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 		tempMesh.jointIndex = (int)tempByte;
 		astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
+		tempMesh.material = tempByte;
 		astStream.read(reinterpret_cast<char*>(&tempShort), sizeof(tempShort));
 
 		uint16_t vtx_count = tempShort;
@@ -222,7 +228,7 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 
 			astStream.read(reinterpret_cast<char*>(&tempShort), sizeof(tempShort));
 
-			if (tempByte) {
+			if (ast_flags & 0x10) {
 
 				uint8_t x = tempShort & 0xFF;
 
@@ -878,6 +884,8 @@ int ModelImporter::getBoneIndex(int m) {
 
 }
 
+
+uint8_t ModelImporter::getMaterial(int m) { return ImpMeshes[m].material; }
 int ModelImporter::getNumVertices(int m) { return ((int)ImpMeshes[m].triangleVerts.size() / 3); }
 int ModelImporter::getNumIndices(int m) { return((int)ImpMeshes[m].indices.size()); }
 std::vector<float> ModelImporter::getVertices(int m) { return ImpMeshes[m].triangleVerts; }

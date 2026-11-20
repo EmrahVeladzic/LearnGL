@@ -330,6 +330,8 @@ void display(GLFWwindow* window, std::vector<Actor* >& actors) {
 			glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
 
 
+			if ((actor->Model->Meshes[i].material & 1) == 0) { glEnable(GL_CULL_FACE); }
+			else { glDisable(GL_CULL_FACE); }
 
 
 			glDrawElements(GL_TRIANGLES, actor->Model->Meshes[i].getNumIndices(), GL_UNSIGNED_SHORT, 0);

@@ -55,10 +55,12 @@ struct MImesh {
 
 	int jointIndex;
 
+	uint8_t material;
+
 	MImesh()
 	{
 		jointIndex = 0;
-		
+		material = 0;
 	}
 
 };
@@ -111,6 +113,7 @@ public:
 	std::vector<float> getTextureCoords(int m);
 	std::vector<float> getNormals(int m);
 	std::vector<uint16_t> getIndices(int m);
+	uint8_t getMaterial(int m);
 
 	void clearRig();
 
@@ -145,6 +148,7 @@ struct Mesh {
 	int numIndices;
 
 	int jointIndex;
+	uint8_t material;
 
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec2> texCoords;
@@ -159,6 +163,7 @@ struct Mesh {
 	int getNumVertices();
 	int getNumIndices();
 
+
 	std::vector<glm::vec3> getVertices();
 	std::vector<glm::vec2> getTexCoords();
 	std::vector<glm::vec3> getNormals();
@@ -170,6 +175,7 @@ struct Mesh {
 		numVertices = 0;
 		numIndices = 0;
 		jointIndex = 0;
+		material = 0;
 
 		for (size_t i = 0; i < numVAOs; i++)
 		{
