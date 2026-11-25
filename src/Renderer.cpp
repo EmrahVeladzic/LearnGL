@@ -2,7 +2,7 @@
 
 GLuint shadowBuffer, shadowTex;
 GLuint renderingProgram;
-GLuint projLoc, vLoc, tfLoc, mvLoc, invBindLoc, transLoc, offsetLoc, clutMultLoc, tWidthLoc, tHeightLoc, psxShaderLoc;
+GLuint projLoc, vLoc, tfLoc, mvLoc, invBindLoc, transLoc, offsetLoc, clutMultLoc, clutOffsetLoc, tWidthLoc, tHeightLoc, psxShaderLoc;
 int width, height;
 float aspect, timeFactor;
 glm::mat4 pMat, mMat, mvMat;
@@ -100,6 +100,7 @@ void renderer_init(GLFWwindow* window, std::vector<Actor*>& actors) {
 	transLoc = glGetUniformLocation(renderingProgram, "transform_matrix");
 	mvLoc = glGetUniformLocation(renderingProgram, "mv_matrix");
 	clutMultLoc = glGetUniformLocation(renderingProgram, "clut_multiplier");
+	clutOffsetLoc = glGetUniformLocation(renderingProgram, "clut_offset");
 
 	tWidthLoc = glGetUniformLocation(renderingProgram, "tex_width");
 	tHeightLoc = glGetUniformLocation(renderingProgram, "tex_height");
@@ -242,7 +243,11 @@ void display(GLFWwindow* window, std::vector<Actor* >& actors) {
 
 		glUniform1f(clutMultLoc, actor->Model->clut_multiplier);
 
-		lightingConfig(cam.viewMat,actor->Model->material);
+		GLuint tick = (GLuint)(glfwGetTime() * 60.0);
+		GLuint frame = (tick / (actor->Model->clut_swap + 1)) % actor->Model->clut_frames;
+		glUniform1f(clutOffsetLoc, (float)frame / (float)actor->Model->clut_frames);
+
+		lightingConfig(cam.viewMat, actor->Model->material);
 
 		glUniform1ui(tWidthLoc, actor->Model->tex_width);
 		glUniform1ui(tHeightLoc, actor->Model->tex_height);

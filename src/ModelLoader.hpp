@@ -35,18 +35,18 @@ struct Bone {
 		fromNode = 0;
 		fromJointTab = 0;
 		extremity = false;
-		
+
 		parent = 0;
 		TransformMat = glm::mat4x4(1.0f);
 	}
-	
 
-		
+
+
 };
 
 struct MImesh {
 
-	
+
 
 	std::vector<float> triangleVerts;
 	std::vector<float> textureCoords;
@@ -71,7 +71,7 @@ class ModelImporter {
 
 private:
 
-	
+
 
 	std::vector<float> vertVals;
 	std::vector<float> stVals;
@@ -79,13 +79,13 @@ private:
 
 	std::vector<MImesh> ImpMeshes;
 
-	
-	
+
+
 	std::vector<Bone> bones;
 
 	std::vector<glm::mat4x4> matrices;
 
-	
+
 
 	std::vector<uint16_t> indices;
 
@@ -120,7 +120,7 @@ public:
 	std::vector<Bone> getBones();
 	std::vector<glm::mat4x4> getInverseBinds();
 
-	
+
 
 
 	GLuint* loadRPF(const char* filePathRel);
@@ -136,7 +136,7 @@ public:
 		num_joints = 0;
 		num_anims = 0;
 
-		
+
 	}
 
 };
@@ -158,7 +158,7 @@ struct Mesh {
 	GLuint vao[numVAOs];
 	GLuint vbo[numVBOs];
 	GLuint ebo[numEBOs];
-	
+
 
 	int getNumVertices();
 	int getNumIndices();
@@ -205,17 +205,17 @@ struct ImportedModel {
 
 	std::vector< glm::mat4x4> INVmatrices;
 	std::vector<Bone> bones;
-	
-	int root;	
+
+	int root;
 
 	int currentAnim;
 
 	ModelImporter importer;
-	
+
 	Material* material;
 
-	ImportedModel(const char * filePath);
-	
+	ImportedModel(const char* filePath);
+
 
 	GLuint texture;
 	GLuint clut;
@@ -225,8 +225,11 @@ struct ImportedModel {
 
 	float clut_multiplier;
 
+	GLuint clut_frames;
+	GLuint clut_swap;
 
-	
+
+
 	~ImportedModel();
 
 };

@@ -72,6 +72,7 @@ uniform mat4 norm_matrix;
 uniform float tf;
 
 uniform float clut_multiplier;
+uniform float clut_offset;
 
 
 
@@ -98,7 +99,7 @@ vec3 specular=pos_light.specular.xyz*material.specular.xyz*pow(max(cosPhi,0.0f),
 
 vec4 light = vec4((ambient+diffuse+specular),1.0f);
 
-float clr_ind = texture(samp,affine_tc).r * clut_multiplier;
+float clr_ind = texture(samp,affine_tc).r * clut_multiplier + clut_offset;
 
 
 

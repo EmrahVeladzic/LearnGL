@@ -193,6 +193,8 @@ int main(void) {
 
 	ActiveScene.AddActor(new Actor("RAVEN", NULL, transform(glm::vec3(4.0f, 0.0f, 16.0f)), 0.0f));
 
+	ActiveScene.AddActor(new Actor("FLAME", NULL, transform(glm::vec3(10.0f, 0.0f, 10.0f)), 0.0f));
+
 
 	glfwSetKeyCallback(window, key_callback);
 
@@ -241,6 +243,8 @@ int main(void) {
 		glfwPollEvents();
 		KeyActions();
 		ActiveScene.SceneActors[1]->AI_Node.target = Player->Trans;
+
+
 
 		last_time = current_time;	
 		

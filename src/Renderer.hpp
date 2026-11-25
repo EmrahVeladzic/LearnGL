@@ -8,7 +8,7 @@
 
 extern GLuint shadowBuffer, shadowTex;
 extern GLuint renderingProgram;
-extern GLuint projLoc, vLoc, tfLoc, mvLoc, invBindLoc, transLoc, offsetLoc, clutMultLoc, tWidthLoc, tHeightLoc, psxShaderLoc;
+extern GLuint projLoc, vLoc, tfLoc, mvLoc, invBindLoc, transLoc, offsetLoc, clutMultLoc, clutOffsetLoc, tWidthLoc, tHeightLoc, psxShaderLoc;
 extern int width, height;
 extern float aspect, timeFactor;
 extern glm::mat4 pMat, mMat, mvMat;

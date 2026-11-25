@@ -75,6 +75,9 @@ ImportedModel::ImportedModel(const char* filePath) {
 
 	clut_multiplier = 256.0f / (float)Mode;
 
+	clut_frames = (temptext[5] > 0) ? temptext[5] : 1;
+	clut_swap = temptext[6];
+
 	delete[] temptext;
 
 
@@ -441,12 +444,12 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 			uint8_t s_count = tempByte;
 
 
-			
+
 
 			for (uint8_t k = 0; k < t_count; k++)
 			{
 
-				
+
 
 				astStream.read(reinterpret_cast<char*>(&tempFix), sizeof(tempFix));
 
@@ -473,8 +476,8 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 
 			for (uint8_t k = 0; k < r_count; k++)
 			{
-							
-				
+
+
 
 				astStream.read(reinterpret_cast<char*>(&tempSFix), sizeof(tempSFix));
 
@@ -508,7 +511,7 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 			for (uint8_t k = 0; k < s_count; k++)
 			{
 
-				
+
 
 				astStream.read(reinterpret_cast<char*>(&tempSFix), sizeof(tempSFix));
 
@@ -554,7 +557,7 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 			for (uint8_t k = 0; k < r_count; k++)
 			{
 
-				
+
 				astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
 				tempFloat = (float(tempByte)) / (float(targetFPS));
@@ -570,7 +573,7 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 
 				tempAnim.rotTimes.push_back(tempFloat);
 
-				
+
 
 
 			}
@@ -578,7 +581,7 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 			for (uint8_t k = 0; k < s_count; k++)
 			{
 
-				
+
 				astStream.read(reinterpret_cast<char*>(&tempByte), sizeof(tempByte));
 
 				tempFloat = (float(tempByte)) / (float(targetFPS));
@@ -595,7 +598,7 @@ void ModelImporter::OpenAST(const char* filePathRel) {
 				tempAnim.scalTimes.push_back(tempFloat);
 
 
-				
+
 			}
 
 			for (size_t p = (4 - ((t_count + r_count + 7 * s_count) & 0x3)) & 0x3; p > 0; p--)
@@ -666,9 +669,24 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 	uint16_t clut_word = 0;
 
 	rpfloader.read(reinterpret_cast<char*>(&rpf.magic), sizeof(rpf.magic));
+	rpfloader.read(reinterpret_cast<char*>(&rpf.anim_data), sizeof(rpf.anim_data));
 	rpfloader.read(reinterpret_cast<char*>(&rpf.width), sizeof(rpf.width));
 	rpfloader.read(reinterpret_cast<char*>(&rpf.height), sizeof(rpf.height));
 	rpfloader.read(reinterpret_cast<char*>(&rpf.plt_size), sizeof(rpf.plt_size));
+
+	rpf.frames = rpf.anim_data & 0x1F;
+
+	if (rpf.frames == 0)
+	{
+		rpf.frames = 1;
+	}
+
+	rpf.anim = rpf.frames > 1;
+
+	rpf.swap_frame = (1 << (rpf.anim_data >> 5)) - 1;
+
+
+
 
 	rpfloader.read(reinterpret_cast<char*>(&dest_tex), sizeof(uint32_t));
 	rpfloader.read(reinterpret_cast<char*>(&size_tex), sizeof(uint32_t));
@@ -677,7 +695,7 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 	rpfloader.read(reinterpret_cast<char*>(&texpage), sizeof(uint16_t));
 	rpfloader.read(reinterpret_cast<char*>(&clut_word), sizeof(uint16_t));
 
-	int count = (int)(rpf.plt_size) + 1;
+	int count = (int)(rpf.plt_size * rpf.frames);
 
 
 
@@ -797,13 +815,15 @@ GLuint* ModelImporter::loadRPF(const char* filePathRel) {
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 
 
-	GLuint* rtn = new GLuint[5];
+	GLuint* rtn = new GLuint[7];
 
 	rtn[0] = text;
 	rtn[1] = clt;
 	rtn[2] = Mode;
 	rtn[3] = (GLuint)width;
 	rtn[4] = (GLuint)height;
+	rtn[5] = (GLuint)rpf.frames;
+	rtn[6] = (GLuint)rpf.swap_frame;
 
 
 
